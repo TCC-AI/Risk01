@@ -164,6 +164,36 @@
                 })
                 .validateLogin(department, name, username, password);
         }
+
+        // 載入部門資料
+        function loadDepartments() {
+          google.script.run
+            .withSuccessHandler(function(departments) {
+              const departmentSelect = document.getElementById('department');
+              
+              // 清空現有選項
+              departmentSelect.innerHTML = '<option value="" selected disabled>請選擇部門</option>';
+              
+              if (departments && departments.length > 0) {
+                departments.forEach(function(dept) {
+                  const option = document.createElement('option');
+                  option.value = dept;
+                  option.textContent = dept;
+                  departmentSelect.appendChild(option);
+                });
+              } else {
+                console.log('沒有部門資料返回');
+                // 顯示錯誤訊息
+                document.getElementById('error-message').textContent = '無法載入部門資料，請聯繫系統管理員';
+              }
+            })
+            .withFailureHandler(function(error) {
+              console.error('載入部門失敗:', error);
+              document.getElementById('error-message').textContent = '載入部門資料失敗: ' + error;
+            })
+            .getDepartments();
+        }
+
     </script>
 </body>
 </html>
