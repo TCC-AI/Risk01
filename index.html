@@ -38,6 +38,11 @@
             margin-top: 10px;
             text-align: center;
         }
+        .loading {
+            text-align: center;
+            color: #666;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -48,15 +53,13 @@
                 <div class="form-group">
                     <label for="department">部門</label>
                     <select class="form-select" id="department">
-                        <option value="" selected disabled>請選擇部門</option>
-                        <!-- 部門選項將由JavaScript動態載入 -->
+                        <option value="" selected disabled>載入中...</option>
                     </select>
                 </div>
                 <div class="form-group">
                     <label for="name">姓名</label>
                     <select class="form-select" id="name" disabled>
                         <option value="" selected disabled>請先選擇部門</option>
-                        <!-- 姓名選項將由JavaScript動態載入 -->
                     </select>
                 </div>
                 <div class="form-group">
@@ -68,25 +71,26 @@
                     <input type="password" class="form-control" id="password" placeholder="請輸入密碼">
                 </div>
                 <button type="button" class="btn btn-primary btn-login" id="login-btn">登入</button>
+                <div class="loading" id="loading" style="display: none;">處理中...</div>
                 <div class="error-message" id="error-message"></div>
             </div>
         </div>
     </div>
 
-    <script src="https://script.google.com/macros/s/AKfycbwqVXuH3nUXqbJOseR2IYkybx5mXOoMDkbjb6UZ6MJUowGWnhLmEXjwlmW1mXA-t2_V/exec"></script>
     <script>
-        // 前端JavaScript代碼
         document.addEventListener('DOMContentLoaded', function() {
-            // 載入部門資料
+            console.log('頁面載入完成');
             loadDepartments();
             
             // 部門選擇事件監聽
             document.getElementById('department').addEventListener('change', function() {
+                console.log('選擇部門:', this.value);
                 loadNames(this.value);
             });
             
             // 姓名選擇事件監聽
             document.getElementById('name').addEventListener('change', function() {
+                console.log('選擇姓名:', this.value);
                 loadUserInfo(this.value);
             });
             
@@ -94,23 +98,46 @@
             document.getElementById('login-btn').addEventListener('click', login);
         });
 
-        // 載入部門資料
+        function showLoading(show = true) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+        }
+
         function loadDepartments() {
+            showLoading();
+            console.log('開始載入部門資料');
+            
             google.script.run
                 .withSuccessHandler(function(departments) {
+                    console.log('收到部門資料:', departments);
                     const departmentSelect = document.getElementById('department');
-                    departments.forEach(function(dept) {
-                        const option = document.createElement('option');
-                        option.value = dept;
-                        option.textContent = dept;
-                        departmentSelect.appendChild(option);
-                    });
+                    departmentSelect.innerHTML = '<option value="" selected disabled>請選擇部門</option>';
+                    
+                    if (departments && departments.length > 0) {
+                        departments.forEach(function(dept) {
+                            const option = document.createElement('option');
+                            option.value = dept;
+                            option.textContent = dept;
+                            departmentSelect.appendChild(option);
+                        });
+                    } else {
+                        showError('無法載入部門資料');
+                    }
+                    showLoading(false);
+                })
+                .withFailureHandler(function(error) {
+                    console.error('載入部門失敗:', error);
+                    showError('載入部門資料失敗');
+                    showLoading(false);
                 })
                 .getDepartments();
         }
 
-        // 載入姓名資料
         function loadNames(department) {
+            showLoading();
             const nameSelect = document.getElementById('name');
             nameSelect.disabled = true;
             nameSelect.innerHTML = '<option value="" selected disabled>載入中...</option>';
@@ -125,75 +152,66 @@
                         nameSelect.appendChild(option);
                     });
                     nameSelect.disabled = false;
+                    showLoading(false);
+                })
+                .withFailureHandler(function(error) {
+                    console.error('載入姓名失敗:', error);
+                    showError('載入姓名資料失敗');
+                    showLoading(false);
                 })
                 .getNamesByDepartment(department);
         }
 
-        // 載入使用者資訊
         function loadUserInfo(name) {
+            showLoading();
             const department = document.getElementById('department').value;
             
             google.script.run
                 .withSuccessHandler(function(userInfo) {
-                    document.getElementById('username').value = userInfo.username;
-                    // 密碼欄位不自動填入，讓使用者手動輸入
+                    if (userInfo && userInfo.username) {
+                        document.getElementById('username').value = userInfo.username;
+                    } else {
+                        showError('無法載入使用者資訊');
+                    }
+                    showLoading(false);
+                })
+                .withFailureHandler(function(error) {
+                    console.error('載入使用者資訊失敗:', error);
+                    showError('載入使用者資訊失敗');
+                    showLoading(false);
                 })
                 .getUserInfo(department, name);
         }
 
-        // 登入功能
         function login() {
+            showLoading();
             const department = document.getElementById('department').value;
             const name = document.getElementById('name').value;
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
             if (!department || !name || !username || !password) {
-                document.getElementById('error-message').textContent = '請填寫所有欄位';
+                showError('請填寫所有欄位');
+                showLoading(false);
                 return;
             }
             
             google.script.run
                 .withSuccessHandler(function(isValid) {
                     if (isValid) {
-                        // 登入成功，跳轉到第二畫面
                         window.location.href = '?page=dashboard&dept=' + encodeURIComponent(department) + '&name=' + encodeURIComponent(name);
                     } else {
-                        document.getElementById('error-message').textContent = '帳號或密碼錯誤';
+                        showError('帳號或密碼錯誤');
                     }
+                    showLoading(false);
+                })
+                .withFailureHandler(function(error) {
+                    console.error('登入失敗:', error);
+                    showError('登入失敗，請稍後再試');
+                    showLoading(false);
                 })
                 .validateLogin(department, name, username, password);
         }
-
-        // 載入部門資料
-        function loadDepartments() {
-          google.script.run
-            .withSuccessHandler(function(departments) {
-              const departmentSelect = document.getElementById('department');
-              
-              // 清空現有選項
-              departmentSelect.innerHTML = '<option value="" selected disabled>請選擇部門</option>';
-              
-              if (departments && departments.length > 0) {
-                departments.forEach(function(dept) {
-                  const option = document.createElement('option');
-                  option.value = dept;
-                  option.textContent = dept;
-                  departmentSelect.appendChild(option);
-                });
-              } else {
-                console.log('沒有部門資料返回');
-                // 顯示錯誤訊息
-                document.getElementById('error-message').textContent = '無法載入部門資料，請聯繫系統管理員';
-              }
-            })
-            .withFailureHandler(function(error) {
-              console.error('載入部門失敗:', error);
-              document.getElementById('error-message').textContent = '載入部門資料失敗: ' + error;
-            })
-            .getDepartments();
-        }
-
     </script>
 </body>
 </html>
