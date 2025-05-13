@@ -1,218 +1,151 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>昶青實業-AI風險控制管理中心</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: 'Noto Sans TC', sans-serif;
-            background-color: #f8f9fa;
+            font-family: 'Arial', sans-serif;
+            margin: 0;
             padding: 20px;
-        }
-        .login-container {
-            max-width: 500px;
-            margin: 50px auto;
-            padding: 30px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-        .title {
+            background-color: #f4f4f9;
             text-align: center;
-            margin-bottom: 30px;
-            color: #0d6efd;
         }
-        .form-group {
-            margin-bottom: 20px;
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
-        .btn-login {
-            width: 100%;
+        h1 {
+            color: #333;
+        }
+        select, input {
+            width: 80%;
             padding: 10px;
-            background-color: #0d6efd;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #007BFF;
+            color: white;
             border: none;
+            border-radius: 4px;
+            cursor: pointer;
         }
-        .error-message {
-            color: red;
-            margin-top: 10px;
-            text-align: center;
+        button:hover {
+            background-color: #0056b3;
         }
-        .loading {
-            text-align: center;
-            color: #666;
-            margin-top: 10px;
+        #loginForm {
+            display: block;
+        }
+        #mainPage {
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="login-container">
-            <h2 class="title">昶青實業-AI風險控制管理中心</h2>
-            <div id="login-form">
-                <div class="form-group">
-                    <label for="department">部門</label>
-                    <select class="form-select" id="department">
-                        <option value="" selected disabled>載入中...</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="name">姓名</label>
-                    <select class="form-select" id="name" disabled>
-                        <option value="" selected disabled>請先選擇部門</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="username">帳號</label>
-                    <input type="text" class="form-control" id="username" readonly>
-                </div>
-                <div class="form-group">
-                    <label for="password">密碼</label>
-                    <input type="password" class="form-control" id="password" placeholder="請輸入密碼">
-                </div>
-                <button type="button" class="btn btn-primary btn-login" id="login-btn">登入</button>
-                <div class="loading" id="loading" style="display: none;">處理中...</div>
-                <div class="error-message" id="error-message"></div>
-            </div>
+        <h1>昶青實業-AI風險控制管理中心</h1>
+        <div id="loginForm">
+            <select id="department" onchange="loadNames()">
+                <option value="">請選擇部門</option>
+            </select>
+            <select id="name" onchange="loadAccountAndPassword()">
+                <option value="">請選擇姓名</option>
+            </select>
+            <input type="text" id="account" placeholder="帳號" readonly>
+            <input type="password" id="password" placeholder="密碼">
+            <button onclick="login()">登入</button>
+        </div>
+        <div id="mainPage">
+            <button onclick="goToInventory()">部門週期盤點</button>
+            <button onclick="goToEventLog()">事件登錄</button>
         </div>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('頁面載入完成');
-            loadDepartments();
-            
-            // 部門選擇事件監聽
-            document.getElementById('department').addEventListener('change', function() {
-                console.log('選擇部門:', this.value);
-                loadNames(this.value);
+        let sheetData = [];
+
+        // 載入部門列表
+        async function loadDepartments() {
+            const response = await fetch('https://script.google.com/macros/s/AKfycbyOt-LKixiNb6hRVD5CqhLkqyr2OEempV7y1YU1W4eHN8yTPzEim49cK0BZnhexR2gC/exec');
+            const data = await response.json();
+            sheetData = data;
+            const departmentSelect = document.getElementById('department');
+            data.forEach(row => {
+                let option = document.createElement('option');
+                option.value = row.department;
+                option.textContent = row.department;
+                departmentSelect.appendChild(option);
             });
-            
-            // 姓名選擇事件監聽
-            document.getElementById('name').addEventListener('change', function() {
-                console.log('選擇姓名:', this.value);
-                loadUserInfo(this.value);
-            });
-            
-            // 登入按鈕事件監聽
-            document.getElementById('login-btn').addEventListener('click', login);
-        });
-
-        function showLoading(show = true) {
-            document.getElementById('loading').style.display = show ? 'block' : 'none';
         }
 
-        function showError(message) {
-            document.getElementById('error-message').textContent = message;
-        }
-
-        function loadDepartments() {
-            showLoading();
-            console.log('開始載入部門資料');
-            
-            google.script.run
-                .withSuccessHandler(function(departments) {
-                    console.log('收到部門資料:', departments);
-                    const departmentSelect = document.getElementById('department');
-                    departmentSelect.innerHTML = '<option value="" selected disabled>請選擇部門</option>';
-                    
-                    if (departments && departments.length > 0) {
-                        departments.forEach(function(dept) {
-                            const option = document.createElement('option');
-                            option.value = dept;
-                            option.textContent = dept;
-                            departmentSelect.appendChild(option);
-                        });
-                    } else {
-                        showError('無法載入部門資料');
-                    }
-                    showLoading(false);
-                })
-                .withFailureHandler(function(error) {
-                    console.error('載入部門失敗:', error);
-                    showError('載入部門資料失敗');
-                    showLoading(false);
-                })
-                .getDepartments();
-        }
-
-        function loadNames(department) {
-            showLoading();
+        // 根據部門載入姓名列表
+        function loadNames() {
+            const department = document.getElementById('department').value;
             const nameSelect = document.getElementById('name');
-            nameSelect.disabled = true;
-            nameSelect.innerHTML = '<option value="" selected disabled>載入中...</option>';
-            
-            google.script.run
-                .withSuccessHandler(function(names) {
-                    nameSelect.innerHTML = '<option value="" selected disabled>請選擇姓名</option>';
-                    names.forEach(function(name) {
-                        const option = document.createElement('option');
-                        option.value = name;
-                        option.textContent = name;
-                        nameSelect.appendChild(option);
-                    });
-                    nameSelect.disabled = false;
-                    showLoading(false);
-                })
-                .withFailureHandler(function(error) {
-                    console.error('載入姓名失敗:', error);
-                    showError('載入姓名資料失敗');
-                    showLoading(false);
-                })
-                .getNamesByDepartment(department);
-        }
-
-        function loadUserInfo(name) {
-            showLoading();
-            const department = document.getElementById('department').value;
-            
-            google.script.run
-                .withSuccessHandler(function(userInfo) {
-                    if (userInfo && userInfo.username) {
-                        document.getElementById('username').value = userInfo.username;
-                    } else {
-                        showError('無法載入使用者資訊');
-                    }
-                    showLoading(false);
-                })
-                .withFailureHandler(function(error) {
-                    console.error('載入使用者資訊失敗:', error);
-                    showError('載入使用者資訊失敗');
-                    showLoading(false);
-                })
-                .getUserInfo(department, name);
-        }
-
-        function login() {
-            showLoading();
-            const department = document.getElementById('department').value;
-            const name = document.getElementById('name').value;
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            if (!department || !name || !username || !password) {
-                showError('請填寫所有欄位');
-                showLoading(false);
-                return;
+            nameSelect.innerHTML = '<option value="">請選擇姓名</option>';
+            document.getElementById('account').value = '';
+            document.getElementById('password').value = '';
+            if (department) {
+                const filteredData = sheetData.filter(row => row.department === department);
+                filteredData.forEach(row => {
+                    let option = document.createElement('option');
+                    option.value = row.name;
+                    option.textContent = row.name;
+                    nameSelect.appendChild(option);
+                });
             }
-            
-            google.script.run
-                .withSuccessHandler(function(isValid) {
-                    if (isValid) {
-                        window.location.href = '?page=dashboard&dept=' + encodeURIComponent(department) + '&name=' + encodeURIComponent(name);
-                    } else {
-                        showError('帳號或密碼錯誤');
-                    }
-                    showLoading(false);
-                })
-                .withFailureHandler(function(error) {
-                    console.error('登入失敗:', error);
-                    showError('登入失敗，請稍後再試');
-                    showLoading(false);
-                })
-                .validateLogin(department, name, username, password);
         }
+
+        // 根據姓名載入帳號和密碼
+        function loadAccountAndPassword() {
+            const name = document.getElementById('name').value;
+            const department = document.getElementById('department').value;
+            document.getElementById('account').value = '';
+            document.getElementById('password').value = '';
+            if (name && department) {
+                const row = sheetData.find(row => row.department === department && row.name === name);
+                if (row) {
+                    document.getElementById('account').value = row.account;
+                    document.getElementById('password').value = row.password;
+                }
+            }
+        }
+
+        // 登入功能
+        function login() {
+            const account = document.getElementById('account').value;
+            const password = document.getElementById('password').value;
+            if (account && password) {
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('mainPage').style.display = 'block';
+            } else {
+                alert('請輸入正確的帳號和密碼');
+            }
+        }
+
+        // 部門週期盤點頁面跳轉
+        function goToInventory() {
+            alert('跳轉到部門週期盤點頁面');
+            // 未來可加入跳轉邏輯
+        }
+
+        // 事件登錄頁面跳轉
+        function goToEventLog() {
+            alert('跳轉到事件登錄頁面');
+            // 未來可加入跳轉邏輯
+        }
+
+        // 頁面載入時執行
+        window.onload = loadDepartments;
     </script>
-    <script src="https://script.google.com/macros/s/AKfycbyjwV4OXITtXW8q6zln3va3AxPVgDAdCAFdqsW6yYDyQJ6ske27fqkHb7wx9BF1XsME/exec"></script>
 </body>
 </html>
