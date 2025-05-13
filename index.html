@@ -75,7 +75,7 @@
 
         // 載入部門列表
         async function loadDepartments() {
-            const response = await fetch('https://script.google.com/macros/s/AKfycbyOt-LKixiNb6hRVD5CqhLkqyr2OEempV7y1YU1W4eHN8yTPzEim49cK0BZnhexR2gC/exec');
+            const response = await fetch('https://script.google.com/macros/s/AKfycbwn20MG1fL2TcJyl2W8GqWjYhmeZGqRbqYmZg-7EDCr36y7PpqxTQz-jv6nXSbMOcNq/exec');
             const data = await response.json();
             sheetData = data;
             const departmentSelect = document.getElementById('department');
