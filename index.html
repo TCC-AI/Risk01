@@ -18,6 +18,10 @@
             border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
         h1 {
             color: #2c3e50;
             text-align: center;
@@ -38,11 +42,6 @@
         .btn-primary:hover {
             background-color: #2980b9;
         }
-        .loading {
-            display: none;
-            text-align: center;
-            margin-top: 15px;
-        }
     </style>
 </head>
 <body>
@@ -52,17 +51,23 @@
             <form id="loginForm">
                 <div class="form-group">
                     <label for="department">部門</label>
-                    <input type="text" class="form-control" id="department" value="管理本部" readonly>
+                    <select class="form-control" id="department" required>
+                        <option value="">請選擇部門</option>
+                        <!-- 部門選項將由JavaScript動態填充 -->
+                    </select>
                 </div>
                 
                 <div class="form-group">
                     <label for="name">姓名</label>
-                    <input type="text" class="form-control" id="name" value="W" readonly>
+                    <select class="form-control" id="name" required disabled>
+                        <option value="">請先選擇部門</option>
+                        <!-- 姓名選項將由JavaScript動態填充 -->
+                    </select>
                 </div>
                 
                 <div class="form-group">
                     <label for="username">帳號</label>
-                    <input type="text" class="form-control" id="username" value="tcc" readonly>
+                    <input type="text" class="form-control" id="username" readonly>
                 </div>
                 
                 <div class="form-group">
@@ -70,97 +75,102 @@
                     <input type="password" class="form-control" id="password" required>
                 </div>
                 
-                <button type="button" id="loginBtn" class="btn btn-primary">登入</button>
-                <div id="loading" class="loading">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p>登入中，請稍候...</p>
-                </div>
-                
-                <!-- 已移除測試直接登入按鈕 -->
+                <button type="submit" class="btn btn-primary">登入</button>
             </form>
         </div>
     </div>
 
     <script>
-        // Google Apps Script 部署網址
-        const scriptURL = 'https://script.google.com/macros/s/AKfycby5_42rOXYGqhbSIOwsB6sElSOftHcTUX_BjX_B3AcB9KUDIUpXdiZM8TmG6jRl-C4t/exec';
+        // 連接到Google Apps Script
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbzktirH_t1TBNXNMpav8-ZbaAQbhJVKtklu0fmCtKL1UHJaCyDkNSO0JNffkKxloTEu/exec';
         
-        // 登入按鈕事件處理
-        document.getElementById('loginBtn').addEventListener('click', function() {
+        // 載入部門資料
+        window.onload = function() {
+            fetch(`${scriptUrl}?action=getDepartments`)
+                .then(response => response.json())
+                .then(data => {
+                    const departmentSelect = document.getElementById('department');
+                    data.forEach(dept => {
+                        const option = document.createElement('option');
+                        option.value = dept;
+                        option.textContent = dept;
+                        departmentSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error loading departments:', error));
+        };
+        
+        // 當部門選擇變更時
+        document.getElementById('department').addEventListener('change', function() {
+            const department = this.value;
+            if (!department) return;
+            
+            document.getElementById('name').disabled = false;
+            document.getElementById('name').innerHTML = '<option value="">請選擇姓名</option>';
+            document.getElementById('username').value = '';
+            
+            fetch(`${scriptUrl}?action=getNamesByDepartment&department=${encodeURIComponent(department)}`)
+                .then(response => response.json())
+                .then(data => {
+                    const nameSelect = document.getElementById('name');
+                    data.forEach(name => {
+                        const option = document.createElement('option');
+                        option.value = name;
+                        option.textContent = name;
+                        nameSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error loading names:', error));
+        });
+        
+        // 當姓名選擇變更時
+        document.getElementById('name').addEventListener('change', function() {
+            const department = document.getElementById('department').value;
+            const name = this.value;
+            if (!name) return;
+            
+            fetch(`${scriptUrl}?action=getUserInfo&department=${encodeURIComponent(department)}&name=${encodeURIComponent(name)}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('username').value = data.username;
+                })
+                .catch(error => console.error('Error loading user info:', error));
+        });
+        
+        // 提交表單
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
             const department = document.getElementById('department').value;
             const name = document.getElementById('name').value;
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
-            if (!password) {
-                alert("請輸入密碼");
-                return;
-            }
-            
-            // 顯示載入中
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('loginBtn').disabled = true;
-            
-            // 準備發送到 Google Apps Script 的數據
-            const data = {
-                action: 'login',
-                department: department,
-                name: name,
-                username: username,
-                password: password
-            };
-            
-            // 發送登入請求到 Google Apps Script
-            fetch(scriptURL, {
+            fetch(`${scriptUrl}?action=login`, {
                 method: 'POST',
-                body: JSON.stringify(data),
                 headers: {
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    department,
+                    name,
+                    username,
+                    password
+                })
             })
             .then(response => response.json())
-            .then(result => {
-                // 隱藏載入中
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('loginBtn').disabled = false;
-                
-                if (result.success) {
-                    // 登入成功
-                    sessionStorage.setItem('userInfo', JSON.stringify(result.userInfo));
+            .then(data => {
+                if (data.success) {
+                    // 登入成功，跳轉到主頁面
                     window.location.href = 'dashboard.html';
                 } else {
                     // 登入失敗
-                    alert(result.message || "登入失敗，請檢查帳號密碼");
+                    alert('帳號或密碼錯誤，請重新輸入');
                     document.getElementById('password').value = '';
                 }
             })
-            .catch(error => {
-                // 隱藏載入中
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('loginBtn').disabled = false;
-                
-                console.error('Error:', error);
-                
-                // 暫時使用簡易密碼驗證作為備用方案
-                if (password === "123456") {  // 假設密碼是 123456
-                    const userInfo = {
-                        department: department,
-                        name: name,
-                        username: username
-                    };
-                    
-                    sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
-                    window.location.href = 'dashboard.html';
-                } else {
-                    alert("密碼錯誤，請重新輸入");
-                    document.getElementById('password').value = '';
-                }
-            });
+            .catch(error => console.error('Error during login:', error));
         });
-        
-        // 已移除測試直接登入按鈕的事件處理程式
     </script>
 </body>
 </html>
