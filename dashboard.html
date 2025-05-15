@@ -78,7 +78,7 @@
     <div class="container">
         <div class="dashboard-container">
             <div class="user-info">
-                <span id="userInfo"></span>
+                <span id="userInfo">載入中...</span>
             </div>
             
             <h1>昶青實業-AI風險控制管理中心</h1>
@@ -102,6 +102,7 @@
             
             if (!userInfo) {
                 // 未登入，跳轉回登入頁面
+                alert('請先登入');
                 window.location.href = 'index.html';
                 return;
             }
@@ -116,68 +117,5 @@
             window.location.href = 'index.html';
         });
     </script>
-
-    // 在 </body> 標籤前添加
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // 獲取登入表單和按鈕
-    const loginForm = document.querySelector('form');
-    const loginButton = document.querySelector('button[type="submit"]');
-    
-    // 添加表單提交事件監聽器
-    loginForm.addEventListener('submit', function(e) {
-      e.preventDefault(); // 阻止表單默認提交行為
-      
-      // 獲取表單數據
-      const department = document.getElementById('department').value;
-      const name = document.getElementById('name').value;
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
-      
-      // 顯示登入中狀態
-      loginButton.disabled = true;
-      loginButton.textContent = '登入中...';
-      
-      // 發送登入請求到 Google Apps Script
-      const scriptUrl = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec';
-      
-      fetch(`${scriptUrl}?action=login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          department,
-          name,
-          username,
-          password
-        })
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          // 登入成功，儲存用戶資訊到 sessionStorage
-          sessionStorage.setItem('userInfo', JSON.stringify(data.userInfo));
-          
-          // 跳轉到儀表板頁面
-          window.location.href = 'dashboard.html';
-        } else {
-          // 登入失敗
-          alert('帳號或密碼錯誤，請重新輸入');
-          document.getElementById('password').value = '';
-          loginButton.disabled = false;
-          loginButton.textContent = '登入';
-        }
-      })
-      .catch(error => {
-        console.error('登入過程中發生錯誤:', error);
-        alert('登入過程中發生錯誤，請稍後再試');
-        loginButton.disabled = false;
-        loginButton.textContent = '登入';
-      });
-    });
-  });
-</script>
-
 </body>
 </html>
