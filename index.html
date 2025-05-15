@@ -78,8 +78,7 @@
                     <p>登入中，請稍候...</p>
                 </div>
                 
-                <!-- 簡易登入按鈕 (測試用) -->
-                <button type="button" id="testLoginBtn" class="btn btn-secondary mt-3">測試直接登入</button>
+                <!-- 已移除測試直接登入按鈕 -->
             </form>
         </div>
     </div>
@@ -161,21 +160,7 @@
             });
         });
         
-        // 測試直接登入按鈕
-        document.getElementById('testLoginBtn').addEventListener('click', function() {
-            // 儲存基本用戶資訊
-            const userInfo = {
-                department: document.getElementById('department').value,
-                name: document.getElementById('name').value,
-                username: document.getElementById('username').value
-            };
-            
-            // 將用戶資訊存到 sessionStorage
-            sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
-            
-            // 跳轉到儀表板頁面
-            window.location.href = 'dashboard.html';
-        });
+        // 已移除測試直接登入按鈕的事件處理程式
     </script>
 </body>
 </html>
