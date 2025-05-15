@@ -74,21 +74,30 @@
     </div>
 
     <script>
-        // 測試直接登入按鈕
-        document.getElementById('testLoginBtn').addEventListener('click', function() {
-            // 儲存基本用戶資訊
-            const userInfo = {
-                department: document.getElementById('department').value,
-                name: document.getElementById('name').value,
-                username: document.getElementById('username').value
-            };
-            
-            // 將用戶資訊存到 sessionStorage
-            sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
-            
-            // 跳轉到儀表板頁面
-            window.location.href = 'dashboard.html';
-        });
+       // 修改登入按鈕的事件處理
+document.getElementById('loginBtn').addEventListener('click', function() {
+    const department = document.getElementById('department').value;
+    const name = document.getElementById('name').value;
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    
+    // 這裡可以連接到您的 Google Sheets 或其他後端進行驗證
+    // 暫時使用簡單的密碼驗證
+    if (password === "123456") {  // 替換為實際密碼或後端驗證
+        const userInfo = {
+            department: department,
+            name: name,
+            username: username
+        };
+        
+        sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
+        window.location.href = 'dashboard.html';
+    } else {
+        alert("密碼錯誤，請重新輸入");
+        document.getElementById('password').value = '';
+    }
+});
+
         
         // 正常登入按鈕
         document.getElementById('loginBtn').addEventListener('click', function() {
