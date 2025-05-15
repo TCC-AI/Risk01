@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>部門週期盤點 - 昶青實業</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f5f5f5;
+            font-family: "Microsoft JhengHei", Arial, sans-serif;
+            padding-top: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        .user-info {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        .btn-back {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="user-info">
+            <span id="userInfo">載入中...</span>
+        </div>
+        
+        <h1>部門週期盤點</h1>
+        
+        <div class="row mb-4">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        盤點資訊
+                    </div>
+                    <div class="card-body">
+                        <form id="inventoryForm">
+                            <div class="mb-3">
+                                <label class="form-label">部門</label>
+                                <input type="text" class="form-control" id="deptField" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">盤點週期</label>
+                                <select class="form-select" id="cycleSelect">
+                                    <option value="weekly">每週</option>
+                                    <option value="monthly">每月</option>
+                                    <option value="quarterly">每季</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">盤點項目</label>
+                                <select class="form-select" id="itemSelect">
+                                    <option value="item1">項目一</option>
+                                    <option value="item2">項目二</option>
+                                    <option value="item3">項目三</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">盤點結果</label>
+                                <textarea class="form-control" id="resultText" rows="3"></textarea>
+                            </div>
+                            <button type="button" class="btn btn-primary" id="submitBtn">提交盤點</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <button class="btn btn-secondary btn-back" id="backBtn">返回主頁</button>
+        </div>
+    </div>
+
+    <script>
+        // 檢查用戶是否已登入
+        window.onload = function() {
+            const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
+            
+            if (!userInfo) {
+                alert('請先登入');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // 顯示用戶資訊
+            document.getElementById('userInfo').textContent = `${userInfo.department} / ${userInfo.name}`;
+            document.getElementById('deptField').value = userInfo.department;
+        };
+        
+        // 返回主頁
+        document.getElementById('backBtn').addEventListener('click', function() {
+            window.location.href = 'dashboard.html';
+        });
+        
+        // 提交盤點
+        document.getElementById('submitBtn').addEventListener('click', function() {
+            const cycle = document.getElementById('cycleSelect').value;
+            const item = document.getElementById('itemSelect').value;
+            const result = document.getElementById('resultText').value;
+            
+            if (!result) {
+                alert('請輸入盤點結果');
+                return;
+            }
+            
+            alert('盤點資料已提交成功！');
+            document.getElementById('resultText').value = '';
+            
+            // 這裡可以添加將數據發送到後端的代碼
+        });
+    </script>
+</body>
+</html>
