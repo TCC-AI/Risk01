@@ -38,6 +38,11 @@
         .btn-primary:hover {
             background-color: #2980b9;
         }
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
@@ -66,6 +71,12 @@
                 </div>
                 
                 <button type="button" id="loginBtn" class="btn btn-primary">登入</button>
+                <div id="loading" class="loading">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p>登入中，請稍候...</p>
+                </div>
                 
                 <!-- 簡易登入按鈕 (測試用) -->
                 <button type="button" id="testLoginBtn" class="btn btn-secondary mt-3">測試直接登入</button>
@@ -74,56 +85,96 @@
     </div>
 
     <script>
-       // 修改登入按鈕的事件處理
-document.getElementById('loginBtn').addEventListener('click', function() {
-    const department = document.getElementById('department').value;
-    const name = document.getElementById('name').value;
-    const username = document.getElementById('username').value;
-    const password = document.getElementById('password').value;
-    
-    // 這裡可以連接到您的 Google Sheets 或其他後端進行驗證
-    // 暫時使用簡單的密碼驗證
-    if (password === "123456") {  // 替換為實際密碼或後端驗證
-        const userInfo = {
-            department: department,
-            name: name,
-            username: username
-        };
+        // Google Apps Script 部署網址
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbwwcE6nG4SqrwbmQpOitPs5E-SFKKKSmbAfax24ZrJDHtmO-KlMMsjgwqafweVmtJQ/exec';
         
-        sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
-        window.location.href = 'dashboard.html';
-    } else {
-        alert("密碼錯誤，請重新輸入");
-        document.getElementById('password').value = '';
-    }
-});
-
-        
-        // 正常登入按鈕
+        // 登入按鈕事件處理
         document.getElementById('loginBtn').addEventListener('click', function() {
             const department = document.getElementById('department').value;
             const name = document.getElementById('name').value;
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
-            // 簡易密碼驗證 (實際應用中應該由後端驗證)
-            if (password === "123456") {  // 假設密碼是 123456
-                // 儲存用戶資訊
-                const userInfo = {
-                    department: department,
-                    name: name,
-                    username: username
-                };
-                
-                // 將用戶資訊存到 sessionStorage
-                sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
-                
-                // 跳轉到儀表板頁面
-                window.location.href = 'dashboard.html';
-            } else {
-                alert("密碼錯誤，請重新輸入");
-                document.getElementById('password').value = '';
+            if (!password) {
+                alert("請輸入密碼");
+                return;
             }
+            
+            // 顯示載入中
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('loginBtn').disabled = true;
+            
+            // 準備發送到 Google Apps Script 的數據
+            const data = {
+                action: 'login',
+                department: department,
+                name: name,
+                username: username,
+                password: password
+            };
+            
+            // 發送登入請求到 Google Apps Script
+            fetch(scriptURL, {
+                method: 'POST',
+                body: JSON.stringify(data),
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(result => {
+                // 隱藏載入中
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('loginBtn').disabled = false;
+                
+                if (result.success) {
+                    // 登入成功
+                    sessionStorage.setItem('userInfo', JSON.stringify(result.userInfo));
+                    window.location.href = 'dashboard.html';
+                } else {
+                    // 登入失敗
+                    alert(result.message || "登入失敗，請檢查帳號密碼");
+                    document.getElementById('password').value = '';
+                }
+            })
+            .catch(error => {
+                // 隱藏載入中
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('loginBtn').disabled = false;
+                
+                console.error('Error:', error);
+                
+                // 暫時使用簡易密碼驗證作為備用方案
+                if (password === "123456") {  // 假設密碼是 123456
+                    const userInfo = {
+                        department: department,
+                        name: name,
+                        username: username
+                    };
+                    
+                    sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
+                    window.location.href = 'dashboard.html';
+                } else {
+                    alert("密碼錯誤，請重新輸入");
+                    document.getElementById('password').value = '';
+                }
+            });
+        });
+        
+        // 測試直接登入按鈕
+        document.getElementById('testLoginBtn').addEventListener('click', function() {
+            // 儲存基本用戶資訊
+            const userInfo = {
+                department: document.getElementById('department').value,
+                name: document.getElementById('name').value,
+                username: document.getElementById('username').value
+            };
+            
+            // 將用戶資訊存到 sessionStorage
+            sessionStorage.setItem('userInfo', JSON.stringify(userInfo));
+            
+            // 跳轉到儀表板頁面
+            window.location.href = 'dashboard.html';
         });
     </script>
 </body>
