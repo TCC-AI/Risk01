@@ -68,22 +68,22 @@
       })
       .catch(()=>showErr('載入部門清單失敗，請稍後再試'));
 
-    /* 當部門改變 → 載入姓名 */
-    document.getElementById('deptSel').addEventListener('change',e=>{
-      const dept=e.target.value;
-      const nameSel=document.getElementById('nameSel');
-      nameSel.innerHTML='<option value="">─ 請選擇姓名 ─</option>';
-      nameSel.disabled=!dept;
-      if(!dept) return;
-      fetch(`${GAS_URL}?action=getNames&dept=${encodeURIComponent(dept)}`)
-        .then(r=>r.json())
-        .then(names=>{
-          names.forEach(n=>{
-            nameSel.insertAdjacentHTML('beforeend',`<option value="${n}">${n}</option>`);
-          });
-        })
-        .catch(()=>showErr('載入姓名清單失敗'));
-    });
+    /* 當姓名改變 → 自動帶入帳號 */
+document.getElementById('nameSel').addEventListener('change',e=>{
+  const dept=document.getElementById('deptSel').value;
+  const name=e.target.value;
+  if(!name) return;
+  fetch(`${GAS_URL}?action=getAccount&dept=${encodeURIComponent(dept)}&name=${encodeURIComponent(name)}`)
+    .then(r=>r.json())
+    .then(obj=>{
+      document.getElementById('accountIn').value = obj.account || '';
+-      document.getElementById('pwIn').value      = obj.password || '';
++      /* 讓使用者自行輸入密碼 */
++      document.getElementById('pwIn').value = '';
+    })
+    .catch(()=>showErr('取得帳號失敗'));
+});
+
 
     /* 當姓名改變 → 自動帶入帳密 */
     document.getElementById('nameSel').addEventListener('change',e=>{
