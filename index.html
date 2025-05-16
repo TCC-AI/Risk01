@@ -40,14 +40,13 @@ async function login(){
   const result = await res.json();
 
   if(result.success){
-    document.getElementById('loginDiv').classList.add('d-none');
-    document.getElementById('actionDiv').classList.remove('d-none');
-    
-    //精準顯示部門與姓名到前端右上角
-    document.getElementById('userInfo').textContent = `部門：${result.department} ｜ 姓名：${result.name}`;
+    //登入成功後跳轉dashboard.html並帶參數
+    window.location.href = `dashboard.html?department=${encodeURIComponent(result.department)}&name=${encodeURIComponent(result.name)}`;
   } else {
     document.getElementById('msg').textContent = result.message;
   }
+}
+
 }
 
 </script>
