@@ -90,19 +90,14 @@
         .catch(()=>showErr('載入姓名清單失敗'));
     });
 
-    /* 當姓名改變 → 自動帶入帳密 */
-    document.getElementById('nameSel').addEventListener('change',e=>{
-      const dept=document.getElementById('deptSel').value;
-      const name=e.target.value;
-      if(!name) return;
-      fetch(`${GAS_URL}?action=getAccount&dept=${encodeURIComponent(dept)}&name=${encodeURIComponent(name)}`)
-        .then(r=>r.json())
-        .then(obj=>{
-          document.getElementById('accountIn').value=obj.account||'';
-          document.getElementById('pwIn').value='';
-        })
-        .catch(()=>showErr('取得帳密失敗'));
-    });
+    /* 當姓名改變 → 不再自動帶入帳號 */
+document.getElementById('nameSel').addEventListener('change', e => {
+  // 移除自動帶入帳號的功能
+  // 清空帳號和密碼輸入框
+  document.getElementById('accountIn').value = '';
+  document.getElementById('pwIn').value = '';
+});
+
 
     /* 登入驗證 */
     document.getElementById('loginBtn').addEventListener('click',()=>{
