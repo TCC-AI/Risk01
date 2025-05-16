@@ -44,35 +44,58 @@
       document.getElementById('msg').textContent = txt;
     };
 
-    /* 登入驗證 */
-    document.getElementById('loginBtn').addEventListener('click',()=>{
-      const account=document.getElementById('accountIn').value.trim();
-      const password=document.getElementById('pwIn').value.trim();
-      const msg=document.getElementById('msg');
-      if(!account||!password){msg.textContent='請填寫帳號、密碼';return;}
+    /* 登入函數 */
+    function attemptLogin() {
+      const account = document.getElementById('accountIn').value.trim();
+      const password = document.getElementById('pwIn').value.trim();
+      const msg = document.getElementById('msg');
+      const loginBtn = document.getElementById('loginBtn');
+      
+      if (!account || !password) {
+        msg.textContent = '請填寫帳號、密碼';
+        return;
+      }
+      
+      // 禁用按鈕防止重複點擊
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 登入中...';
       
       // 添加隨機挑戰值以防止重放攻擊
       const clientNonce = Math.random().toString(36).substring(2, 15);
       const timestamp = new Date().getTime();
       
       fetch(`${GAS_URL}?action=login&account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}&nonce=${clientNonce}&timestamp=${timestamp}`)
-        .then(r=>r.json())
-        .then(res=>{
-          if(res.ok){
+        .then(r => r.json())
+        .then(res => {
+          if (res.ok) {
             // 存儲安全的token和過期時間
             sessionStorage.setItem('cc_token', res.token || '');
             sessionStorage.setItem('cc_token_expires', res.expires || '');
             sessionStorage.setItem('cc_user_dept', res.dept || '');
             sessionStorage.setItem('cc_user_name', res.name || '');
             
-            console.log("登入資訊:", res); // 調試用
-            
-            location.href='dashboard.html';
-          }else{
-            msg.textContent='帳號或密碼錯誤';
+            location.href = 'dashboard.html';
+          } else {
+            msg.textContent = '帳號或密碼錯誤';
+            loginBtn.disabled = false;
+            loginBtn.textContent = '登入';
           }
         })
-        .catch(()=>showErr('登入服務異常'));
+        .catch(() => {
+          showErr('登入服務異常');
+          loginBtn.disabled = false;
+          loginBtn.textContent = '登入';
+        });
+    }
+
+    /* 登入驗證 */
+    document.getElementById('loginBtn').addEventListener('click', attemptLogin);
+    
+    /* 按Enter鍵登入 */
+    document.getElementById('pwIn').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        attemptLogin();
+      }
     });
   </script>
 </body>
