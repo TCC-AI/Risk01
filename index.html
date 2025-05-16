@@ -9,6 +9,7 @@
     body {background: #f0f4f8;font-family:"Microsoft JhengHei",Arial,sans-serif;}
     .login-card,.action-card {max-width:480px;margin:5rem auto;padding:2rem;background:#fff;border-radius:12px;box-shadow:0 4px 10px rgba(0,0,0,.1);}
     button {width:100%;}
+    .user-info {position:absolute;top:10px;right:10px;font-size:0.9rem;color:#333;}
   </style>
 </head>
 <body>
@@ -21,6 +22,7 @@
 </div>
 
 <div class="action-card d-none" id="actionDiv">
+  <div class="user-info" id="userInfo"></div>
   <h4 class="text-center mb-4">昶青實業-AI風險控制管理中心</h4>
   <button class="btn btn-success mb-3">部門週期盤點</button>
   <button class="btn btn-info">事件登錄</button>
@@ -39,6 +41,7 @@ async function login(){
   if(result.success){
     document.getElementById('loginDiv').classList.add('d-none');
     document.getElementById('actionDiv').classList.remove('d-none');
+    document.getElementById('userInfo').textContent = `${result.department} ${result.name}`;
   } else {
     document.getElementById('msg').textContent = result.message;
   }
