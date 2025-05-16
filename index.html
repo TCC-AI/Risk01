@@ -1,122 +1,176 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>昶青實業 ‧ AI 風險控制管理中心</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body{background:#f5f5f5;font-family:"Microsoft JhengHei",Arial,sans-serif}
-    .login-card{max-width:460px;margin:6rem auto;padding:2.5rem;background:#fff;border-radius:1rem;
-                box-shadow:0 4px 12px rgba(0,0,0,.12)}
-  </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>昶青實業-AI風險控制管理中心</title>
+  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-router-dom@6.4.3/dist/umd/react-router-dom.production.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.4.0/dist/axios.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.20.6/babel.min.js"></script>
 </head>
 <body>
-  <div class="login-card">
-    <h3 class="text-center mb-4">昶青實業-AI風險控制管理中心</h3>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const { BrowserRouter, Routes, Route, useNavigate } = ReactRouterDOM;
 
-    <div class="mb-3">
-      <label for="deptSel" class="form-label fw-bold">部門</label>
-      <select id="deptSel" class="form-select">
-        <option value="">─ 請選擇部門 ─</option>
-      </select>
-    </div>
+    // 首頁組件
+    function Home() {
+      const [departments, setDepartments] = useState([]);
+      const [selectedDept, setSelectedDept] = useState('');
+      const [names, setNames] = useState([]);
+      const [selectedName, setSelectedName] = useState('');
+      const [account, setAccount] = useState('');
+      const [password, setPassword] = useState('');
+      const [inputAccount, setInputAccount] = useState('');
+      const [inputPassword, setInputPassword] = useState('');
+      const [error, setError] = useState('');
+      const navigate = useNavigate();
 
-    <div class="mb-3">
-      <label for="nameSel" class="form-label fw-bold">姓名</label>
-      <select id="nameSel" class="form-select" disabled>
-        <option value="">─ 先選部門 ─</option>
-      </select>
-    </div>
+      // 獲取部門列表
+      useEffect(() => {
+        axios.get('https://script.google.com/macros/s/AKfycbw6g0dcjItfobBvLRsack5suRY0vC80HTnNwphIQdLxvXXQgT8FNrU1S5TIXKj_Ul-U/exec?action=getDepartments')
+          .then(response => {
+            setDepartments(response.data.departments);
+          })
+          .catch(err => console.error('Error fetching departments:', err));
+      }, []);
 
-    <div class="mb-3">
-      <label for="accountIn" class="form-label fw-bold">帳號</label>
-      <input id="accountIn" class="form-control" placeholder="自動帶入或自行輸入">
-    </div>
+      // 當部門改變時，獲取對應姓名
+      useEffect(() => {
+        if (selectedDept) {
+          axios.get(`https://script.google.com/macros/s/AKfycbybW8z3X9fJ5x6Z3bY7zK1X8yU3ZqW4eR5tY6uV7w/exec?action=getNames&dept=${encodeURIComponent(selectedDept)}`)
+            .then(response => {
+              setNames(response.data.names);
+              setSelectedName('');
+              setAccount('');
+              setPassword('');
+            })
+            .catch(err => console.error('Error fetching names:', err));
+        }
+      }, [selectedDept]);
 
-    <div class="mb-4">
-      <label for="pwIn" class="form-label fw-bold">密碼</label>
-      <input id="pwIn" type="password" class="form-control" placeholder="自動帶入或自行輸入">
-    </div>
+      // 當姓名改變時，獲取對應帳號和密碼
+      useEffect(() => {
+        if (selectedName) {
+          axios.get(`https://script.google.com/macros/s/AKfycbybW8z3X9fJ5x6Z3bY7zK1X8yU3ZqW4eR5tY6uV7w/exec?action=getAccount&name=${encodeURIComponent(selectedName)}`)
+            .then(response => {
+              setAccount(response.data.account);
+              setPassword(response.data.password);
+            })
+            .catch(err => console.error('Error fetching account:', err));
+        }
+      }, [selectedName]);
 
-    <button id="loginBtn" class="btn btn-primary w-100">登入</button>
-    <div id="msg" class="small text-danger mt-3 text-center"></div>
-  </div>
+      // 處理登錄
+      const handleLogin = () => {
+        if (inputAccount === account && inputPassword === password) {
+          navigate('/dashboard');
+        } else {
+          setError('帳號或密碼錯誤');
+        }
+      };
 
-  <script>
-    /* ← 換成你重新部署後的網址 */
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbywrW4_8YOc3kSmV1G-LPuk4J4gTAZPL_vCJSQ7ey2CN1cBS2S_sEnYUuxB3zkVFbnM/exec';
+      return (
+        <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-center mb-6">昶青實業-AI風險控制管理中心</h1>
+          <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md">
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">部門</label>
+              <select
+                value={selectedDept}
+                onChange={(e) => setSelectedDept(e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+              >
+                <option value="">請選擇部門</option>
+                {departments.map((dept, index) => (
+                  <option key={index} value={dept}>{dept}</option>
+                ))}
+              </select>
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">姓名</label>
+              <select
+                value={selectedName}
+                onChange={(e) => setSelectedName(e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                disabled={!selectedDept}
+              >
+                <option value="">請選擇姓名</option>
+                {names.map((name, index) => (
+                  <option key={index} value={name}>{name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">帳號</label>
+              <input
+                type="text"
+                value={inputAccount}
+                onChange={(e) => setInputAccount(e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                placeholder={account || '請先選擇姓名'}
+                disabled={!selectedName}
+              />
+            </div>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700">密碼</label>
+              <input
+                type="password"
+                value={inputPassword}
+                onChange={(e) => setInputPassword(e.target.value)}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                placeholder={password || '請先選擇姓名'}
+                disabled={!selectedName}
+              />
+            </div>
+            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+            <button
+              onClick={handleLogin}
+              className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50"
+              disabled={!inputAccount || !inputPassword}
+            >
+              登錄
+            </button>
+          </div>
+        </div>
+      );
+    }
 
-    /* 共用錯誤顯示 */
-    const showErr = txt => {
-      console.error(txt);
-      document.getElementById('msg').textContent = txt;
-    };
+    // 第二畫面組件
+    function Dashboard() {
+      return (
+        <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-center mb-6">昶青實業-AI風險控制管理中心</h1>
+          <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-md flex flex-col gap-4">
+            <button className="bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+              部門週期盤點
+            </button>
+            <button className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">
+              事件登錄
+            </button>
+          </div>
+        </div>
+      );
+    }
 
-    /* 取得部門清單 */
-    fetch(`${GAS_URL}?action=getDepartments`)
-      .then(r=>{
-        if(!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then(depts=>{
-        if(!Array.isArray(depts)||!depts.length) throw new Error('部門清單為空');
-        const sel=document.getElementById('deptSel');
-        depts.forEach(d=>{
-          sel.insertAdjacentHTML('beforeend',`<option value="${d}">${d}</option>`);
-        });
-      })
-      .catch(()=>showErr('載入部門清單失敗，請稍後再試'));
+    // 主應用組件
+    function App() {
+      return (
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+          </Routes>
+        </BrowserRouter>
+      );
+    }
 
-    /* 當部門改變 → 載入姓名 */
-    document.getElementById('deptSel').addEventListener('change',e=>{
-      const dept=e.target.value;
-      const nameSel=document.getElementById('nameSel');
-      nameSel.innerHTML='<option value="">─ 請選擇姓名 ─</option>';
-      nameSel.disabled=!dept;
-      if(!dept) return;
-      fetch(`${GAS_URL}?action=getNames&dept=${encodeURIComponent(dept)}`)
-        .then(r=>r.json())
-        .then(names=>{
-          names.forEach(n=>{
-            nameSel.insertAdjacentHTML('beforeend',`<option value="${n}">${n}</option>`);
-          });
-        })
-        .catch(()=>showErr('載入姓名清單失敗'));
-    });
-
-    /* 當姓名改變 → 自動帶入帳密 */
-    document.getElementById('nameSel').addEventListener('change',e=>{
-      const dept=document.getElementById('deptSel').value;
-      const name=e.target.value;
-      if(!name) return;
-      fetch(`${GAS_URL}?action=getAccount&dept=${encodeURIComponent(dept)}&name=${encodeURIComponent(name)}`)
-        .then(r=>r.json())
-        .then(obj=>{
-          document.getElementById('accountIn').value=obj.account||'';
-          document.getElementById('pwIn').value=obj.password||'';
-        })
-        .catch(()=>showErr('取得帳密失敗'));
-    });
-
-    /* 登入驗證 */
-    document.getElementById('loginBtn').addEventListener('click',()=>{
-      const account=document.getElementById('accountIn').value.trim();
-      const password=document.getElementById('pwIn').value.trim();
-      const msg=document.getElementById('msg');
-      if(!account||!password){msg.textContent='請填寫帳號、密碼';return;}
-      fetch(`${GAS_URL}?action=login&account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}`)
-        .then(r=>r.json())
-        .then(res=>{
-          if(res.ok){
-            sessionStorage.setItem('cc_token',res.token);
-            location.href='dashboard.html';
-          }else{
-            msg.textContent='帳號或密碼錯誤';
-          }
-        })
-        .catch(()=>showErr('登入服務異常'));
-    });
+    // 渲染應用
+    ReactDOM.render(<App />, document.getElementById('root'));
   </script>
 </body>
 </html>
