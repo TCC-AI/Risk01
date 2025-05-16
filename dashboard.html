@@ -2,75 +2,32 @@
 <html lang="zh-TW">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>昶青實業 ‧ AI 風險控制管理中心</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>昶青實業-AI風險控制管理中心</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body{background:#f5f5f5;font-family:"Microsoft JhengHei",Arial,sans-serif}
-    .container{max-width:900px;margin:4rem auto;padding:2rem;background:#fff;border-radius:1rem;
-               box-shadow:0 4px 12px rgba(0,0,0,.12)}
-    .menu-btn{display:block;width:100%;padding:1rem;margin-bottom:1rem;
-              text-align:center;font-size:1.1rem;border-radius:0.5rem}
-    .user-info{position:absolute;top:10px;right:20px;text-align:right;padding:5px 10px;
-               background-color:rgba(255,255,255,0.9);border-radius:5px}
+    body { background: #f0f4f8; font-family: "Microsoft JhengHei", Arial, sans-serif; }
+    .action-card { max-width:480px; margin:5rem auto; padding:2rem; background:#fff; border-radius:12px; box-shadow:0 4px 10px rgba(0,0,0,.1); position:relative;}
+    button { width:100%; }
+    .user-info { position:absolute; top:10px; right:10px; font-size:14px; color:#333; }
   </style>
 </head>
 <body>
-  <div class="user-info">
-    <span id="userInfo">載入中...</span>
-    <button class="btn btn-sm btn-outline-secondary ms-2" onclick="logout()">登出</button>
-  </div>
-
-  <div class="container text-center">
-    <h2 class="mb-5">昶青實業-AI風險控制管理中心</h2>
-    
-    <div class="row">
-      <div class="col-md-6 mb-3">
-        <a href="dept_check.html" class="btn btn-primary menu-btn">部門週期盤點</a>
-      </div>
-      <div class="col-md-6 mb-3">
-        <a href="event_log.html" class="btn btn-success menu-btn">事件登錄</a>
-      </div>
-    </div>
+  <div class="action-card">
+    <div class="user-info" id="userInfo"></div>
+    <h4 class="text-center mb-4">昶青實業-AI風險控制管理中心</h4>
+    <button class="btn btn-success mb-3">部門週期盤點</button>
+    <button class="btn btn-info">事件登錄</button>
   </div>
 
   <script>
-    /* 檢查登入狀態 */
-    document.addEventListener('DOMContentLoaded', function() {
-      // 檢查是否已登入
-      const token = sessionStorage.getItem('cc_token');
-      const expires = sessionStorage.getItem('cc_token_expires');
-      const now = new Date().getTime();
-      
-      if (!token || !expires || now > parseInt(expires)) {
-        // 未登入或登入已過期
-        alert('請先登入');
-        window.location.href = 'index.html';
-        return;
-      }
-      
-      // 獲取並顯示用戶資訊
-      const dept = sessionStorage.getItem('cc_user_dept');
-      const name = sessionStorage.getItem('cc_user_name');
-      
-      const userInfoElement = document.getElementById('userInfo');
-      if (dept && name) {
-        userInfoElement.textContent = `${dept} - ${name}`;
-      } else {
-        userInfoElement.textContent = '未知用戶';
-        // 如果沒有用戶資訊，可能是sessionStorage損壞，重定向到登入頁面
-        setTimeout(() => {
-          alert('用戶資訊不完整，請重新登入');
-          logout();
-        }, 500);
-      }
-    });
-    
-    /* 登出功能 */
-    function logout() {
-      sessionStorage.clear();
-      window.location.href = 'index.html';
-    }
+    // 從URL讀取部門與姓名
+    const params = new URLSearchParams(window.location.search);
+    const department = params.get('department');
+    const name = params.get('name');
+
+    //精準顯示部門與姓名
+    document.getElementById('userInfo').textContent = `部門：${department} ｜ 姓名：${name}`;
   </script>
 </body>
 </html>
