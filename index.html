@@ -94,7 +94,7 @@
         .then(r=>r.json())
         .then(obj=>{
           document.getElementById('accountIn').value=obj.account||'';
-          document.getElementById('pwIn').value=obj.password||'';
+          document.getElementById('pwIn').value='';
         })
         .catch(()=>showErr('取得帳密失敗'));
     });
