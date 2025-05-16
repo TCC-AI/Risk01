@@ -142,22 +142,57 @@
           .catch((err) => console.error("load names:", err));
       });
 
-    /* -------------------  姓名→帳號  ------------------- */
-    document.getElementById("name").addEventListener("change", function () {
-      const dept = document.getElementById("department").value;
-      const name = this.value;
-      if (!name) return;
-      fetch(
-        `${scriptUrl}?action=getUserInfo&department=${encodeURIComponent(
-          dept
-        )}&name=${encodeURIComponent(name)}`
-      )
-        .then((r) => r.json())
-        .then((data) => {
-          document.getElementById("username").value = data.username || "";
-        })
-        .catch((err) => console.error("load user info:", err));
+    // -------------------  登入  -------------------
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+
+  const dept  = document.getElementById("department").value;
+  const name  = document.getElementById("name").value;
+  const user  = document.getElementById("username").value;
+  const pwdRaw = document.getElementById("password").value;
+  if (!dept || !name || !user || !pwdRaw) return;
+
+  const btn = document.getElementById("loginBtn");
+  btn.disabled = true;
+  btn.textContent = "登入中…";
+
+  const pwdHash = await sha256(pwdRaw);
+
+- fetch(scriptUrl, {
+-   method: "POST",
+-   headers: { "Content-Type": "application/json" },
+-   body: JSON.stringify({ action:"login", department:dept, name, username:user, password:pwdHash })
+- })
++ fetch(scriptUrl, {
++   method: "POST",
++   // 不要自訂 headers！瀏覽器會自動帶上
++   body: new URLSearchParams({
++     action:     "login",
++     department: dept,
++     name,
++     username:   user,
++     password:   pwdHash
++   })
++ })
+    .then((r) => r.json())
+    .then((res) => {
+      if (res.success) {
+        window.location.href = "dashboard.html";
+      } else {
+        alert("帳號或密碼錯誤，請重新輸入");
+        document.getElementById("password").value = "";
+      }
+    })
+    .catch((err) => {
+      console.error("login error:", err);
+      alert("系統錯誤，請稍後再試");
+    })
+    .finally(() => {
+      btn.disabled = false;
+      btn.textContent = "登入";
     });
+});
+
 
     /* -------------------  登入  ------------------- */
     document
