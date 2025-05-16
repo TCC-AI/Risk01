@@ -13,5 +13,23 @@
     <button class="btn btn-outline-primary btn-lg" onclick="alert('開發中')">部門週期盤點</button>
     <button class="btn btn-outline-success btn-lg" onclick="alert('開發中')">事件登錄</button>
   </div>
+  <!-- 在dashboard.html頁面添加這段代碼 -->
+<div class="user-info" style="position: absolute; top: 10px; right: 20px; text-align: right;">
+  <span id="userDept"></span> - <span id="userName"></span>
+  <button class="btn btn-sm btn-outline-secondary ms-2" onclick="logout()">登出</button>
+</div>
+
+<script>
+  // 從sessionStorage獲取用戶資訊並顯示
+  document.getElementById('userDept').textContent = sessionStorage.getItem('cc_user_dept') || '';
+  document.getElementById('userName').textContent = sessionStorage.getItem('cc_user_name') || '';
+  
+  // 登出功能
+  function logout() {
+    sessionStorage.clear();
+    window.location.href = 'index.html';
+  }
+</script>
+
 </body>
 </html>
