@@ -1,248 +1,108 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>昶青實業 ‧ AI 風險控制管理中心</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    body {
-      background-color: #f5f5f5;
-      font-family: "Microsoft JhengHei", Arial, sans-serif;
-    }
-    .login-container {
-      max-width: 450px;
-      margin: 100px auto;
-      padding: 30px;
-      background-color: #fff;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    }
-    h1 {
-      color: #2c3e50;
-      text-align: center;
-      font-weight: 700;
-      margin-bottom: 30px;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    .btn-primary {
-      background-color: #3498db;
-      border: none;
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      font-weight: 700;
-    }
-    .btn-primary:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .btn-primary:hover:not(:disabled) {
-      background-color: #2980b9;
-    }
+    body{background:#f5f5f5;font-family:"Microsoft JhengHei",Arial,sans-serif}
+    .login-card{max-width:460px;margin:6rem auto;padding:2.5rem;background:#fff;border-radius:1rem;
+                box-shadow:0 4px 12px rgba(0,0,0,.12)}
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="login-container">
-      <h1>昶青實業 ‧ AI 風險控制管理中心</h1>
-      <form id="loginForm">
-        <div class="form-group">
-          <label for="department">部門</label>
-          <select class="form-control" id="department" required>
-            <option value="">請選擇部門</option>
-          </select>
-        </div>
+  <div class="login-card">
+    <h3 class="text-center mb-4">昶青實業-AI風險控制管理中心</h3>
 
-        <div class="form-group">
-          <label for="name">姓名</label>
-          <select class="form-control" id="name" required disabled>
-            <option value="">請先選擇部門</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label for="username">帳號</label>
-          <input type="text" class="form-control" id="username" readonly />
-        </div>
-
-        <div class="form-group">
-          <label for="password">密碼</label>
-          <input type="password" class="form-control" id="password" required />
-        </div>
-
-        <button type="submit" class="btn btn-primary" id="loginBtn">登入</button>
-      </form>
+    <div class="mb-3">
+      <label for="deptSel" class="form-label fw-bold">部門</label>
+      <select id="deptSel" class="form-select">
+        <option value="">─ 請選擇部門 ─</option>
+      </select>
     </div>
+
+    <div class="mb-3">
+      <label for="nameSel" class="form-label fw-bold">姓名</label>
+      <select id="nameSel" class="form-select" disabled>
+        <option value="">─ 先選部門 ─</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="accountIn" class="form-label fw-bold">帳號</label>
+      <input id="accountIn" class="form-control" placeholder="自動帶入或自行輸入">
+    </div>
+
+    <div class="mb-4">
+      <label for="pwIn" class="form-label fw-bold">密碼</label>
+      <input id="pwIn" type="password" class="form-control" placeholder="自動帶入或自行輸入">
+    </div>
+
+    <button id="loginBtn" class="btn btn-primary w-100">登入</button>
+    <div id="msg" class="small text-danger mt-3 text-center"></div>
   </div>
 
   <script>
-    /* -----------------------  基本設定  ----------------------- */
-    const scriptUrl =
-      "https://script.google.com/macros/s/AKfycbw67qio8hwoID9Z0z1IKnEdEGFjXqoL25LSJ-pn9x-rh-IfMQcgiPmKpd9zrSiJQaJk/exec";
+    const GAS_URL = '❶ https://script.google.com/macros/s/XXXXXXXXXXXX/exec'; // 換成部署網址
 
-    /**
-     * SHA‑256 雜湊（回傳 hex 字串）
-     * @param {string} str
-     * @return {Promise<string>}
-     */
-    async function sha256(str) {
-      const buf = await crypto.subtle.digest(
-        "SHA-256",
-        new TextEncoder().encode(str)
-      );
-      return Array.from(new Uint8Array(buf))
-        .map((b) => b.toString(16).padStart(2, "0"))
-        .join("");
-    }
-
-    /* -----------------------  載入部門  ----------------------- */
-    window.addEventListener("DOMContentLoaded", () => {
-      fetch(`${scriptUrl}?action=getDepartments`)
-        .then((r) => r.json())
-        .then((depts) => {
-          const sel = document.getElementById("department");
-          depts.forEach((d) => {
-            const opt = document.createElement("option");
-            opt.value = d;
-            opt.textContent = d;
-            sel.appendChild(opt);
-          });
-        })
-        .catch((err) => console.error("load departments:", err));
-    });
-
-    /* -------------------  部門→姓名  ------------------- */
-    document
-      .getElementById("department")
-      .addEventListener("change", function () {
-        const dept = this.value;
-        const nameSel = document.getElementById("name");
-        nameSel.innerHTML = '<option value="">請選擇姓名</option>';
-        nameSel.disabled = !dept;
-        document.getElementById("username").value = "";
-        if (!dept) return;
-
-        fetch(
-          `${scriptUrl}?action=getNamesByDepartment&department=${encodeURIComponent(
-            dept
-          )}`
-        )
-          .then((r) => r.json())
-          .then((names) => {
-            names.forEach((n) => {
-              const opt = document.createElement("option");
-              opt.value = n;
-              opt.textContent = n;
-              nameSel.appendChild(opt);
-            });
-          })
-          .catch((err) => console.error("load names:", err));
+    /* 取得部門清單 */
+    fetch(`${GAS_URL}?action=getDepartments`)
+      .then(r=>r.json())
+      .then(depts=>{
+        const sel=document.getElementById('deptSel');
+        depts.forEach(d=>{
+          sel.insertAdjacentHTML('beforeend',`<option value="${d}">${d}</option>`);
+        });
       });
 
-    // -------------------  登入  -------------------
-document.getElementById("loginForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  const dept  = document.getElementById("department").value;
-  const name  = document.getElementById("name").value;
-  const user  = document.getElementById("username").value;
-  const pwdRaw = document.getElementById("password").value;
-  if (!dept || !name || !user || !pwdRaw) return;
-
-  const btn = document.getElementById("loginBtn");
-  btn.disabled = true;
-  btn.textContent = "登入中…";
-
-  const pwdHash = await sha256(pwdRaw);
-
-- fetch(scriptUrl, {
--   method: "POST",
--   headers: { "Content-Type": "application/json" },
--   body: JSON.stringify({ action:"login", department:dept, name, username:user, password:pwdHash })
-- })
-+ fetch(scriptUrl, {
-+   method: "POST",
-+   // 不要自訂 headers！瀏覽器會自動帶上
-+   body: new URLSearchParams({
-+     action:     "login",
-+     department: dept,
-+     name,
-+     username:   user,
-+     password:   pwdHash
-+   })
-+ })
-    .then((r) => r.json())
-    .then((res) => {
-      if (res.success) {
-        window.location.href = "dashboard.html";
-      } else {
-        alert("帳號或密碼錯誤，請重新輸入");
-        document.getElementById("password").value = "";
-      }
-    })
-    .catch((err) => {
-      console.error("login error:", err);
-      alert("系統錯誤，請稍後再試");
-    })
-    .finally(() => {
-      btn.disabled = false;
-      btn.textContent = "登入";
-    });
-});
-
-
-    /* -------------------  登入  ------------------- */
-    document
-      .getElementById("loginForm")
-      .addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const dept = document.getElementById("department").value;
-        const name = document.getElementById("name").value;
-        const user = document.getElementById("username").value;
-        const pwdRaw = document.getElementById("password").value;
-        if (!dept || !name || !user || !pwdRaw) return;
-
-        const btn = document.getElementById("loginBtn");
-        btn.disabled = true;
-        btn.textContent = "登入中…";
-
-        const pwdHash = await sha256(pwdRaw);
-
-        fetch(scriptUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            action: "login",
-            department: dept,
-            name,
-            username: user,
-            password: pwdHash,
-          }),
-        })
-          .then((r) => r.json())
-          .then((res) => {
-            if (res.success) {
-              window.location.href = "dashboard.html";
-            } else {
-              alert("帳號或密碼錯誤，請重新輸入");
-              document.getElementById("password").value = "";
-            }
-          })
-          .catch((err) => {
-            console.error("login error:", err);
-            alert("系統錯誤，請稍後再試");
-          })
-          .finally(() => {
-            btn.disabled = false;
-            btn.textContent = "登入";
+    /* 當部門改變 → 載入對應姓名 */
+    document.getElementById('deptSel').addEventListener('change',e=>{
+      const dept=e.target.value;
+      const nameSel=document.getElementById('nameSel');
+      nameSel.innerHTML='<option value="">─ 請選擇姓名 ─</option>';
+      nameSel.disabled=!dept;
+      if(!dept) return;
+      fetch(`${GAS_URL}?action=getNames&dept=${encodeURIComponent(dept)}`)
+        .then(r=>r.json())
+        .then(names=>{
+          names.forEach(n=>{
+            nameSel.insertAdjacentHTML('beforeend',`<option value="${n}">${n}</option>`);
           });
-      });
+        });
+    });
+
+    /* 當姓名改變 → 自動帶入帳密 */
+    document.getElementById('nameSel').addEventListener('change',e=>{
+      const dept=document.getElementById('deptSel').value;
+      const name=e.target.value;
+      if(!name) return;
+      fetch(`${GAS_URL}?action=getAccount&dept=${encodeURIComponent(dept)}&name=${encodeURIComponent(name)}`)
+        .then(r=>r.json())
+        .then(obj=>{
+          document.getElementById('accountIn').value=obj.account||'';
+          document.getElementById('pwIn').value=obj.password||'';
+        });
+    });
+
+    /* 登入驗證 */
+    document.getElementById('loginBtn').addEventListener('click',()=>{
+      const account=document.getElementById('accountIn').value.trim();
+      const password=document.getElementById('pwIn').value.trim();
+      const msg=document.getElementById('msg');
+      if(!account||!password){msg.textContent='請填寫帳號、密碼';return;}
+      fetch(`${GAS_URL}?action=login&account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}`)
+        .then(r=>r.json())
+        .then(res=>{
+          if(res.ok){
+            sessionStorage.setItem('cc_token',res.token);   // 簡易範例：存前端 token
+            location.href='dashboard.html';
+          }else{
+            msg.textContent='帳號或密碼錯誤';
+          }
+        })
+        .catch(()=>msg.textContent='登入服務異常');
+    });
   </script>
 </body>
 </html>
