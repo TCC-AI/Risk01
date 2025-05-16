@@ -47,6 +47,11 @@
     /* ← 換成你重新部署後的網址 */
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbzc6xDNXvOcuwksTs-HEyTckoUhhSqtrcHAfTUl8C0tBQ4tyFOHKiNR3fZnL8biPo6S/exec';
 
+    // 檢查是否為HTTPS連接
+    if (window.location.protocol !== 'https:' && !window.location.hostname.includes('localhost')) {
+      window.location.href = window.location.href.replace('http:', 'https:');
+    }
+
     /* 共用錯誤顯示 */
     const showErr = txt => {
       console.error(txt);
@@ -105,11 +110,21 @@
       const password=document.getElementById('pwIn').value.trim();
       const msg=document.getElementById('msg');
       if(!account||!password){msg.textContent='請填寫帳號、密碼';return;}
-      fetch(`${GAS_URL}?action=login&account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}`)
+      
+      // 添加隨機挑戰值以防止重放攻擊
+      const clientNonce = Math.random().toString(36).substring(2, 15);
+      const timestamp = new Date().getTime();
+      
+      fetch(`${GAS_URL}?action=login&account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}&nonce=${clientNonce}&timestamp=${timestamp}`)
         .then(r=>r.json())
         .then(res=>{
           if(res.ok){
-            sessionStorage.setItem('cc_token',res.token);
+            // 存儲安全的token和過期時間
+            sessionStorage.setItem('cc_token', res.token);
+            sessionStorage.setItem('cc_token_expires', res.expires);
+            sessionStorage.setItem('cc_user_dept', res.dept);
+            sessionStorage.setItem('cc_user_name', res.name);
+            
             location.href='dashboard.html';
           }else{
             msg.textContent='帳號或密碼錯誤';
