@@ -10,8 +10,6 @@
     .login-card{max-width:460px;margin:6rem auto;padding:2.5rem;background:#fff;border-radius:1rem;
                 box-shadow:0 4px 12px rgba(0,0,0,.12)}
   </style>
-  <!-- 添加 Content Security Policy 標頭以防止 XSS 攻擊 -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://cdn.jsdelivr.net; connect-src 'self' https://script.google.com;">
 </head>
 <body>
   <div class="login-card">
@@ -33,12 +31,12 @@
 
     <div class="mb-3">
       <label for="accountIn" class="form-label fw-bold">帳號</label>
-      <input id="accountIn" class="form-control" placeholder="自動帶入或自行輸入" maxlength="50">
+      <input id="accountIn" class="form-control" placeholder="自動帶入或自行輸入">
     </div>
 
     <div class="mb-4">
       <label for="pwIn" class="form-label fw-bold">密碼</label>
-      <input id="pwIn" type="password" class="form-control" placeholder="自動帶入或自行輸入" maxlength="50">
+      <input id="pwIn" type="password" class="form-control" placeholder="自動帶入或自行輸入">
     </div>
 
     <button id="loginBtn" class="btn btn-primary w-100">登入</button>
@@ -57,64 +55,8 @@
     /* 共用錯誤顯示 */
     const showErr = txt => {
       console.error(txt);
-      document.getElementById('msg').textContent = sanitizeHTML(txt);
+      document.getElementById('msg').textContent = txt;
     };
-
-    /* 防止 XSS 攻擊的輸入驗證函數 */
-    function sanitizeHTML(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    /* 驗證輸入內容是否合法 */
-    function validateInput(input, pattern, maxLength = 50) {
-      if (!input) return false;
-      if (input.length > maxLength) return false;
-      
-      // 根據不同類型的輸入使用不同的驗證規則
-      if (pattern === 'name') {
-        // 姓名允許中文、英文、數字和常見符號
-        return /^[\u4e00-\u9fa5a-zA-Z0-9_\-\s\.]{1,50}$/.test(input);
-      } else if (pattern === 'account') {
-        // 帳號只允許英文、數字和部分特殊字符
-        return /^[a-zA-Z0-9_\-\.@]{3,50}$/.test(input);
-      } else if (pattern === 'password') {
-        // 密碼至少需要3個字符
-        return input.length >= 3;
-      }
-      
-      return false;
-    }
-
-    /* 安全地設置 HTML 內容 */
-    function setOptionsSafely(selectElement, options) {
-      // 清除現有選項
-      selectElement.innerHTML = '';
-      
-      // 添加預設選項
-      const defaultOption = document.createElement('option');
-      defaultOption.value = '';
-      defaultOption.textContent = selectElement.id === 'deptSel' ? 
-        '─ 請選擇部門 ─' : '─ 請選擇姓名 ─';
-      selectElement.appendChild(defaultOption);
-      
-      // 安全地添加新選項
-      if (Array.isArray(options)) {
-        options.forEach(option => {
-          if (validateInput(option, 'name')) {
-            const optElement = document.createElement('option');
-            optElement.value = option;
-            optElement.textContent = option;
-            selectElement.appendChild(optElement);
-          }
-        });
-      }
-    }
 
     /* 取得部門清單 */
     fetch(`${GAS_URL}?action=getDepartments`)
@@ -125,7 +67,9 @@
       .then(depts=>{
         if(!Array.isArray(depts)||!depts.length) throw new Error('部門清單為空');
         const sel=document.getElementById('deptSel');
-        setOptionsSafely(sel, depts);
+        depts.forEach(d=>{
+          sel.insertAdjacentHTML('beforeend',`<option value="${d}">${d}</option>`);
+        });
       })
       .catch(()=>showErr('載入部門清單失敗，請稍後再試'));
 
@@ -135,19 +79,13 @@
       const nameSel=document.getElementById('nameSel');
       nameSel.innerHTML='<option value="">─ 請選擇姓名 ─</option>';
       nameSel.disabled=!dept;
-      
       if(!dept) return;
-      
-      // 驗證部門輸入
-      if (!validateInput(dept, 'name')) {
-        showErr('部門名稱格式不正確');
-        return;
-      }
-      
       fetch(`${GAS_URL}?action=getNames&dept=${encodeURIComponent(dept)}`)
         .then(r=>r.json())
         .then(names=>{
-          setOptionsSafely(nameSel, names);
+          names.forEach(n=>{
+            nameSel.insertAdjacentHTML('beforeend',`<option value="${n}">${n}</option>`);
+          });
         })
         .catch(()=>showErr('載入姓名清單失敗'));
     });
@@ -156,28 +94,14 @@
     document.getElementById('nameSel').addEventListener('change',e=>{
       const dept=document.getElementById('deptSel').value;
       const name=e.target.value;
-      
       if(!name) return;
-      
-      // 驗證部門和姓名輸入
-      if (!validateInput(dept, 'name') || !validateInput(name, 'name')) {
-        showErr('部門或姓名格式不正確');
-        return;
-      }
-      
       fetch(`${GAS_URL}?action=getAccount&dept=${encodeURIComponent(dept)}&name=${encodeURIComponent(name)}`)
         .then(r=>r.json())
         .then(obj=>{
-          // 驗證返回的帳號
-          const account = obj.account || '';
-          if (account && !validateInput(account, 'account')) {
-            showErr('獲取的帳號格式不正確');
-            return;
-          }
-          document.getElementById('accountIn').value = account;
-          document.getElementById('pwIn').value = '';
+          document.getElementById('accountIn').value=obj.account||'';
+          document.getElementById('pwIn').value='';
         })
-        .catch(()=>showErr('取得帳號失敗'));
+        .catch(()=>showErr('取得帳密失敗'));
     });
 
     /* 登入驗證 */
@@ -185,31 +109,11 @@
       const account=document.getElementById('accountIn').value.trim();
       const password=document.getElementById('pwIn').value.trim();
       const msg=document.getElementById('msg');
-      
-      if(!account||!password){
-        msg.textContent='請填寫帳號、密碼';
-        return;
-      }
-      
-      // 驗證帳號和密碼格式
-      if (!validateInput(account, 'account')) {
-        msg.textContent = '帳號格式不正確，只允許英文、數字和部分特殊字符';
-        return;
-      }
-      
-      if (!validateInput(password, 'password')) {
-        msg.textContent = '密碼長度不足';
-        return;
-      }
+      if(!account||!password){msg.textContent='請填寫帳號、密碼';return;}
       
       // 添加隨機挑戰值以防止重放攻擊
       const clientNonce = Math.random().toString(36).substring(2, 15);
       const timestamp = new Date().getTime();
-      
-      // 禁用登入按鈕防止重複提交
-      const loginBtn = document.getElementById('loginBtn');
-      loginBtn.disabled = true;
-      loginBtn.textContent = '登入中...';
       
       fetch(`${GAS_URL}?action=login&account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}&nonce=${clientNonce}&timestamp=${timestamp}`)
         .then(r=>r.json())
@@ -223,16 +127,10 @@
             
             location.href='dashboard.html';
           }else{
-            msg.textContent = res.message || '帳號或密碼錯誤';
-            loginBtn.disabled = false;
-            loginBtn.textContent = '登入';
+            msg.textContent='帳號或密碼錯誤';
           }
         })
-        .catch(()=>{
-          showErr('登入服務異常');
-          loginBtn.disabled = false;
-          loginBtn.textContent = '登入';
-        });
+        .catch(()=>showErr('登入服務異常'));
     });
   </script>
 </body>
