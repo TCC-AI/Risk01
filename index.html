@@ -50,20 +50,8 @@
     /* 共用錯誤顯示 */
     const showErr = txt => {
       console.error(txt);
-      /* 當姓名改變 → 自動帶入帳號（不帶入密碼） */
-document.getElementById('nameSel').addEventListener('change',e=>{
-  const dept=document.getElementById('deptSel').value;
-  const name=e.target.value;
-  if(!name) return;
-  fetch(`${GAS_URL}?action=getAccount&dept=${encodeURIComponent(dept)}&name=${encodeURIComponent(name)}`)
-    .then(r=>r.json())
-    .then(obj=>{
-      document.getElementById('accountIn').value=obj.account||'';
-      document.getElementById('pwIn').value=''; // 清空密碼輸入框，需要用戶自行輸入
-    })
-    .catch(()=>showErr('取得帳號失敗'));
-});
-
+      document.getElementById('msg').textContent = txt;
+    };
 
     /* 取得部門清單 */
     fetch(`${GAS_URL}?action=getDepartments`)
