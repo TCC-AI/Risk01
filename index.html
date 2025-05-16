@@ -22,11 +22,12 @@
 </div>
 
 <div class="action-card d-none" id="actionDiv">
-  <div class="user-info" id="userInfo"></div>
+  <div class="user-info" id="userInfo" style="position:absolute; top:10px; right:10px; font-size:14px; color:#333;"></div>
   <h4 class="text-center mb-4">昶青實業-AI風險控制管理中心</h4>
   <button class="btn btn-success mb-3">部門週期盤點</button>
   <button class="btn btn-info">事件登錄</button>
 </div>
+
 
 <script>
 const apiURL = "https://script.google.com/macros/s/AKfycbybG_wJZKxmbVq7kbcNHRfHZDZrfdL_rsRbyrccB21MLGzHbMCWfFuXbelHrRaWPfVB/exec"; // 替換成你的Web App URL
@@ -41,11 +42,14 @@ async function login(){
   if(result.success){
     document.getElementById('loginDiv').classList.add('d-none');
     document.getElementById('actionDiv').classList.remove('d-none');
-    document.getElementById('userInfo').textContent = `${result.department} ${result.name}`;
+    
+    //精準顯示部門與姓名到前端右上角
+    document.getElementById('userInfo').textContent = `部門：${result.department} ｜ 姓名：${result.name}`;
   } else {
     document.getElementById('msg').textContent = result.message;
   }
 }
+
 </script>
 </body>
 </html>
