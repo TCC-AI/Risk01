@@ -60,10 +60,12 @@
         .then(res=>{
           if(res.ok){
             // 存儲安全的token和過期時間
-            sessionStorage.setItem('cc_token', res.token);
-            sessionStorage.setItem('cc_token_expires', res.expires);
-            sessionStorage.setItem('cc_user_dept', res.dept);
-            sessionStorage.setItem('cc_user_name', res.name);
+            sessionStorage.setItem('cc_token', res.token || '');
+            sessionStorage.setItem('cc_token_expires', res.expires || '');
+            sessionStorage.setItem('cc_user_dept', res.dept || '');
+            sessionStorage.setItem('cc_user_name', res.name || '');
+            
+            console.log("登入資訊:", res); // 調試用
             
             location.href='dashboard.html';
           }else{
