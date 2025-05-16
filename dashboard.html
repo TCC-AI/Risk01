@@ -1,121 +1,17 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>昶青實業-AI風險控制管理中心</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body {
-            background-color: #f5f5f5;
-            font-family: "Microsoft JhengHei", Arial, sans-serif;
-            padding-top: 20px;
-        }
-        .dashboard-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 30px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 40px;
-        }
-        .btn-container {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        .btn-function {
-            padding: 20px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 8px;
-            text-align: center;
-        }
-        .btn-inventory {
-            background-color: #3498db;
-            color: white;
-        }
-        .btn-inventory:hover {
-            background-color: #2980b9;
-            color: white;
-        }
-        .btn-event {
-            background-color: #2ecc71;
-            color: white;
-        }
-        .btn-event:hover {
-            background-color: #27ae60;
-            color: white;
-        }
-        .user-info {
-            text-align: right;
-            margin-bottom: 20px;
-        }
-        .logout-btn {
-            margin-top: 30px;
-            text-align: center;
-        }
-        
-        /* 手機版響應式設計 */
-        @media (max-width: 576px) {
-            .dashboard-container {
-                padding: 20px;
-            }
-            .btn-function {
-                padding: 15px;
-                font-size: 16px;
-            }
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>昶青實業 ‧ AI 風險控制管理中心</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-    <div class="container">
-        <div class="dashboard-container">
-            <div class="user-info">
-                <span id="userInfo">載入中...</span>
-            </div>
-            
-            <h1>昶青實業-AI風險控制管理中心</h1>
-            
-            <div class="btn-container">
-                <a href="inventory.html" class="btn btn-function btn-inventory">部門週期盤點</a>
-                <a href="event.html" class="btn btn-function btn-event">事件登錄</a>
-            </div>
-            
-            <div class="logout-btn">
-                <button id="logoutBtn" class="btn btn-secondary">登出</button>
-            </div>
-        </div>
-    </div>
+<body class="d-flex flex-column justify-content-center align-items-center vh-100 bg-light">
+  <h2 class="mb-5 text-center">昶青實業-AI風險控制管理中心</h2>
 
-    <script>
-        // 檢查用戶是否已登入
-        window.onload = function() {
-            // 從sessionStorage獲取用戶資訊
-            const userInfo = JSON.parse(sessionStorage.getItem('userInfo'));
-            
-            if (!userInfo) {
-                // 未登入，跳轉回登入頁面
-                alert('請先登入');
-                window.location.href = 'index.html';
-                return;
-            }
-            
-            // 顯示用戶資訊
-            document.getElementById('userInfo').textContent = `${userInfo.department} / ${userInfo.name}`;
-        };
-        
-        // 登出功能
-        document.getElementById('logoutBtn').addEventListener('click', function() {
-            sessionStorage.removeItem('userInfo');
-            window.location.href = 'index.html';
-        });
-    </script>
+  <div class="d-grid gap-4 col-10 col-sm-6 col-lg-4">
+    <button class="btn btn-outline-primary btn-lg" onclick="alert('開發中')">部門週期盤點</button>
+    <button class="btn btn-outline-success btn-lg" onclick="alert('開發中')">事件登錄</button>
+  </div>
 </body>
 </html>
