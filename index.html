@@ -16,27 +16,13 @@
     <h3 class="text-center mb-4">昶青實業-AI風險控制管理中心</h3>
 
     <div class="mb-3">
-      <label for="deptSel" class="form-label fw-bold">部門</label>
-      <select id="deptSel" class="form-select">
-        <option value="">─ 請選擇部門 ─</option>
-      </select>
-    </div>
-
-    <div class="mb-3">
-      <label for="nameSel" class="form-label fw-bold">姓名</label>
-      <select id="nameSel" class="form-select" disabled>
-        <option value="">─ 先選部門 ─</option>
-      </select>
-    </div>
-
-    <div class="mb-3">
       <label for="accountIn" class="form-label fw-bold">帳號</label>
-      <input id="accountIn" class="form-control" placeholder="自動帶入或自行輸入">
+      <input id="accountIn" class="form-control" placeholder="請輸入帳號">
     </div>
 
     <div class="mb-4">
       <label for="pwIn" class="form-label fw-bold">密碼</label>
-      <input id="pwIn" type="password" class="form-control" placeholder="自動帶入或自行輸入">
+      <input id="pwIn" type="password" class="form-control" placeholder="請輸入密碼">
     </div>
 
     <button id="loginBtn" class="btn btn-primary w-100">登入</button>
@@ -57,47 +43,6 @@
       console.error(txt);
       document.getElementById('msg').textContent = txt;
     };
-
-    /* 取得部門清單 */
-    fetch(`${GAS_URL}?action=getDepartments`)
-      .then(r=>{
-        if(!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then(depts=>{
-        if(!Array.isArray(depts)||!depts.length) throw new Error('部門清單為空');
-        const sel=document.getElementById('deptSel');
-        depts.forEach(d=>{
-          sel.insertAdjacentHTML('beforeend',`<option value="${d}">${d}</option>`);
-        });
-      })
-      .catch(()=>showErr('載入部門清單失敗，請稍後再試'));
-
-    /* 當部門改變 → 載入姓名 */
-    document.getElementById('deptSel').addEventListener('change',e=>{
-      const dept=e.target.value;
-      const nameSel=document.getElementById('nameSel');
-      nameSel.innerHTML='<option value="">─ 請選擇姓名 ─</option>';
-      nameSel.disabled=!dept;
-      if(!dept) return;
-      fetch(`${GAS_URL}?action=getNames&dept=${encodeURIComponent(dept)}`)
-        .then(r=>r.json())
-        .then(names=>{
-          names.forEach(n=>{
-            nameSel.insertAdjacentHTML('beforeend',`<option value="${n}">${n}</option>`);
-          });
-        })
-        .catch(()=>showErr('載入姓名清單失敗'));
-    });
-
-    /* 當姓名改變 → 不再自動帶入帳號 */
-document.getElementById('nameSel').addEventListener('change', e => {
-  // 移除自動帶入帳號的功能
-  // 清空帳號和密碼輸入框
-  document.getElementById('accountIn').value = '';
-  document.getElementById('pwIn').value = '';
-});
-
 
     /* 登入驗證 */
     document.getElementById('loginBtn').addEventListener('click',()=>{
