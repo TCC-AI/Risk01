@@ -16,13 +16,27 @@
     <h3 class="text-center mb-4">昶青實業-AI風險控制管理中心</h3>
 
     <div class="mb-3">
+      <label for="deptSel" class="form-label fw-bold">部門</label>
+      <select id="deptSel" class="form-select">
+        <option value="">─ 請選擇部門 ─</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="nameSel" class="form-label fw-bold">姓名</label>
+      <select id="nameSel" class="form-select" disabled>
+        <option value="">─ 先選部門 ─</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
       <label for="accountIn" class="form-label fw-bold">帳號</label>
-      <input id="accountIn" class="form-control" placeholder="請輸入帳號">
+      <input id="accountIn" class="form-control" placeholder="自動帶入或自行輸入">
     </div>
 
     <div class="mb-4">
       <label for="pwIn" class="form-label fw-bold">密碼</label>
-      <input id="pwIn" type="password" class="form-control" placeholder="請輸入密碼">
+      <input id="pwIn" type="password" class="form-control" placeholder="自動帶入或自行輸入">
     </div>
 
     <button id="loginBtn" class="btn btn-primary w-100">登入</button>
@@ -44,58 +58,79 @@
       document.getElementById('msg').textContent = txt;
     };
 
-    /* 登入函數 */
-    function attemptLogin() {
-      const account = document.getElementById('accountIn').value.trim();
-      const password = document.getElementById('pwIn').value.trim();
-      const msg = document.getElementById('msg');
-      const loginBtn = document.getElementById('loginBtn');
-      
-      if (!account || !password) {
-        msg.textContent = '請填寫帳號、密碼';
-        return;
-      }
-      
-      // 禁用按鈕防止重複點擊
-      loginBtn.disabled = true;
-      loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 登入中...';
+    /* 取得部門清單 */
+    fetch(`${GAS_URL}?action=getDepartments`)
+      .then(r=>{
+        if(!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
+      })
+      .then(depts=>{
+        if(!Array.isArray(depts)||!depts.length) throw new Error('部門清單為空');
+        const sel=document.getElementById('deptSel');
+        depts.forEach(d=>{
+          sel.insertAdjacentHTML('beforeend',`<option value="${d}">${d}</option>`);
+        });
+      })
+      .catch(()=>showErr('載入部門清單失敗，請稍後再試'));
+
+    /* 當部門改變 → 載入姓名 */
+    document.getElementById('deptSel').addEventListener('change',e=>{
+      const dept=e.target.value;
+      const nameSel=document.getElementById('nameSel');
+      nameSel.innerHTML='<option value="">─ 請選擇姓名 ─</option>';
+      nameSel.disabled=!dept;
+      if(!dept) return;
+      fetch(`${GAS_URL}?action=getNames&dept=${encodeURIComponent(dept)}`)
+        .then(r=>r.json())
+        .then(names=>{
+          names.forEach(n=>{
+            nameSel.insertAdjacentHTML('beforeend',`<option value="${n}">${n}</option>`);
+          });
+        })
+        .catch(()=>showErr('載入姓名清單失敗'));
+    });
+
+    /* 當姓名改變 → 自動帶入帳密 */
+    document.getElementById('nameSel').addEventListener('change',e=>{
+      const dept=document.getElementById('deptSel').value;
+      const name=e.target.value;
+      if(!name) return;
+      fetch(`${GAS_URL}?action=getAccount&dept=${encodeURIComponent(dept)}&name=${encodeURIComponent(name)}`)
+        .then(r=>r.json())
+        .then(obj=>{
+          document.getElementById('accountIn').value=obj.account||'';
+          document.getElementById('pwIn').value='';
+        })
+        .catch(()=>showErr('取得帳密失敗'));
+    });
+
+    /* 登入驗證 */
+    document.getElementById('loginBtn').addEventListener('click',()=>{
+      const account=document.getElementById('accountIn').value.trim();
+      const password=document.getElementById('pwIn').value.trim();
+      const msg=document.getElementById('msg');
+      if(!account||!password){msg.textContent='請填寫帳號、密碼';return;}
       
       // 添加隨機挑戰值以防止重放攻擊
       const clientNonce = Math.random().toString(36).substring(2, 15);
       const timestamp = new Date().getTime();
       
       fetch(`${GAS_URL}?action=login&account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}&nonce=${clientNonce}&timestamp=${timestamp}`)
-        .then(r => r.json())
-        .then(res => {
-          if (res.ok) {
+        .then(r=>r.json())
+        .then(res=>{
+          if(res.ok){
             // 存儲安全的token和過期時間
-            sessionStorage.setItem('cc_token', res.token || '');
-            sessionStorage.setItem('cc_token_expires', res.expires || '');
-            sessionStorage.setItem('cc_user_dept', res.dept || '');
-            sessionStorage.setItem('cc_user_name', res.name || '');
+            sessionStorage.setItem('cc_token', res.token);
+            sessionStorage.setItem('cc_token_expires', res.expires);
+            sessionStorage.setItem('cc_user_dept', res.dept);
+            sessionStorage.setItem('cc_user_name', res.name);
             
-            location.href = 'dashboard.html';
-          } else {
-            msg.textContent = '帳號或密碼錯誤';
-            loginBtn.disabled = false;
-            loginBtn.textContent = '登入';
+            location.href='dashboard.html';
+          }else{
+            msg.textContent='帳號或密碼錯誤';
           }
         })
-        .catch(() => {
-          showErr('登入服務異常');
-          loginBtn.disabled = false;
-          loginBtn.textContent = '登入';
-        });
-    }
-
-    /* 登入驗證 */
-    document.getElementById('loginBtn').addEventListener('click', attemptLogin);
-    
-    /* 按Enter鍵登入 */
-    document.getElementById('pwIn').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        attemptLogin();
-      }
+        .catch(()=>showErr('登入服務異常'));
     });
   </script>
 </body>
