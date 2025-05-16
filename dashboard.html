@@ -5,31 +5,67 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>昶青實業 ‧ AI 風險控制管理中心</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body{background:#f5f5f5;font-family:"Microsoft JhengHei",Arial,sans-serif}
+    .container{max-width:900px;margin:4rem auto;padding:2rem;background:#fff;border-radius:1rem;
+               box-shadow:0 4px 12px rgba(0,0,0,.12)}
+    .menu-btn{display:block;width:100%;padding:1rem;margin-bottom:1rem;
+              text-align:center;font-size:1.1rem;border-radius:0.5rem}
+  </style>
 </head>
-<body class="d-flex flex-column justify-content-center align-items-center vh-100 bg-light">
-  <h2 class="mb-5 text-center">昶青實業-AI風險控制管理中心</h2>
-
-  <div class="d-grid gap-4 col-10 col-sm-6 col-lg-4">
-    <button class="btn btn-outline-primary btn-lg" onclick="alert('開發中')">部門週期盤點</button>
-    <button class="btn btn-outline-success btn-lg" onclick="alert('開發中')">事件登錄</button>
+<body>
+  <div class="user-info" style="position: absolute; top: 10px; right: 20px; text-align: right;">
+    <span id="userInfo"></span>
+    <button class="btn btn-sm btn-outline-secondary ms-2" onclick="logout()">登出</button>
   </div>
-  <!-- 在dashboard.html頁面添加這段代碼 -->
-<div class="user-info" style="position: absolute; top: 10px; right: 20px; text-align: right;">
-  <span id="userDept"></span> - <span id="userName"></span>
-  <button class="btn btn-sm btn-outline-secondary ms-2" onclick="logout()">登出</button>
-</div>
 
-<script>
-  // 從sessionStorage獲取用戶資訊並顯示
-  document.getElementById('userDept').textContent = sessionStorage.getItem('cc_user_dept') || '';
-  document.getElementById('userName').textContent = sessionStorage.getItem('cc_user_name') || '';
-  
-  // 登出功能
-  function logout() {
-    sessionStorage.clear();
-    window.location.href = 'index.html';
-  }
-</script>
+  <div class="container text-center">
+    <h2 class="mb-5">昶青實業-AI風險控制管理中心</h2>
+    
+    <div class="row">
+      <div class="col-md-6 mb-3">
+        <a href="dept_check.html" class="btn btn-primary menu-btn">部門週期盤點</a>
+      </div>
+      <div class="col-md-6 mb-3">
+        <a href="event_log.html" class="btn btn-success menu-btn">事件登錄</a>
+      </div>
+    </div>
+  </div>
 
+  <script>
+    /* 檢查登入狀態 */
+    document.addEventListener('DOMContentLoaded', function() {
+      // 檢查是否已登入
+      const token = sessionStorage.getItem('cc_token');
+      const expires = sessionStorage.getItem('cc_token_expires');
+      const now = new Date().getTime();
+      
+      if (!token || !expires || now > parseInt(expires)) {
+        // 未登入或登入已過期
+        alert('請先登入');
+        window.location.href = 'index.html';
+        return;
+      }
+      
+      // 獲取並顯示用戶資訊
+      const dept = sessionStorage.getItem('cc_user_dept');
+      const name = sessionStorage.getItem('cc_user_name');
+      
+      console.log("部門:", dept, "姓名:", name); // 調試用
+      
+      const userInfoElement = document.getElementById('userInfo');
+      if (dept && name) {
+        userInfoElement.textContent = `${dept} - ${name}`;
+      } else {
+        userInfoElement.textContent = '未知用戶';
+      }
+    });
+    
+    /* 登出功能 */
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = 'index.html';
+    }
+  </script>
 </body>
 </html>
