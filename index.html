@@ -437,7 +437,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 自動登出相關變數
     let inactivityTimer;
-    const inactivityTimeout = 2 * 60 * 1000; // 15分鐘，以毫秒為單位
+    const inactivityTimeout = 15 * 60 * 1000; // 15分鐘，以毫秒為單位
     
     // 監控用戶活動的函數
     function resetInactivityTimer() {
@@ -474,7 +474,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-    const scriptUrl = 'https://script.google.com/macros/s/AKfycbyvCxfFbv1qkTAchQ18Cvcb5vi1WCIhmhNWOHA-EoI2ItXtaV9Uf0B64MDDc3OYDrOz/exec';
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbxpB9hJHpC-ezHvC86O_Sx-AFYYY1bfM6-FDutmuLl-Jczj2FBOYAjKv65GvFgSlfNN/exec';
     
     // 檢查是否已登入
     if (localStorage.getItem('isLoggedIn') === 'true') {
@@ -745,7 +745,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 username: username,
                 name: name,
                 responses: responses,
-                sheetName: '部門週期盤點紀錄' // 指定要寫入的工作表名稱
+                sheetName: '定期紀錄' // 指定要寫入的工作表名稱
             })
         })
         .then(response => response.json())
