@@ -1,3 +1,10 @@
+# 部門週期盤點功能實作
+
+我將為您實作部門週期盤點功能，以下是完整的修改後代碼：
+
+## 前端代碼 (HTML/CSS/JS)
+
+```html
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -138,6 +145,142 @@
             margin-top: 20px;
         }
 
+        /* 部門週期盤點頁面樣式 */
+        .inventory-section {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .inventory-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .back-btn {
+            padding: 8px 15px;
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            width: auto;
+        }
+
+        .back-btn:hover {
+            background-color: #5a6268;
+        }
+
+        .inventory-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .inventory-table th, .inventory-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .inventory-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        .inventory-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .inventory-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .submit-btn {
+            background-color: #34a853;
+            width: 150px;
+        }
+
+        .submit-btn:hover {
+            background-color: #2d9249;
+        }
+
+        .reset-btn {
+            background-color: #ea4335;
+            width: 150px;
+        }
+
+        .reset-btn:hover {
+            background-color: #d33426;
+        }
+
+        .select-container, .input-container {
+            margin-bottom: 0;
+        }
+
+        .select-container select, .input-container input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .input-container input[disabled] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+        .risk-info {
+            margin-bottom: 10px;
+        }
+
+        .risk-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .risk-description {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .risk-category, .risk-level, .related-departments {
+            font-size: 13px;
+            color: #777;
+        }
+
+        @media (max-width: 768px) {
+            .inventory-section {
+                padding: 15px;
+            }
+            
+            .inventory-table th, .inventory-table td {
+                padding: 8px;
+                font-size: 14px;
+            }
+            
+            .inventory-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .submit-btn, .reset-btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+        }
+
         @media (max-width: 480px) {
             .container {
                 padding: 10px;
@@ -230,6 +373,37 @@
         </div>
     </div>
 
+    <!-- 部門週期盤點頁面 -->
+    <div id="inventory-section" class="inventory-section hidden">
+        <div class="inventory-header">
+            <h1>部門週期盤點</h1>
+            <button id="back-btn" class="back-btn">返回前頁</button>
+        </div>
+        
+        <div id="inventory-loading" class="loading">載入中，請稍候...</div>
+        
+        <div id="inventory-content" class="hidden">
+            <table class="inventory-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40%">風險項目</th>
+                        <th style="width: 20%">本月是否增加</th>
+                        <th style="width: 15%">發生次數</th>
+                        <th style="width: 25%">原因</th>
+                    </tr>
+                </thead>
+                <tbody id="inventory-table-body">
+                    <!-- 風險項目將在JavaScript中動態生成 -->
+                </tbody>
+            </table>
+            
+            <div class="inventory-actions">
+                <button id="submit-inventory-btn" class="submit-btn">送出</button>
+                <button id="reset-inventory-btn" class="reset-btn">重置</button>
+            </div>
+        </div>
+    </div>
+
     <!-- 新增 Bootstrap JS 和 Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
@@ -238,6 +412,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const loginSection = document.getElementById('login-section');
             const dashboardSection = document.getElementById('dashboard-section');
+            const inventorySection = document.getElementById('inventory-section');
             const loginBtn = document.getElementById('login-btn');
             const usernameInput = document.getElementById('username');
             const passwordInput = document.getElementById('password');
@@ -250,9 +425,15 @@
             const submitChangePasswordBtn = document.getElementById('submitChangePassword');
             const userDepartment = document.getElementById('user-department');
             const userName = document.getElementById('user-name');
+            const backBtn = document.getElementById('back-btn');
+            const submitInventoryBtn = document.getElementById('submit-inventory-btn');
+            const resetInventoryBtn = document.getElementById('reset-inventory-btn');
+            const inventoryTableBody = document.getElementById('inventory-table-body');
+            const inventoryLoading = document.getElementById('inventory-loading');
+            const inventoryContent = document.getElementById('inventory-content');
             
             // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-            const scriptUrl = 'https://script.google.com/macros/s/AKfycbxjgo5KXWVwn4SXuQqWuV2xWGZ1BxVUqwryINMseZjFSPpcwK3aNlbjJq4EgHnnY_As/exec';
+            const scriptUrl = 'https://script.google.com/macros/s/AKfycbybr9vcbHAaamvQdpRCLAm2UJhHBXgitXD-5hfjDqIu0VyBnMA_eSAyJa0lFvWGusdQ/exec';
             
             // 檢查是否已登入
             if (localStorage.getItem('isLoggedIn') === 'true') {
@@ -311,8 +492,229 @@
             
             // 部門週期盤點按鈕點擊事件
             inventoryBtn.addEventListener('click', function() {
-                alert('將導向部門週期盤點功能');
-                // 這裡可以替換成實際的功能實現
+                showInventorySection();
+                loadInventoryData();
+            });
+            
+            // 返回按鈕點擊事件
+            backBtn.addEventListener('click', function() {
+                showDashboard();
+            });
+            
+            // 載入部門週期盤點資料
+            function loadInventoryData() {
+                const department = localStorage.getItem('department');
+                if (!department) {
+                    alert('無法獲取部門資訊，請重新登入');
+                    showLogin();
+                    return;
+                }
+                
+                inventoryLoading.classList.remove('hidden');
+                inventoryContent.classList.add('hidden');
+                inventoryTableBody.innerHTML = '';
+                
+                // 從後端獲取風險清單
+                fetch(`${scriptUrl}?action=getRiskItems&department=${encodeURIComponent(department)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        inventoryLoading.classList.add('hidden');
+                        
+                        if (data.success) {
+                            // 成功獲取風險清單
+                            renderRiskItems(data.items);
+                            inventoryContent.classList.remove('hidden');
+                        } else {
+                            alert(data.message || '無法獲取風險清單');
+                        }
+                    })
+                    .catch(error => {
+                        inventoryLoading.classList.add('hidden');
+                        alert('系統錯誤，請稍後再試');
+                        console.error('Error:', error);
+                    });
+            }
+            
+            // 渲染風險項目表格
+            function renderRiskItems(items) {
+                inventoryTableBody.innerHTML = '';
+                
+                if (items.length === 0) {
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.innerHTML = `
+                        <td colspan="4" style="text-align: center;">沒有風險項目</td>
+                    `;
+                    inventoryTableBody.appendChild(emptyRow);
+                    return;
+                }
+                
+                items.forEach((item, index) => {
+                    const row = document.createElement('tr');
+                    row.setAttribute('data-risk-id', index);
+                    row.innerHTML = `
+                        <td>
+                            <div class="risk-info">
+                                <div class="risk-name">${item.name}</div>
+                                <div class="risk-description">${item.description}</div>
+                                <div class="risk-category">類別: ${item.category}</div>
+                                <div class="risk-level">風險等級: ${item.level}</div>
+                                <div class="related-departments">相關聯部門: ${item.relatedDepartments}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="select-container">
+                                <select class="increase-select" data-index="${index}">
+                                    <option value="">請選擇</option>
+                                    <option value="yes">是</option>
+                                    <option value="no">否</option>
+                                </select>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="input-container">
+                                <input type="number" class="occurrence-input" data-index="${index}" min="0" disabled>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="input-container">
+                                <input type="text" class="reason-input" data-index="${index}" disabled>
+                            </div>
+                        </td>
+                    `;
+                    inventoryTableBody.appendChild(row);
+                });
+                
+                // 為所有增加選擇框添加事件監聽器
+                document.querySelectorAll('.increase-select').forEach(select => {
+                    select.addEventListener('change', function() {
+                        const index = this.getAttribute('data-index');
+                        const occurrenceInput = document.querySelector(`.occurrence-input[data-index="${index}"]`);
+                        const reasonInput = document.querySelector(`.reason-input[data-index="${index}"]`);
+                        
+                        if (this.value === 'yes') {
+                            occurrenceInput.disabled = false;
+                            reasonInput.disabled = false;
+                            occurrenceInput.required = true;
+                            reasonInput.required = true;
+                        } else {
+                            occurrenceInput.disabled = true;
+                            reasonInput.disabled = true;
+                            occurrenceInput.required = false;
+                            reasonInput.required = false;
+                            occurrenceInput.value = '';
+                            reasonInput.value = '';
+                        }
+                    });
+                });
+            }
+            
+            // 送出按鈕點擊事件
+            submitInventoryBtn.addEventListener('click', function() {
+                // 驗證所有必填欄位
+                let isValid = true;
+                const responses = [];
+                
+                document.querySelectorAll('.increase-select').forEach(select => {
+                    const index = select.getAttribute('data-index');
+                    const occurrenceInput = document.querySelector(`.occurrence-input[data-index="${index}"]`);
+                    const reasonInput = document.querySelector(`.reason-input[data-index="${index}"]`);
+                    
+                    if (select.value === '') {
+                        isValid = false;
+                        select.style.borderColor = 'red';
+                    } else {
+                        select.style.borderColor = '';
+                        
+                        if (select.value === 'yes') {
+                            if (!occurrenceInput.value) {
+                                isValid = false;
+                                occurrenceInput.style.borderColor = 'red';
+                            } else {
+                                occurrenceInput.style.borderColor = '';
+                            }
+                            
+                            if (!reasonInput.value) {
+                                isValid = false;
+                                reasonInput.style.borderColor = 'red';
+                            } else {
+                                reasonInput.style.borderColor = '';
+                            }
+                        }
+                        
+                        // 收集回應
+                        responses.push({
+                            index: index,
+                            increased: select.value === 'yes',
+                            occurrences: select.value === 'yes' ? occurrenceInput.value : 0,
+                            reason: select.value === 'yes' ? reasonInput.value : ''
+                        });
+                    }
+                });
+                
+                if (!isValid) {
+                    alert('請填寫所有必填欄位');
+                    return;
+                }
+                
+                // 送出資料
+                const department = localStorage.getItem('department');
+                const username = localStorage.getItem('username');
+                const name = localStorage.getItem('name');
+                
+                submitInventoryBtn.disabled = true;
+                submitInventoryBtn.textContent = '送出中...';
+                
+                fetch(`${scriptUrl}?action=submitInventory`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        department: department,
+                        username: username,
+                        name: name,
+                        responses: responses
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    submitInventoryBtn.disabled = false;
+                    submitInventoryBtn.textContent = '送出';
+                    
+                    if (data.success) {
+                        alert('部門週期盤點已成功送出');
+                        showDashboard();
+                    } else {
+                        alert(data.message || '送出失敗，請稍後再試');
+                    }
+                })
+                .catch(error => {
+                    submitInventoryBtn.disabled = false;
+                    submitInventoryBtn.textContent = '送出';
+                    alert('系統錯誤，請稍後再試');
+                    console.error('Error:', error);
+                });
+            });
+            
+            // 重置按鈕點擊事件
+            resetInventoryBtn.addEventListener('click', function() {
+                // 重置所有輸入和選擇
+                document.querySelectorAll('.increase-select').forEach(select => {
+                    select.value = '';
+                    select.style.borderColor = '';
+                    
+                    const index = select.getAttribute('data-index');
+                    const occurrenceInput = document.querySelector(`.occurrence-input[data-index="${index}"]`);
+                    const reasonInput = document.querySelector(`.reason-input[data-index="${index}"]`);
+                    
+                    occurrenceInput.value = '';
+                    occurrenceInput.disabled = true;
+                    occurrenceInput.style.borderColor = '';
+                    
+                    reasonInput.value = '';
+                    reasonInput.disabled = true;
+                    reasonInput.style.borderColor = '';
+                });
             });
             
             // 事件登錄按鈕點擊事件
@@ -392,24 +794,29 @@
             // 顯示主頁面
             function showDashboard() {
                 loginSection.classList.add('hidden');
+                inventorySection.classList.add('hidden');
                 dashboardSection.classList.remove('hidden');
+                document.querySelector('.container').style.maxWidth = '500px';
             }
             
             // 顯示登入頁面
             function showLogin() {
                 dashboardSection.classList.add('hidden');
+                inventorySection.classList.add('hidden');
                 loginSection.classList.remove('hidden');
                 usernameInput.value = '';
                 passwordInput.value = '';
                 errorMessage.textContent = '';
+                document.querySelector('.container').style.maxWidth = '500px';
             }
             
-            // 按下 Enter 鍵觸發登入
-            passwordInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    loginBtn.click();
-                }
-            });
+                        // 顯示部門週期盤點頁面
+            function showInventorySection() {
+                loginSection.classList.add('hidden');
+                dashboardSection.classList.add('hidden');
+                inventorySection.classList.remove('hidden');
+                document.querySelector('.container').style.maxWidth = '100%';
+            }
         });
     </script>
 </body>
