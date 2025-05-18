@@ -127,6 +127,18 @@
             margin-top: 15px;
         }
 
+        /* 新增使用者資訊區塊的樣式 */
+        .user-info {
+            text-align: right;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .user-info strong {
+            color: #4285f4;
+        }
+
         @media (max-width: 480px) {
             .container {
                 padding: 10px;
@@ -163,6 +175,10 @@
 
         <!-- 主頁面 -->
         <div id="dashboard-section" class="dashboard hidden">
+            <!-- 新增使用者資訊區塊 -->
+            <div id="user-info" class="user-info">
+                歡迎 <strong id="user-department"></strong> 的 <strong id="user-name"></strong>
+            </div>
             <h1>昶青實業-AI控制管理中心</h1>
             <div class="button-group">
                 <button id="inventory-btn" class="feature-btn">部門週期盤點</button>
@@ -184,12 +200,17 @@
             const inventoryBtn = document.getElementById('inventory-btn');
             const eventBtn = document.getElementById('event-btn');
             const logoutBtn = document.getElementById('logout-btn');
+            const userDepartment = document.getElementById('user-department');
+            const userName = document.getElementById('user-name');
             
             // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-            const scriptUrl = 'https://script.google.com/macros/s/AKfycbx7VRRxS6hnXwFN8oPOSQJc0rcs8LTEGjNFshyrlSgQD_hsNL6mY_YbK1OVeIJ2Wcwi/exec';
+            const scriptUrl = 'https://script.google.com/macros/s/AKfycbyZ18dYcIYNl1HfYBaDqzvBt2J7TBJEEdRXnacXUTkKuJqExC3vGPdbiB0sPqPbqC9V/exec';
             
             // 檢查是否已登入
             if (localStorage.getItem('isLoggedIn') === 'true') {
+                // 顯示使用者資訊
+                userDepartment.textContent = localStorage.getItem('department') || '';
+                userName.textContent = localStorage.getItem('name') || '';
                 showDashboard();
             }
             
@@ -216,9 +237,16 @@
                         loginBtn.disabled = false;
                         
                         if (data.success) {
-                            // 登入成功
+                            // 登入成功，儲存使用者資訊
                             localStorage.setItem('isLoggedIn', 'true');
                             localStorage.setItem('username', username);
+                            localStorage.setItem('department', data.department || '');
+                            localStorage.setItem('name', data.name || '');
+                            
+                            // 顯示使用者資訊
+                            userDepartment.textContent = data.department || '';
+                            userName.textContent = data.name || '';
+                            
                             showDashboard();
                         } else {
                             // 登入失敗
@@ -249,6 +277,8 @@
             logoutBtn.addEventListener('click', function() {
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('username');
+                localStorage.removeItem('department');
+                localStorage.removeItem('name');
                 showLogin();
             });
             
