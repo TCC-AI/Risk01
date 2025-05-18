@@ -2,108 +2,56 @@
 <html lang="zh-TW">
 <head>
   <meta charset="utf-8">
+  <title>昶青實業‧AI控制管理中心</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>昶青實業 ‧ AI 風險控制管理中心</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body{background:#f5f5f5;font-family:"Microsoft JhengHei",Arial,sans-serif}
-    .login-card{max-width:460px;margin:6rem auto;padding:2.5rem;background:#fff;border-radius:1rem;
-                box-shadow:0 4px 12px rgba(0,0,0,.12)}
-  </style>
 </head>
-<body>
-  <div class="login-card">
-    <h3 class="text-center mb-4">昶青實業-AI風險控制管理中心</h3>
+<body class="bg-light d-flex align-items-center justify-content-center" style="min-height:100vh">
+  <div class="card shadow p-4" style="max-width:420px;width:100%">
+    <h4 class="text-center mb-4">昶青實業-AI控制管理中心</h4>
 
     <div class="mb-3">
-      <label for="accountIn" class="form-label fw-bold">帳號</label>
-      <input id="accountIn" class="form-control" placeholder="請輸入帳號">
+      <label class="form-label">帳號</label>
+      <input id="acc" class="form-control" placeholder="請輸入帳號">
     </div>
-
     <div class="mb-4">
-      <label for="pwIn" class="form-label fw-bold">密碼</label>
-      <input id="pwIn" type="password" class="form-control" placeholder="請輸入密碼">
+      <label class="form-label">密碼</label>
+      <input id="pw" type="password" class="form-control" placeholder="請輸入密碼">
     </div>
 
     <button id="loginBtn" class="btn btn-primary w-100">登入</button>
-    <div id="msg" class="small text-danger mt-3 text-center"></div>
+    <div id="msg" class="text-danger small mt-3 text-center"></div>
   </div>
 
-  <script>
-    /* ← 換成你重新部署後的網址 */
-    const GAS_URL = 'https://script.google.com/macros/s/AKfycbybG_wJZKxmbVq7kbcNHRfHZDZrfdL_rsRbyrccB21MLGzHbMCWfFuXbelHrRaWPfVB/exec';
+<script>
+const API = 'https://script.google.com/macros/s/AKfycbwNF9cqUr-lIawVju_pJPEz09JXO4SMi585LUtlrRQ9-VoVzKcSXTTLh7uIvEgVFAjq/exec'; // 換成你的 Web App URL
 
-    // 檢查是否為HTTPS連接
-    if (window.location.protocol !== 'https:' && !window.location.hostname.includes('localhost')) {
-      window.location.href = window.location.href.replace('http:', 'https:');
-    }
+document.getElementById('loginBtn').addEventListener('click', async () => {
+  const account = document.getElementById('acc').value.trim();
+  const password = document.getElementById('pw').value.trim();
+  const msgDOM = document.getElementById('msg');
+  msgDOM.textContent = '';
 
-    /* 共用錯誤顯示 */
-    const showErr = txt => {
-      console.error(txt);
-      document.getElementById('msg').textContent = txt;
-    };
+  if (!account || !password) return msgDOM.textContent = '請填帳號密碼！';
 
-    /* 登入函數 */
-    function attemptLogin() {
-      const account = document.getElementById('accountIn').value.trim();
-      const password = document.getElementById('pwIn').value.trim();
-      const msg = document.getElementById('msg');
-      const loginBtn = document.getElementById('loginBtn');
-      
-      if (!account || !password) {
-        msg.textContent = '請填寫帳號、密碼';
-        return;
-      }
-      
-      // 禁用按鈕防止重複點擊
-      loginBtn.disabled = true;
-      loginBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 登入中...';
-      msg.textContent = '';
-      
-      // 添加隨機挑戰值以防止重放攻擊
-      const clientNonce = Math.random().toString(36).substring(2, 15);
-      const timestamp = new Date().getTime();
-      
-      fetch(`${GAS_URL}?action=login&account=${encodeURIComponent(account)}&password=${encodeURIComponent(password)}&nonce=${clientNonce}&timestamp=${timestamp}`)
-        .then(r => r.json())
-        .then(res => {
-          if (res.ok) {
-            // 存儲安全的token和過期時間
-            sessionStorage.setItem('cc_token', res.token || '');
-            sessionStorage.setItem('cc_token_expires', res.expires || '');
-            sessionStorage.setItem('cc_user_dept', res.dept || '');
-            sessionStorage.setItem('cc_user_name', res.name || '');
-            
-            location.href = 'dashboard.html';
-          } else {
-            msg.textContent = '帳號或密碼錯誤';
-            loginBtn.disabled = false;
-            loginBtn.textContent = '登入';
-          }
-        })
-        .catch(() => {
-          showErr('登入服務異常，請稍後再試');
-          loginBtn.disabled = false;
-          loginBtn.textContent = '登入';
-        });
-    }
-
-    /* 登入驗證 */
-    document.getElementById('loginBtn').addEventListener('click', attemptLogin);
-    
-    /* 按Enter鍵登入 */
-    document.getElementById('pwIn').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        attemptLogin();
-      }
+  try {
+    const res = await fetch(API, {
+      method: 'POST',
+      body: new URLSearchParams({ action: 'login', account, password })
     });
-    
-    document.getElementById('accountIn').addEventListener('keypress', function(e) {
-      if (e.key === 'Enter') {
-        document.getElementById('pwIn').focus();
-      }
-    });
-  </script>
+    const data = await res.json();
+    if (data.ok) {
+      // 登入成功，跳第二畫面
+      sessionStorage.setItem('loginOK', '1');
+      location.href = 'dashboard.html';
+    } else {
+      msgDOM.textContent = '帳號或密碼錯誤';
+    }
+  } catch (err) {
+    msgDOM.textContent = '連線失敗，再試看看～';
+    console.error(err);
+  }
+});
+</script>
 </body>
 </html>
