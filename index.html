@@ -139,7 +139,7 @@
             margin-top: 20px;
         }
 
-        /* 部門週期盤點頁面樣式 */
+               /* 修改 inventory-section 的樣式 */
         .inventory-section {
             background-color: white;
             padding: 30px;
@@ -147,8 +147,26 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             width: 100%;
             max-width: 900px;
-            margin: 0 auto;
+            /* 新增以下屬性來確保居中 */
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 20px;
         }
+        
+        /* 修改 body 樣式，確保內容可以正確定位 */
+        body {
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            position: relative;
+            padding: 20px;
+        }
+        
+        /* 修改 container 樣式，當切換到盤點頁面時不需要 */
+        .container.hidden {
+            display: none;
+        }
+
 
         .inventory-header {
             display: flex;
@@ -804,13 +822,16 @@
                 document.querySelector('.container').style.maxWidth = '500px';
             }
             
-                        // 顯示部門週期盤點頁面
+                       // 顯示部門週期盤點頁面
             function showInventorySection() {
                 loginSection.classList.add('hidden');
                 dashboardSection.classList.add('hidden');
+                document.querySelector('.container').classList.add('hidden'); // 隱藏原容器
                 inventorySection.classList.remove('hidden');
-                document.querySelector('.container').style.maxWidth = '100%';
             }
+            
+        
+
         });
     </script>
 </body>
