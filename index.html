@@ -474,7 +474,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-    const scriptUrl = 'https://script.google.com/macros/s/AKfycbxmBEsztWLKoPF5I1m-R3a3mOmCo_CXjR3KzHZClOagXJPL3Gt9PWm-wy2IvSbs4YhV/exec';
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbzUulrAeU1-EvPuLitqR1_g1pqBwNe-APXY0OyehVTnf10fL5M438n5Clvek-CKN1V1/exec';
     
     // 檢查是否已登入
     if (localStorage.getItem('isLoggedIn') === 'true') {
@@ -665,55 +665,44 @@ document.addEventListener('DOMContentLoaded', function() {
     // 送出按鈕點擊事件
 submitInventoryBtn.addEventListener('click', async function() {
     try {
-        // 驗證所有必填欄位
-        let isValid = true;
-        const responses = [];
-        
-        document.querySelectorAll('.increase-select').forEach(select => {
-            const index = select.getAttribute('data-index');
-            const occurrenceInput = document.querySelector(`.occurrence-input[data-index="${index}"]`);
-            const reasonInput = document.querySelector(`.reason-input[data-index="${index}"]`);
-            
-            // 取得風險項目名稱和其他資訊
-            const riskRow = document.querySelector(`tr[data-risk-id="${index}"]`);
-            const riskName = riskRow.querySelector('.risk-name').textContent;
-            const riskDescription = riskRow.querySelector('.risk-description').textContent;
-            const riskCategory = riskRow.querySelector('.risk-category').textContent.replace('類別: ', '');
-            const riskLevel = riskRow.querySelector('.risk-level').textContent.replace('風險等級: ', '');
-            const relatedDepartments = riskRow.querySelector('.related-departments').textContent.replace('相關聯部門: ', '');
-            
-            if (select.value === '') {
-                isValid = false;
-                select.style.borderColor = 'red';
-                throw new Error('請填寫所有必填欄位');
-            }
-            
-            // 如果選擇"是"，驗證次數和原因
-            if (select.value === 'yes') {
-                if (!occurrenceInput.value) {
-                    isValid = false;
-                    occurrenceInput.style.borderColor = 'red';
-                    throw new Error('請填寫發生次數');
-                }
-                if (!reasonInput.value) {
-                    isValid = false;
-                    reasonInput.style.borderColor = 'red';
-                    throw new Error('請填寫原因');
-                }
-            }
-            
-                   responses.push({
-            riskName: riskName,
-            riskDescription: riskDescription,
-            riskCategory: riskCategory,
-            riskLevel: riskLevel,
-            relatedDepartments: relatedDepartments,
-            increased: select.value === 'yes',
-            occurrences: select.value === 'yes' ? parseInt(occurrenceInput.value) : 0,
-            reason: select.value === 'yes' ? reasonInput.value : ''
+        // 準備要傳送的資料
+        const updatedData = responses.map(item => ({
+            riskName: item.riskName,          // 用來配對風險清單中的項目
+            increased: item.increased,         // 本月是否增加
+            occurrences: item.occurrences,    // 發生次數
+            reason: item.reason               // 原因
+        }));
+
+        // 準備查詢參數
+        const params = new URLSearchParams({
+            action: 'updateRiskList',         // 改用新的 action
+            timestamp: new Date().toISOString(),
+            department: localStorage.getItem('department'),
+            username: localStorage.getItem('username'),
+            data: JSON.stringify(updatedData),
+            sheetName: '風險清單'              // 改寫入風險清單
         });
 
-        });
+        console.log('送出的資料:', updatedData);
+
+        const response = await fetch(`${scriptUrl}?${params.toString()}`);
+        const responseText = await response.text();
+        console.log('後端回應:', responseText);
+        
+        const data = JSON.parse(responseText);
+        if (!data.success) {
+            throw new Error(data.message || '提交失敗');
+        }
+
+        alert('盤點資料已成功更新');
+        showDashboard();
+
+    } catch (error) {
+        console.error('錯誤詳情:', error);
+        alert('系統錯誤：' + error.message);
+    }
+});
+
 
         // 禁用按鈕並顯示載入狀態
         submitInventoryBtn.disabled = true;
