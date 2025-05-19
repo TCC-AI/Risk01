@@ -474,7 +474,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-    const scriptUrl = 'https://script.google.com/macros/s/AKfycbwG1CkjgE3mqgPbEoXH5_0MxrTkIAalow5IRjg_ntQqiEI9KwQMwVMj0iEjqFW97Y5N/exec';
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbzK0z6dA3xBK-XyDzHSvZAiKLJJ2ezNyJ0e6GqgNEzU2l8XMlN6hJBfY9qeBFDb4AgJ/exec';
     
     // 檢查是否已登入
     if (localStorage.getItem('isLoggedIn') === 'true') {
@@ -663,94 +663,112 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // 送出按鈕點擊事件
-submitInventoryBtn.addEventListener('click', async function() {
-    try {
-        // 準備要傳送的資料
-        const updatedData = responses.map(item => ({
-            riskName: item.riskName,          // 用來配對風險清單中的項目
-            increased: item.increased,         // 本月是否增加
-            occurrences: item.occurrences,    // 發生次數
-            reason: item.reason               // 原因
-        }));
-
-        // 準備查詢參數
-        const params = new URLSearchParams({
-            action: 'updateRiskList',         // 改用新的 action
-            timestamp: new Date().toISOString(),
-            department: localStorage.getItem('department'),
-            username: localStorage.getItem('username'),
-            data: JSON.stringify(updatedData),
-            sheetName: '風險清單'              // 改寫入風險清單
-        });
-
-        console.log('送出的資料:', updatedData);
-
-        const response = await fetch(`${scriptUrl}?${params.toString()}`);
-        const responseText = await response.text();
-        console.log('後端回應:', responseText);
+    submitInventoryBtn.addEventListener('click', function() {
+        // 驗證所有必填欄位
+        let isValid = true;
+        const responses = [];
         
-        const data = JSON.parse(responseText);
-        if (!data.success) {
-            throw new Error(data.message || '提交失敗');
+        document.querySelectorAll('.increase-select').forEach(select => {
+            const index = select.getAttribute('data-index');
+            const occurrenceInput = document.querySelector(`.occurrence-input[data-index="${index}"]`);
+            const reasonInput = document.querySelector(`.reason-input[data-index="${index}"]`);
+            
+            // 取得風險項目名稱和其他資訊
+            const riskRow = document.querySelector(`tr[data-risk-id="${index}"]`);
+            const riskName = riskRow.querySelector('.risk-name').textContent;
+            const riskDescription = riskRow.querySelector('.risk-description').textContent;
+            const riskCategory = riskRow.querySelector('.risk-category').textContent.replace('類別: ', '');
+            const riskLevel = riskRow.querySelector('.risk-level').textContent.replace('風險等級: ', '');
+            const relatedDepartments = riskRow.querySelector('.related-departments').textContent.replace('相關聯部門: ', '');
+            
+            if (select.value === '') {
+                isValid = false;
+                select.style.borderColor = 'red';
+            } else {
+                select.style.borderColor = '';
+                
+                if (select.value === 'yes') {
+                    if (!occurrenceInput.value) {
+                        isValid = false;
+                        occurrenceInput.style.borderColor = 'red';
+                    } else {
+                        occurrenceInput.style.borderColor = '';
+                    }
+                    
+                    if (!reasonInput.value) {
+                        isValid = false;
+                        reasonInput.style.borderColor = 'red';
+                    } else {
+                        reasonInput.style.borderColor = '';
+                    }
+                }
+                
+                // 收集回應，包含更多風險項目資訊
+                responses.push({
+                    index: index,
+                    riskName: riskName,
+                    riskDescription: riskDescription,
+                    riskCategory: riskCategory,
+                    riskLevel: riskLevel,
+                    relatedDepartments: relatedDepartments,
+                    increased: select.value === 'yes',
+                    occurrences: select.value === 'yes' ? occurrenceInput.value : 0,
+                    reason: select.value === 'yes' ? reasonInput.value : ''
+                });
+            }
+        });
+        
+        if (!isValid) {
+            alert('請填寫所有必填欄位');
+            return;
         }
-
-        alert('盤點資料已成功更新');
-        showDashboard();
-
-    } catch (error) {
-        console.error('錯誤詳情:', error);
-        alert('系統錯誤：' + error.message);
-    }
-});
-
-
-        // 禁用按鈕並顯示載入狀態
+        
+        // 送出資料
+        const department = localStorage.getItem('department');
+        const username = localStorage.getItem('username');
+        const name = localStorage.getItem('name');
+        
+        // 添加當前時間
+        const currentTime = new Date().toISOString();
+        
         submitInventoryBtn.disabled = true;
         submitInventoryBtn.textContent = '送出中...';
-
-        // 準備查詢參數
-               const params = new URLSearchParams({
-            action: 'submitInventory',
-            timestamp: new Date().toISOString(),
-            department: localStorage.getItem('department'),
-            username: localStorage.getItem('username'),
-            name: localStorage.getItem('name'),
-            responses: JSON.stringify(responses),  // 確保這裡正確序列化
-            sheetName: '部門週期盤點紀錄'
-        });
-        // 第3點：加入這段除錯訊息 (在發送請求前)
-        console.log('送出的資料:', {
-            params: params.toString(),
-            responses: responses
-        });
-
-
-        // 第4點：修改這段發送請求的程式碼
-        const response = await fetch(`${scriptUrl}?${params.toString()}`);
-        const responseText = await response.text();
-        console.log('後端回應:', responseText);
         
-        const data = JSON.parse(responseText);
-        if (!data.success) {
-            throw new Error(data.message || '提交失敗');
-        }
-
-        alert('部門週期盤點已成功送出');
-        showDashboard();
-
-    } catch (error) {
-        console.error('完整錯誤:', error);
-        alert('系統錯誤：' + error.message);
-    } finally {
-        // 恢復按鈕狀態
-        submitInventoryBtn.disabled = false;
-        submitInventoryBtn.textContent = '送出';
-        // 重置計時器
-        resetInactivityTimer();
-    }
-});
-
-
+        fetch(`${scriptUrl}?action=submitInventory`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                timestamp: currentTime,
+                department: department,
+                username: username,
+                name: name,
+                responses: responses,
+                sheetName: '定期紀錄' // 指定要寫入的工作表名稱
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            submitInventoryBtn.disabled = false;
+            submitInventoryBtn.textContent = '送出';
+            
+            if (data.success) {
+                alert('部門週期盤點已成功送出');
+                showDashboard();
+            } else {
+                alert(data.message || '送出失敗，請稍後再試');
+            }
+            // 重置計時器
+            resetInactivityTimer();
+        })
+        .catch(error => {
+            submitInventoryBtn.disabled = false;
+            submitInventoryBtn.textContent = '送出';
+            alert('系統錯誤，請稍後再試');
+            console.error('Error:', error);
+        });
+    });
     
     // 重置按鈕點擊事件
     resetInventoryBtn.addEventListener('click', function() {
