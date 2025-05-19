@@ -1,5 +1,5 @@
 // 全局變數
-const API_URL = 'https://script.google.com/macros/s/您的部署ID/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwqcz8CNrqM4gMKZjzaH40WFkUP6wHGaZhe-2Q3GIiez-63RcbGQXxm5ibQnhsy_p_L/exec';
 let currentUser = {
     department: '',
     name: ''
