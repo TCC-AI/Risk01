@@ -474,7 +474,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-    const scriptUrl = 'https://script.google.com/macros/s/AKfycbx812spKKxC1ZfkMYfCQ2eNq3gf6n_V3S-IsjH65Za08ZjCaVXIU7QqQAjdxNo-oioW/exec';
+    const scriptUrl = 'https://script.google.com/macros/s/AKfycbypHP-daRTlYcG8i_AFDNbmVaISSsqlDGfkrgYEw_wYBX2jCzvI1EKlznIB5Rwouf5z/exec';
     
     // 檢查是否已登入
     if (localStorage.getItem('isLoggedIn') === 'true') {
@@ -663,91 +663,80 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // 送出按鈕點擊事件
-    submitInventoryBtn.addEventListener('click', function() {
-        // 驗證所有必填欄位
-        let isValid = true;
-        const responses = [];
+submitInventoryBtn.addEventListener('click', function() {
+    // 驗證所有必填欄位
+    let isValid = true;
+    const responses = [];
+    
+    document.querySelectorAll('.increase-select').forEach(select => {
+        const index = select.getAttribute('data-index');
+        const occurrenceInput = document.querySelector(`.occurrence-input[data-index="${index}"]`);
+        const reasonInput = document.querySelector(`.reason-input[data-index="${index}"]`);
         
-        document.querySelectorAll('.increase-select').forEach(select => {
-            const index = select.getAttribute('data-index');
-            const occurrenceInput = document.querySelector(`.occurrence-input[data-index="${index}"]`);
-            const reasonInput = document.querySelector(`.reason-input[data-index="${index}"]`);
+        // 取得風險項目名稱和其他資訊
+        const riskRow = document.querySelector(`tr[data-risk-id="${index}"]`);
+        const riskName = riskRow.querySelector('.risk-name').textContent;
+        const riskDescription = riskRow.querySelector('.risk-description').textContent;
+        const riskCategory = riskRow.querySelector('.risk-category').textContent.replace('類別: ', '');
+        const riskLevel = riskRow.querySelector('.risk-level').textContent.replace('風險等級: ', '');
+        const relatedDepartments = riskRow.querySelector('.related-departments').textContent.replace('相關聯部門: ', '');
+        
+        if (select.value === '') {
+            isValid = false;
+            select.style.borderColor = 'red';
+        } else {
+            select.style.borderColor = '';
             
-            // 取得風險項目名稱和其他資訊
-            const riskRow = document.querySelector(`tr[data-risk-id="${index}"]`);
-            const riskName = riskRow.querySelector('.risk-name').textContent;
-            const riskDescription = riskRow.querySelector('.risk-description').textContent;
-            const riskCategory = riskRow.querySelector('.risk-category').textContent.replace('類別: ', '');
-            const riskLevel = riskRow.querySelector('.risk-level').textContent.replace('風險等級: ', '');
-            const relatedDepartments = riskRow.querySelector('.related-departments').textContent.replace('相關聯部門: ', '');
-            
-            if (select.value === '') {
-                isValid = false;
-                select.style.borderColor = 'red';
-            } else {
-                select.style.borderColor = '';
-                
-                if (select.value === 'yes') {
-                    if (!occurrenceInput.value) {
-                        isValid = false;
-                        occurrenceInput.style.borderColor = 'red';
-                    } else {
-                        occurrenceInput.style.borderColor = '';
-                    }
-                    
-                    if (!reasonInput.value) {
-                        isValid = false;
-                        reasonInput.style.borderColor = 'red';
-                    } else {
-                        reasonInput.style.borderColor = '';
-                    }
+            if (select.value === 'yes') {
+                if (!occurrenceInput.value) {
+                    isValid = false;
+                    occurrenceInput.style.borderColor = 'red';
+                } else {
+                    occurrenceInput.style.borderColor = '';
                 }
                 
-                // 收集回應，包含更多風險項目資訊
-                responses.push({
-                    index: index,
-                    riskName: riskName,
-                    riskDescription: riskDescription,
-                    riskCategory: riskCategory,
-                    riskLevel: riskLevel,
-                    relatedDepartments: relatedDepartments,
-                    increased: select.value === 'yes',
-                    occurrences: select.value === 'yes' ? occurrenceInput.value : 0,
-                    reason: select.value === 'yes' ? reasonInput.value : ''
-                });
+                if (!reasonInput.value) {
+                    isValid = false;
+                    reasonInput.style.borderColor = 'red';
+                } else {
+                    reasonInput.style.borderColor = '';
+                }
             }
-        });
-        
-        if (!isValid) {
-            alert('請填寫所有必填欄位');
-            return;
+            
+            responses.push({
+                riskName: riskName,
+                riskDescription: riskDescription,
+                riskCategory: riskCategory,
+                riskLevel: riskLevel,
+                relatedDepartments: relatedDepartments,
+                increased: select.value === 'yes',
+                occurrences: select.value === 'yes' ? occurrenceInput.value : 0,
+                reason: select.value === 'yes' ? reasonInput.value : ''
+            });
         }
-        
-        // 送出資料
-        const department = localStorage.getItem('department');
-        const username = localStorage.getItem('username');
-        const name = localStorage.getItem('name');
-        
-        // 添加當前時間
-        const currentTime = new Date().toISOString();
-        
-        submitInventoryBtn.disabled = true;
-        submitInventoryBtn.textContent = '送出中...';
-        
-        fetch(`${scriptUrl}?action=submitInventory`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                timestamp: currentTime,
-                department: department,
-                username: username,
-                name: name,
-                responses: responses,
-                sheetName: '定期紀錄' // 指定要寫入的工作表名稱
-            })
-        })
+    });
+    
+    if (!isValid) {
+        alert('請填寫所有必填欄位');
+        return;
+    }
+    
+    // 準備 GET 請求的參數
+    const queryParams = new URLSearchParams({
+        action: 'submitInventory',
+        timestamp: new Date().toISOString(),
+        department: localStorage.getItem('department'),
+        username: localStorage.getItem('username'),
+        name: localStorage.getItem('name'),
+        responses: JSON.stringify(responses),
+        sheetName: '部門週期盤點紀錄'
+    });
+    
+    submitInventoryBtn.disabled = true;
+    submitInventoryBtn.textContent = '送出中...';
+    
+    // 使用 GET 請求
+    fetch(`${scriptUrl}?${queryParams.toString()}`)
         .then(response => response.json())
         .then(data => {
             submitInventoryBtn.disabled = false;
@@ -759,7 +748,6 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 alert(data.message || '送出失敗，請稍後再試');
             }
-            // 重置計時器
             resetInactivityTimer();
         })
         .catch(error => {
@@ -768,7 +756,8 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('系統錯誤，請稍後再試');
             console.error('Error:', error);
         });
-    });
+});
+
     
     // 重置按鈕點擊事件
     resetInventoryBtn.addEventListener('click', function() {
