@@ -663,43 +663,42 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // 送出按鈕點擊事件
-submitInventoryBtn.addEventListener('click', function() {
-    // 驗證所有必填欄位
-    let isValid = true;
-    const responses = [];
-    
-    document.querySelectorAll('.increase-select').forEach(select => {
-        const index = select.getAttribute('data-index');
-        const occurrenceInput = document.querySelector(`.occurrence-input[data-index="${index}"]`);
-        const reasonInput = document.querySelector(`.reason-input[data-index="${index}"]`);
+submitInventoryBtn.addEventListener('click', async function() {
+    try {
+        // 驗證所有必填欄位
+        let isValid = true;
+        const responses = [];
         
-        // 取得風險項目名稱和其他資訊
-        const riskRow = document.querySelector(`tr[data-risk-id="${index}"]`);
-        const riskName = riskRow.querySelector('.risk-name').textContent;
-        const riskDescription = riskRow.querySelector('.risk-description').textContent;
-        const riskCategory = riskRow.querySelector('.risk-category').textContent.replace('類別: ', '');
-        const riskLevel = riskRow.querySelector('.risk-level').textContent.replace('風險等級: ', '');
-        const relatedDepartments = riskRow.querySelector('.related-departments').textContent.replace('相關聯部門: ', '');
-        
-        if (select.value === '') {
-            isValid = false;
-            select.style.borderColor = 'red';
-        } else {
-            select.style.borderColor = '';
+        document.querySelectorAll('.increase-select').forEach(select => {
+            const index = select.getAttribute('data-index');
+            const occurrenceInput = document.querySelector(`.occurrence-input[data-index="${index}"]`);
+            const reasonInput = document.querySelector(`.reason-input[data-index="${index}"]`);
             
+            // 取得風險項目名稱和其他資訊
+            const riskRow = document.querySelector(`tr[data-risk-id="${index}"]`);
+            const riskName = riskRow.querySelector('.risk-name').textContent;
+            const riskDescription = riskRow.querySelector('.risk-description').textContent;
+            const riskCategory = riskRow.querySelector('.risk-category').textContent.replace('類別: ', '');
+            const riskLevel = riskRow.querySelector('.risk-level').textContent.replace('風險等級: ', '');
+            const relatedDepartments = riskRow.querySelector('.related-departments').textContent.replace('相關聯部門: ', '');
+            
+            if (select.value === '') {
+                isValid = false;
+                select.style.borderColor = 'red';
+                throw new Error('請填寫所有必填欄位');
+            }
+            
+            // 如果選擇"是"，驗證次數和原因
             if (select.value === 'yes') {
                 if (!occurrenceInput.value) {
                     isValid = false;
                     occurrenceInput.style.borderColor = 'red';
-                } else {
-                    occurrenceInput.style.borderColor = '';
+                    throw new Error('請填寫發生次數');
                 }
-                
                 if (!reasonInput.value) {
                     isValid = false;
                     reasonInput.style.borderColor = 'red';
-                } else {
-                    reasonInput.style.borderColor = '';
+                    throw new Error('請填寫原因');
                 }
             }
             
@@ -713,50 +712,51 @@ submitInventoryBtn.addEventListener('click', function() {
                 occurrences: select.value === 'yes' ? occurrenceInput.value : 0,
                 reason: select.value === 'yes' ? reasonInput.value : ''
             });
-        }
-    });
-    
-    if (!isValid) {
-        alert('請填寫所有必填欄位');
-        return;
-    }
-    
-    // 準備 GET 請求的參數
-    const queryParams = new URLSearchParams({
-        action: 'submitInventory',
-        timestamp: new Date().toISOString(),
-        department: localStorage.getItem('department'),
-        username: localStorage.getItem('username'),
-        name: localStorage.getItem('name'),
-        responses: JSON.stringify(responses),
-        sheetName: '部門週期盤點紀錄'
-    });
-    
-    submitInventoryBtn.disabled = true;
-    submitInventoryBtn.textContent = '送出中...';
-    
-    // 使用 GET 請求
-    fetch(`${scriptUrl}?${queryParams.toString()}`)
-        .then(response => response.json())
-        .then(data => {
-            submitInventoryBtn.disabled = false;
-            submitInventoryBtn.textContent = '送出';
-            
-            if (data.success) {
-                alert('部門週期盤點已成功送出');
-                showDashboard();
-            } else {
-                alert(data.message || '送出失敗，請稍後再試');
-            }
-            resetInactivityTimer();
-        })
-        .catch(error => {
-            submitInventoryBtn.disabled = false;
-            submitInventoryBtn.textContent = '送出';
-            alert('系統錯誤，請稍後再試');
-            console.error('Error:', error);
         });
+
+        // 禁用按鈕並顯示載入狀態
+        submitInventoryBtn.disabled = true;
+        submitInventoryBtn.textContent = '送出中...';
+
+        // 準備查詢參數
+        const params = new URLSearchParams({
+            action: 'submitInventory',
+            timestamp: new Date().toISOString(),
+            department: localStorage.getItem('department'),
+            username: localStorage.getItem('username'),
+            name: localStorage.getItem('name'),
+            responses: JSON.stringify(responses),
+            sheetName: '部門週期盤點紀錄'
+        });
+
+        // 發送請求
+        const response = await fetch(`${scriptUrl}?${params.toString()}`);
+        
+        if (!response.ok) {
+            throw new Error(`請求失敗: ${response.status}`);
+        }
+
+        const data = await response.json();
+        
+        if (!data.success) {
+            throw new Error(data.message || '提交失敗');
+        }
+
+        alert('部門週期盤點已成功送出');
+        showDashboard();
+
+    } catch (error) {
+        alert(error.message || '系統錯誤，請稍後再試');
+        console.error('Error:', error);
+    } finally {
+        // 恢復按鈕狀態
+        submitInventoryBtn.disabled = false;
+        submitInventoryBtn.textContent = '送出';
+        // 重置計時器
+        resetInactivityTimer();
+    }
 });
+
 
     
     // 重置按鈕點擊事件
