@@ -702,16 +702,17 @@ submitInventoryBtn.addEventListener('click', async function() {
                 }
             }
             
-            responses.push({
-                riskName: riskName,
-                riskDescription: riskDescription,
-                riskCategory: riskCategory,
-                riskLevel: riskLevel,
-                relatedDepartments: relatedDepartments,
-                increased: select.value === 'yes',
-                occurrences: select.value === 'yes' ? occurrenceInput.value : 0,
-                reason: select.value === 'yes' ? reasonInput.value : ''
-            });
+                   responses.push({
+            riskName: riskName,
+            riskDescription: riskDescription,
+            riskCategory: riskCategory,
+            riskLevel: riskLevel,
+            relatedDepartments: relatedDepartments,
+            increased: select.value === 'yes',
+            occurrences: select.value === 'yes' ? parseInt(occurrenceInput.value) : 0,
+            reason: select.value === 'yes' ? reasonInput.value : ''
+        });
+
         });
 
         // 禁用按鈕並顯示載入狀態
@@ -719,25 +720,28 @@ submitInventoryBtn.addEventListener('click', async function() {
         submitInventoryBtn.textContent = '送出中...';
 
         // 準備查詢參數
-        const params = new URLSearchParams({
+               const params = new URLSearchParams({
             action: 'submitInventory',
             timestamp: new Date().toISOString(),
             department: localStorage.getItem('department'),
             username: localStorage.getItem('username'),
             name: localStorage.getItem('name'),
-            responses: JSON.stringify(responses),
+            responses: JSON.stringify(responses),  // 確保這裡正確序列化
             sheetName: '部門週期盤點紀錄'
         });
+        // 第3點：加入這段除錯訊息 (在發送請求前)
+        console.log('送出的資料:', {
+            params: params.toString(),
+            responses: responses
+        });
 
-        // 發送請求
+
+        // 第4點：修改這段發送請求的程式碼
         const response = await fetch(`${scriptUrl}?${params.toString()}`);
+        const responseText = await response.text();
+        console.log('後端回應:', responseText);
         
-        if (!response.ok) {
-            throw new Error(`請求失敗: ${response.status}`);
-        }
-
-        const data = await response.json();
-        
+        const data = JSON.parse(responseText);
         if (!data.success) {
             throw new Error(data.message || '提交失敗');
         }
@@ -746,8 +750,8 @@ submitInventoryBtn.addEventListener('click', async function() {
         showDashboard();
 
     } catch (error) {
-        alert(error.message || '系統錯誤，請稍後再試');
-        console.error('Error:', error);
+        console.error('完整錯誤:', error);
+        alert('系統錯誤：' + error.message);
     } finally {
         // 恢復按鈕狀態
         submitInventoryBtn.disabled = false;
