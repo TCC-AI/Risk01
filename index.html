@@ -736,9 +736,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         fetch(`${scriptUrl}?action=submitInventory`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
+            
             body: JSON.stringify({
                 timestamp: currentTime,
                 department: department,
