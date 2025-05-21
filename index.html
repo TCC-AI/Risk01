@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>昶青實業-AI風險控制中心</title>
+    <title>昶青實業-AI控制管理中心</title>
     <!-- 新增 Bootstrap CSS 用於下拉選單 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -53,6 +52,24 @@
             padding: 20px;
             margin: 0 auto;
             position: relative;
+        }
+
+        /* Logo 樣式 */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .logo {
+            max-width: 150px;
+            height: auto;
+            display: inline-block;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
         }
 
         /* 卡片樣式 */
@@ -547,6 +564,10 @@
             .half-width-btn {
                 width: 45%;
             }
+            
+            .logo {
+                max-width: 120px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -573,16 +594,21 @@
                 font-size: 14px;
                 padding: 8px;
             }
+            
+            .logo {
+                max-width: 100px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        
         <!-- 登入表單 -->
         <div id="login-section" class="login-form">
-             <img src="LOGO.png" alt="TCC.AI" class="logo-img">
-            <h1>昶青實業-AI風險控制中心</h1>
+            <div class="logo-container">
+                <img src="LOGO.png" alt="昶青實業 Logo" class="logo">
+            </div>
+            <h1>昶青實業-AI控制管理中心</h1>
             <div class="form-group">
                 <label for="username">帳號</label>
                 <input type="text" id="username" placeholder="請輸入帳號">
@@ -602,7 +628,10 @@
             <div id="user-info" class="user-info">
                 歡迎： <strong id="user-department"></strong> - <strong id="user-name"></strong>
             </div>
-            <h1>昶青實業-AI風險控制中心</h1>
+            <div class="logo-container">
+                <img src="LOGO.png" alt="昶青實業 Logo" class="logo">
+            </div>
+            <h1>昶青實業-AI控制管理中心</h1>
             <div class="button-group">
                 <button id="inventory-btn" class="feature-btn">部門週期盤點</button>
                 <button id="event-btn" class="feature-btn">事件登錄</button>
@@ -657,6 +686,9 @@
     <!-- 部門週期盤點頁面 -->
     <div id="inventory-section" class="inventory-section hidden">
         <div class="inventory-header">
+            <div class="logo-container">
+                <img src="LOGO.png" alt="昶青實業 Logo" class="logo">
+            </div>
             <h1 class="centered-title">部門週期盤點</h1>
             <div class="button-container">
                 <button id="all-no-btn" class="half-width-btn">一鍵全否</button>
@@ -720,7 +752,7 @@
         let inactivityTimer;
         const inactivityTimeout = 2 * 60 * 1000; // 15分鐘，以毫秒為單位
         
-        // 監控用戶活動的函數
+               // 監控用戶活動的函數
         function resetInactivityTimer() {
             // 清除現有計時器
             clearTimeout(inactivityTimer);
@@ -754,7 +786,7 @@
             document.addEventListener(event, resetInactivityTimer, true);
         });
         
-                // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
+        // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
         const scriptUrl = 'https://script.google.com/macros/s/AKfycbzZWj-Per8eT-uEfLpk4B1qYtQKQ9KGjYQUXThNtSoKAsvGsqR61L-7HmchCM9Ya33a/exec';
         
         // 檢查是否已登入
