@@ -309,7 +309,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             color: #1a6fc4;
         }
 
-        /* 部門風險指數頁面樣式 */
+        /* 部門風險係數頁面樣式 */
 .dashboard-page {
     background-color: white;
     border-radius: 10px;
@@ -758,7 +758,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             </div>
             <h1>昶青實業<br>【AI企業風控中心】</h1>
             <div class="button-group">
-                <button class="btn btn-primary mb-3" id="dept-risk-index-btn">部門風險指數</button>
+                <button class="btn btn-primary mb-3" id="dept-risk-index-btn">部門風險係數</button>
                 <button id="inventory-btn" class="feature-btn">部門週期盤點</button>
                 <button id="event-btn" class="feature-btn">事件登錄</button>
             </div>
@@ -809,7 +809,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         </div>
     </div>
 
-    <!-- 部門風險指數頁面 -->
+    <!-- 部門風險係數頁面 -->
 <div id="dept-risk-index-page" class="dashboard-page" style="display: none;">
     <div class="logo-container">
         <img src="LOGO.png" alt="TCC.AI Logo" class="logo">
@@ -821,7 +821,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             <thead>
                 <tr>
                     <th>部門</th>
-                    <th>風險指數(R值)</th>
+                    <th>風險係數(R值)</th>
                 </tr>
             </thead>
             <tbody id="risk-index-table-body">
@@ -956,12 +956,12 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             resetInactivityTimer();
         }
 
-        // 添加部門風險指數按鈕點擊事件
+        // 添加部門風險係數按鈕點擊事件
         deptRiskIndexBtn.addEventListener('click', function() {
             dashboardSection.style.display = 'none';
             deptRiskIndexPage.style.display = 'block';
             
-            // 載入風險指數數據
+            // 載入風險係數數據
             loadRiskIndexData();
             
             // 重置計時器
@@ -977,7 +977,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             resetInactivityTimer();
         });
         
-        // 載入風險指數數據的函數
+        // 載入風險係數數據的函數
         function loadRiskIndexData() {
             // 顯示載入中訊息
             document.getElementById('risk-index-table-body').innerHTML = '<tr><td colspan="2" class="text-center">載入中...</td></tr>';
