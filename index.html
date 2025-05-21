@@ -72,6 +72,42 @@
             transform: scale(1.05);
         }
 
+        /* 歡迎詞置中樣式 */
+.welcome-message, /* 假設的類名 */
+div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
+.dotted-box p, /* 如果歡迎詞在虛線框內 */
+.user-greeting { /* 另一個可能的類名 */
+    width: 100%;
+    text-align: center !important;
+    display: block;
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* 針對虛線框內的所有文字 */
+.dotted-container, 
+.dotted-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+}
+
+/* 特別針對行動裝置的修正 */
+@media (max-width: 767px) {
+    .welcome-message,
+    div:contains("歡迎"),
+    .dotted-box p,
+    .user-greeting {
+        padding: 0 !important;
+        margin: 0 auto !important;
+        left: 0 !important;
+        right: 0 !important;
+    }
+}
+
+
         /* 卡片樣式 */
         .login-form, .dashboard {
             background: rgba(255, 255, 255, 0.9);
