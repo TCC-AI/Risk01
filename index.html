@@ -122,6 +122,28 @@
             margin-top: 15px;
         }
 
+                .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .action-btn {
+            padding: 8px 15px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            width: auto;
+        }
+        
+        .action-btn:hover {
+            background-color: #3367d6;
+        }
+
+
         /* 使用者資訊區塊的樣式 */
         .user-info {
             text-align: right;
@@ -380,6 +402,7 @@
     <div id="inventory-section" class="inventory-section hidden">
         <div class="inventory-header">
             <h1>部門週期盤點</h1>
+            <button id="all-no-btn" class="action-btn">一鍵全否</button>
             <button id="back-btn" class="back-btn">返回前頁</button>
         </div>
         
@@ -485,6 +508,23 @@ document.addEventListener('DOMContentLoaded', function() {
         // 初始化自動登出計時器
         resetInactivityTimer();
     }
+
+    // 一鍵全否按鈕點擊事件
+const allNoBtn = document.getElementById('all-no-btn');
+allNoBtn.addEventListener('click', function() {
+    // 將所有增加選擇框設為「否」
+    document.querySelectorAll('.increase-select').forEach(select => {
+        select.value = 'no';
+        
+        // 觸發 change 事件，以便禁用相關輸入框
+        const event = new Event('change');
+        select.dispatchEvent(event);
+    });
+    
+    // 重置計時器
+    resetInactivityTimer();
+});
+
     
     // 登入按鈕點擊事件
     loginBtn.addEventListener('click', function() {
