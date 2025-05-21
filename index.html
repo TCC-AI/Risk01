@@ -309,6 +309,73 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             color: #1a6fc4;
         }
 
+        /* 部門風險指數頁面樣式 */
+.dashboard-page {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #212529;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 0.75rem;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+    text-align: center;
+}
+
+.table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.table-bordered {
+    border: 1px solid #dee2e6;
+}
+
+.table-bordered th,
+.table-bordered td {
+    border: 1px solid #dee2e6;
+}
+
+/* 確保在移動設備上也能正常顯示 */
+@media (max-width: 767px) {
+    .dashboard-page {
+        padding: 15px;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.5rem;
+    }
+}
+
+        
+        
         /* 部門週期盤點頁面樣式 */
         .inventory-section {
             background: rgba(255, 255, 255, 0.9);
@@ -691,6 +758,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             </div>
             <h1>昶青實業<br>【AI企業風控中心】</h1>
             <div class="button-group">
+                <button class="btn btn-primary mb-3" id="dept-risk-index-btn">部門風險指數</button>
                 <button id="inventory-btn" class="feature-btn">部門週期盤點</button>
                 <button id="event-btn" class="feature-btn">事件登錄</button>
             </div>
@@ -732,7 +800,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                             <div id="passwordChangeMessage" class="alert" style="display: none;"></div>
                         </form>
                     </div>
-                    <div class="modal-footer">
+                                        <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
                         <button type="button" class="btn btn-primary" id="submitChangePassword">確認更改</button>
                     </div>
@@ -741,6 +809,34 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         </div>
     </div>
 
+    <!-- 部門風險指數頁面 -->
+<div id="dept-risk-index-page" class="dashboard-page" style="display: none;">
+    <div class="logo-container">
+        <img src="LOGO.png" alt="TCC.AI Logo" class="logo">
+    </div>
+    <h2 class="text-center mb-4">部門風險係數</h2>
+    
+    <div class="table-responsive">
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>部門</th>
+                    <th>風險指數(R值)</th>
+                </tr>
+            </thead>
+            <tbody id="risk-index-table-body">
+                <!-- 數據將通過JavaScript動態填充 -->
+                <tr>
+                    <td colspan="2" class="text-center">載入中...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <button class="btn btn-secondary mt-3" id="back-to-dashboard-from-risk">返回</button>
+</div>
+
+    
     <!-- 部門週期盤點頁面 -->
     <div id="inventory-section" class="inventory-section hidden">
         <div class="inventory-header">
@@ -787,6 +883,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         const loginSection = document.getElementById('login-section');
         const dashboardSection = document.getElementById('dashboard-section');
         const inventorySection = document.getElementById('inventory-section');
+        const deptRiskIndexPage = document.getElementById('dept-risk-index-page');
         const loginBtn = document.getElementById('login-btn');
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
@@ -805,12 +902,14 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         const inventoryTableBody = document.getElementById('inventory-table-body');
         const inventoryLoading = document.getElementById('inventory-loading');
         const inventoryContent = document.getElementById('inventory-content');
+        const deptRiskIndexBtn = document.getElementById('dept-risk-index-btn');
+        const backFromRiskBtn = document.getElementById('back-to-dashboard-from-risk');
         
         // 自動登出相關變數
         let inactivityTimer;
-        const inactivityTimeout = 10 * 60 * 1000; // 15分鐘，以毫秒為單位
+        const inactivityTimeout = 10 * 60 * 1000; // 10分鐘，以毫秒為單位
         
-               // 監控用戶活動的函數
+        // 監控用戶活動的函數
         function resetInactivityTimer() {
             // 清除現有計時器
             clearTimeout(inactivityTimer);
@@ -845,7 +944,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         });
         
         // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-        const scriptUrl = 'https://script.google.com/macros/s/AKfycbzZWj-Per8eT-uEfLpk4B1qYtQKQ9KGjYQUXThNtSoKAsvGsqR61L-7HmchCM9Ya33a/exec';
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbyV4KlaRgY-vybjonwh55yubfYWckvB1ak8WYp-Z94D57yiShReM5bPlMnl0k-JjHXE/exec';
         
         // 檢查是否已登入
         if (localStorage.getItem('isLoggedIn') === 'true') {
@@ -855,6 +954,74 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             showDashboard();
             // 初始化自動登出計時器
             resetInactivityTimer();
+        }
+
+        // 添加部門風險指數按鈕點擊事件
+        deptRiskIndexBtn.addEventListener('click', function() {
+            dashboardSection.style.display = 'none';
+            deptRiskIndexPage.style.display = 'block';
+            
+            // 載入風險指數數據
+            loadRiskIndexData();
+            
+            // 重置計時器
+            resetInactivityTimer();
+        });
+        
+        // 返回按鈕點擊事件
+        backFromRiskBtn.addEventListener('click', function() {
+            deptRiskIndexPage.style.display = 'none';
+            dashboardSection.style.display = 'block';
+            
+            // 重置計時器
+            resetInactivityTimer();
+        });
+        
+        // 載入風險指數數據的函數
+        function loadRiskIndexData() {
+            // 顯示載入中訊息
+            document.getElementById('risk-index-table-body').innerHTML = '<tr><td colspan="2" class="text-center">載入中...</td></tr>';
+            
+            // 調用後端API獲取數據
+            fetch(`${scriptUrl}?action=getDepartmentRiskIndex`)
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        // 更新表格
+                        updateRiskTable(result.data);
+                    } else {
+                        console.error('獲取數據失敗:', result.message);
+                        document.getElementById('risk-index-table-body').innerHTML = 
+                            '<tr><td colspan="2" class="text-center text-danger">獲取數據失敗: ' + result.message + '</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error('獲取數據失敗:', error);
+                    document.getElementById('risk-index-table-body').innerHTML = 
+                        '<tr><td colspan="2" class="text-center text-danger">獲取數據失敗</td></tr>';
+                });
+        }
+        
+        // 更新風險表格的函數
+        function updateRiskTable(riskData) {
+            const tableBody = document.getElementById('risk-index-table-body');
+            
+            if (riskData.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="2" class="text-center">本月無數據</td></tr>';
+                return;
+            }
+            
+            // 創建表格行
+            const rows = riskData.map(item => {
+                return `
+                    <tr>
+                        <td>${item.department}</td>
+                        <td>${item.riskIndex}</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            tableBody.innerHTML = rows;
         }
 
         // 一鍵全否按鈕點擊事件
@@ -1267,6 +1434,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         function showDashboard() {
             loginSection.classList.add('hidden');
             inventorySection.classList.add('hidden');
+            deptRiskIndexPage.style.display = 'none';
             document.querySelector('.container').classList.remove('hidden');
             dashboardSection.classList.remove('hidden');
             document.querySelector('.container').style.maxWidth = '500px';
@@ -1278,6 +1446,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         function showLogin() {
             dashboardSection.classList.add('hidden');
             inventorySection.classList.add('hidden');
+            deptRiskIndexPage.style.display = 'none';
             document.querySelector('.container').classList.remove('hidden');
             loginSection.classList.remove('hidden');
             usernameInput.value = '';
@@ -1292,6 +1461,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         function showInventorySection() {
             loginSection.classList.add('hidden');
             dashboardSection.classList.add('hidden');
+            deptRiskIndexPage.style.display = 'none';
             document.querySelector('.container').classList.add('hidden'); // 隱藏原容器
             inventorySection.classList.remove('hidden');
             // 重置計時器
