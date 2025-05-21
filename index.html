@@ -467,6 +467,25 @@
             border-color: rgba(0, 0, 0, 0.1);
         }
 
+                /* 行動裝置特定修正 */
+        @media (max-width: 767px) {
+            img[src*="LOGO.png"] {
+                position: relative;
+                left: 50%;
+                transform: translateX(-50%); /* 這個技巧可以確保完美置中 */
+                margin: 0; /* 重設可能的邊距 */
+            }
+            
+            /* 確保容器沒有額外的內邊距或邊距 */
+            .logo-container, div:has(> img[src*="LOGO.png"]) {
+                padding: 0;
+                margin: 0;
+                width: 100%;
+                position: relative;
+            }
+        }
+
+
         /* 風險項目樣式 */
         .risk-info {
             margin-bottom: 10px;
