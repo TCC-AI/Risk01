@@ -22,7 +22,7 @@
         .feature-btn { padding: 20px; font-size: 18px; font-weight: bold; }
         #inventory-btn { background-color: #34a853; }
         #inventory-btn:hover { background-color: #2d9249; }
-        #event-btn { background-color: #ea4335; }
+        #event-btn     { background-color: #ea4335; }
         #event-btn:hover { background-color: #d33426; }
         .hidden { display: none; }
         .loading { text-align: center; margin-top: 15px; }
@@ -83,21 +83,14 @@
 
         <!-- 主頁面 -->
         <div id="dashboard-section" class="dashboard hidden">
-            <!-- 使用者資訊區塊 -->
-            <div id="user-info" class="user-info">
-                歡迎： <strong id="user-department"></strong> - <strong id="user-name"></strong>
-            </div>
+            <div id="user-info" class="user-info">歡迎： <strong id="user-department"></strong> - <strong id="user-name"></strong></div>
             <h1>昶青實業-AI控制管理中心</h1>
             <div class="button-group">
                 <button id="inventory-btn" class="feature-btn">部門週期盤點</button>
                 <button id="event-btn" class="feature-btn">事件登錄</button>
             </div>
-
-            <!-- 登出下拉選單 -->
             <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle w-100 py-2" type="button" id="logoutDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    登出選項
-                </button>
+                <button class="btn btn-secondary dropdown-toggle w-100 py-2" type="button" id="logoutDropdown" data-bs-toggle="dropdown" aria-expanded="false">登出選項</button>
                 <ul class="dropdown-menu w-100" aria-labelledby="logoutDropdown">
                     <li><a class="dropdown-item" href="#" id="changePasswordBtn">更改密碼</a></li>
                     <li><a class="dropdown-item" href="#" id="logoutBtn">登出</a></li>
@@ -151,7 +144,7 @@
                 <thead>
                     <tr>
                         <th style="width:40%">風險項目</th>
-                        <th style="width:20%">本月是否增加 <button id="select-none-btn" style="margin-left:8px;padding:4px 8px;font-size:12px;">一鍵全否</button></th>
+                        <th style="width:20%">本月是否增加 <button id="select-none-btn" class="btn btn-sm btn-outline-secondary">一鍵全否</button></th>
                         <th style="width:15%">發生次數</th>
                         <th style="width:25%">原因</th>
                     </tr>
@@ -165,7 +158,7 @@
         </div>
     </div>
 
-    <!-- 必要的 Bootstrap JS 和 Popper.js -->
+    <!-- 新增 Bootstrap JS 和 Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
@@ -237,185 +230,128 @@
             }
             errorMessage.textContent = ''; loadingMsg.classList.remove('hidden'); loginBtn.disabled = true;
             fetch(`${scriptUrl}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
-                .then(res => res.json())
-                .then(data => {
-                    loadingMsg.classList.add('hidden'); loginBtn.disabled = false;
-                    if (data.success) {
-                        localStorage.setItem('isLoggedIn','true');
-                        localStorage.setItem('username',username);
-                        localStorage.setItem('department',data.department||'');
-                        localStorage.setItem('name',data.name||'');
-                        userDepartment.textContent = data.department||'';
-                        userName.textContent = data.name||'';
-                        showDashboard(); resetInactivityTimer();
-                    } else {
-                        errorMessage.textContent = data.message||'帳號或密碼錯誤';
-                    }
-                })
-                .catch(error => {
-                    loadingMsg.classList.add('hidden'); loginBtn.disabled = false;
-                    errorMessage.textContent = '系統錯誤，請稍後再試'; console.error(error);
-                });
+            .then(response => response.json())
+            .then(data => {
+                loadingMsg.classList.add('hidden'); loginBtn.disabled = false;
+                if (data.success) {
+                    localStorage.setItem('isLoggedIn','true');
+                    localStorage.setItem('username',username);
+                    localStorage.setItem('department',data.department||'');
+                    localStorage.setItem('name',data.name||'');
+                    userDepartment.textContent = data.department||'';
+                    userName.textContent = data.name||'';
+                    showDashboard(); resetInactivityTimer();
+                } else {
+                    errorMessage.textContent = data.message|| '帳號或密碼錯誤';
+                }
+            })
+            .catch(error => {
+                loadingMsg.classList.add('hidden'); loginBtn.disabled = false;
+                errorMessage.textContent = '系統錯誤，請稍後再試'; console.error(error);
+            });
         });
 
         inventoryBtn.addEventListener('click', function() { showInventorySection(); loadInventoryData(); resetInactivityTimer(); });
         backBtn.addEventListener('click', function() { showDashboard(); resetInactivityTimer(); });
 
         function loadInventoryData() {
-            const dept = localStorage.getItem('department');
-            if (!dept) { alert('無法獲取部門資訊，請重新登入'); showLogin(); return; }
+            const department = localStorage.getItem('department');
+            if (!department) { alert('無法獲取部門資訊，請重新登入'); showLogin(); return; }
             inventoryLoading.classList.remove('hidden'); inventoryContent.classList.add('hidden'); inventoryTableBody.innerHTML = '';
-            fetch(`${scriptUrl}?action=getRiskItems&department=${encodeURIComponent(dept)}`)
-                .then(res => res.json())
-                .then(data => {
-                    inventoryLoading.classList.add('hidden');
-                    if (data.success) { renderRiskItems(data.items); inventoryContent.classList.remove('hidden'); }
-                    else { alert(data.message|| '無法獲取風險清單'); }
-                    resetInactivityTimer();
-                })
-                .catch(err => { inventoryLoading.classList.add('hidden'); alert('系統錯誤，請稍後再試'); console.error(err); });
+            fetch(`${scriptUrl}?action=getRiskItems&department=${encodeURIComponent(department)}`)
+            .then(response => response.json())
+            .then(data => {
+                inventoryLoading.classList.add('hidden');
+                if (data.success) { renderRiskItems(data.items); inventoryContent.classList.remove('hidden'); }
+                else { alert(data.message|| '無法獲取風險清單'); }
+                resetInactivityTimer();
+            })
+            .catch(error => { inventoryLoading.classList.add('hidden'); alert('系統錯誤，請稍後再試'); console.error(error); });
         }
 
         function renderRiskItems(items) {
             inventoryTableBody.innerHTML = '';
-            if (items.length === 0) {
-                const tr = document.createElement('tr'); tr.innerHTML = '<td colspan="4" style="text-align:center;">沒有風險項目</td>';
-                inventoryTableBody.appendChild(tr); return;
+            if (!items.length) {
+                inventoryTableBody.innerHTML = '<tr><td colspan="4" class="text-center">沒有風險項目</td></tr>';
+                return;
             }
-            items.forEach((item, idx) => {
-                const tr = document.createElement('tr'); tr.setAttribute('data-risk-id', idx);
+            items.forEach((item, index) => {
+                const tr = document.createElement('tr'); tr.setAttribute('data-risk-id', index);
                 tr.innerHTML = `
                     <td>
                         <div class="risk-info">
-                            <div class="risk-name">\${item.name}</div>
-                            <div class="risk-description">\${item.description}</div>
-                            <div class="risk-category">類別: \${item.category}</div>
-                            <div class="risk-level">風險等級: \${item.level}</div>
-                            <div class="related-departments">相關聯部門: \${item.relatedDepartments}</div>
+                            <div class="risk-name">${item.name}</div>
+                            <div class="risk-description">${item.description}</div>
+                            <div class="risk-category">類別: ${item.category}</div>
+                            <div class="risk-level">風險等級: ${item.level}</div>
+                            <div class="related-departments">相關聯部門: ${item.relatedDepartments}</div>
                         </div>
                     </td>
                     <td>
                         <div class="select-container">
-                            <select class="increase-select" data-index="\${idx}">
+                            <select class="increase-select form-select form-select-sm" data-index="${index}">
                                 <option value="">請選擇</option>
                                 <option value="yes">是</option>
                                 <option value="no">否</option>
                             </select>
                         </div>
                     </td>
-                    <td>
-                        <div class="input-container">
-                            <input type="number" class="occurrence-input" data-index="\${idx}" min="0" disabled>
-                        </div>
-                    </td>
-                    <td>
-                        <div class="input-container">
-                            <input type="text" class="reason-input" data-index="\${idx}" disabled>
-                        </div>
-                    </td>
+                    <td><input type="number" class="occurrence-input form-control form-control-sm" data-index="${index}" disabled></td>
+                    <td><input type="text" class="reason-input form-control form-control-sm" data-index="${index}" disabled></td>
                 `;
                 inventoryTableBody.appendChild(tr);
             });
             document.querySelectorAll('.increase-select').forEach(select => {
                 select.addEventListener('change', function() {
-                    const i = this.getAttribute('data-index');
-                    const occ = document.querySelector(`.occurrence-input[data-index="${i}"]`);
-                    const rea = document.querySelector(`.reason-input[data-index="${i}"]`);
+                    const idx = this.dataset.index;
+                    const occ = document.querySelector(`.occurrence-input[data-index='${idx}']`);
+                    const rea = document.querySelector(`.reason-input[data-index='${idx}']`);
                     if (this.value === 'yes') { occ.disabled = false; rea.disabled = false; occ.required=true; rea.required=true; }
                     else { occ.disabled=true; rea.disabled=true; occ.required=false; rea.required=false; occ.value=''; rea.value=''; }
-                    resetInactivityTimer();
                 });
             });
         }
 
+        // 一鍵全否
         selectNoneBtn.addEventListener('click', function() {
-            document.querySelectorAll('.increase-select').forEach(select => {
-                select.value = 'no'; select.dispatchEvent(new Event('change')); });
-            resetInactivityTimer();
+            document.querySelectorAll('.increase-select').forEach(sel => { sel.value='no'; sel.dispatchEvent(new Event('change')); });
         });
 
         submitInventoryBtn.addEventListener('click', function() {
-            let isValid = true; const responses = [];
+            let isValid=true; const responses=[];
             document.querySelectorAll('.increase-select').forEach(select => {
-                const i = select.getAttribute('data-index');
-                const occ = document.querySelector(`.occurrence-input[data-index="${i}"]`);
-                const rea = document.querySelector(`.reason-input[data-index="${i}"]`);
-                const row = document.querySelector(`tr[data-risk-id="${i}"]`);
-                const riskName = row.querySelector('.risk-name').textContent;
-                const riskDescription = row.querySelector('.risk-description').textContent;
-                const riskCategory = row.querySelector('.risk-category').textContent.replace('類別: ', '');
-                const riskLevel = row.querySelector('.risk-level').textContent.replace('風險等級: ', '');
-                const relatedDepartments = row.querySelector('.related-departments').textContent.replace('相關聯部門: ', '');
-                if (select.value === '') { isValid=false; select.style.borderColor='red'; }
+                const idx=select.dataset.index;
+                const occ=document.querySelector(`.occurrence-input[data-index='${idx}']`);
+                const rea=document.querySelector(`.reason-input[data-index='${idx}']`);
+                const row=document.querySelector(`tr[data-risk-id='${idx}']`);
+                const riskName=row.querySelector('.risk-name').textContent;
+                const riskDescription=row.querySelector('.risk-description').textContent;
+                const riskCategory=row.querySelector('.risk-category').textContent.replace('類別: ','');
+                const riskLevel=row.querySelector('.risk-level').textContent.replace('風險等級: ','');
+                const relatedDepartments=row.querySelector('.related-departments').textContent.replace('相關聯部門: ','');
+                if(select.value===''){ isValid=false; select.style.borderColor='red'; }
                 else {
                     select.style.borderColor='';
-                    if (select.value==='yes') {
-                        if (!occ.value) { isValid=false; occ.style.borderColor='red'; } else occ.style.borderColor='';
-                        if (!rea.value) { isValid=false; rea.style.borderColor='red'; } else rea.style.borderColor='';
-                    }
-                    responses.push({ index:i, riskName, riskDescription, riskCategory, riskLevel, relatedDepartments, increased: select.value==='yes', occurrences: select.value==='yes'?occ.value:0, reason: select.value==='yes'?rea.value:'' });
+                    if(select.value==='yes'){ if(!occ.value){ isValid=false; occ.style.borderColor='red'; } else occ.style.borderColor=''; if(!rea.value){ isValid=false; rea.style.borderColor='red'; } else rea.style.borderColor=''; }
+                    responses.push({ index:idx, riskName, riskDescription, riskCategory, riskLevel, relatedDepartments, increased:select.value==='yes', occurrences:select.value==='yes'?occ.value:0, reason:select.value==='yes'?rea.value:'' });
                 }
             });
-            if (!isValid) { alert('請填寫所有必填欄位'); return; }
-            const department = localStorage.getItem('department');
-            const username = localStorage.getItem('username');
-            const name = localStorage.getItem('name');
-            const currentTime = new Date().toISOString();
+            if(!isValid){ alert('請填寫所有必填欄位'); return; }
+            const dept=localStorage.getItem('department'); const user=localStorage.getItem('username'); const name=localStorage.getItem('name');
+            const now=new Date().toISOString();
             submitInventoryBtn.disabled=true; submitInventoryBtn.textContent='送出中...';
-            fetch(`${scriptUrl}?action=submitInventory`, {
-                method:'POST',
-                body: JSON.stringify({ timestamp:currentTime, department, username, name, responses, sheetName:'定期紀錄' })
-            })
-            .then(res=>res.json())
-            .then(data=>{
-                submitInventoryBtn.disabled=false; submitInventoryBtn.textContent='送出';
-                if (data.success) { alert('部門週期盤點已成功送出'); showDashboard(); }
-                else { alert(data.message||'送出失敗，請稍後再試'); }
-                resetInactivityTimer();
-            })
-            .catch(err=>{
-                submitInventoryBtn.disabled=false; submitInventoryBtn.textContent='送出';
-                alert('系統錯誤，請稍後再試'); console.error(err);
-            });
+            fetch(`${scriptUrl}?action=submitInventory`,{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ timestamp:now, department:dept, username:user, name:name, responses:responses, sheetName:'定期紀錄' }) })
+            .then(r=>r.json()).then(data=>{ submitInventoryBtn.disabled=false; submitInventoryBtn.textContent='送出'; if(data.success){ alert('部門週期盤點已成功送出'); showDashboard(); } else{ alert(data.message||'送出失敗，請稍後再試'); } resetInactivityTimer(); }).catch(err=>{ submitInventoryBtn.disabled=false; submitInventoryBtn.textContent='送出'; alert('系統錯誤，請稍後再試'); console.error(err); });
         });
 
         resetInventoryBtn.addEventListener('click', function() {
-            document.querySelectorAll('.increase-select').forEach(select => {
-                select.value=''; select.style.borderColor=''; const i=select.getAttribute('data-index');
-                const occ=document.querySelector(`.occurrence-input[data-index="${i}"]`);
-                const rea=document.querySelector(`.reason-input[data-index="${i}"]`);
-                occ.value=''; occ.disabled=true; occ.style.borderColor=''; rea.value=''; rea.disabled=true; rea.style.borderColor='';
-            }); resetInactivityTimer();
+            document.querySelectorAll('.increase-select').forEach(select => { select.value=''; select.style.borderColor=''; const idx=select.dataset.index; const occ=document.querySelector(`.occurrence-input[data-index='${idx}']`); const rea=document.querySelector(`.reason-input[data-index='${idx}']`); occ.value=''; occ.disabled=true; occ.style.borderColor=''; rea.value=''; rea.disabled=true; rea.style.borderColor=''; }); resetInactivityTimer();
         });
 
         eventBtn.addEventListener('click', function() { alert('將導向事件登錄功能'); resetInactivityTimer(); });
         logoutBtn.addEventListener('click', function() { localStorage.clear(); clearTimeout(inactivityTimer); showLogin(); });
-        changePasswordBtn.addEventListener('click', function() {
-            document.getElementById('changePasswordForm').reset();
-            document.getElementById('passwordChangeMessage').style.display='none';
-            new bootstrap.Modal(document.getElementById('changePasswordModal')).show();
-            resetInactivityTimer();
-        });
-        submitChangePasswordBtn.addEventListener('click', function() {
-            const cur=document.getElementById('currentPassword').value;
-            const nw=document.getElementById('newPassword').value;
-            const cf=document.getElementById('confirmPassword').value;
-            const msg=document.getElementById('passwordChangeMessage');
-            if (nw!==cf) { msg.className='alert alert-danger'; msg.textContent='新密碼與確認密碼不一致！'; msg.style.display='block'; return; }
-            const user=localStorage.getItem('username');
-            fetch(`${scriptUrl}?action=changePassword&username=${encodeURIComponent(user)}&currentPassword=${encodeURIComponent(cur)}&newPassword=${encodeURIComponent(nw)}`)
-                .then(res=>res.json())
-                .then(data=>{
-                    if (data.success) {
-                        msg.className='alert alert-success'; msg.textContent='密碼更改成功！'; msg.style.display='block';
-                        setTimeout(()=>{ bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide(); document.getElementById('changePasswordForm').reset(); msg.style.display='none'; },3000);
-                    } else {
-                        msg.className='alert alert-danger'; msg.textContent=data.message||'密碼更改失敗！'; msg.style.display='block';
-                    }
-                    resetInactivityTimer();
-                })
-                .catch(err=>{ msg.className='alert alert-danger'; msg.textContent='系統錯誤，請稍後再試'; msg.style.display='block'; console.error(err); });
-        });
+        changePasswordBtn.addEventListener('click', function() { document.getElementById('changePasswordForm').reset(); document.getElementById('passwordChangeMessage').style.display='none'; new bootstrap.Modal(document.getElementById('changePasswordModal')).show(); resetInactivityTimer(); });
+        submitChangePasswordBtn.addEventListener('click', function() { const cur=document.getElementById('currentPassword').value; const nw=document.getElementById('newPassword').value; const cf=document.getElementById('confirmPassword').value; const msg=document.getElementById('passwordChangeMessage'); if(nw!==cf){ msg.className='alert alert-danger'; msg.textContent='新密碼與確認密碼不一致！'; msg.style.display='block'; return; } fetch(`${scriptUrl}?action=changePassword&username=${encodeURIComponent(localStorage.getItem('username'))}&currentPassword=${encodeURIComponent(cur)}&newPassword=${encodeURIComponent(nw)}`) .then(r=>r.json()).then(data=>{ if(data.success){ msg.className='alert alert-success'; msg.textContent='密碼更改成功！'; msg.style.display='block'; setTimeout(() =>{ bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide(); document.getElementById('changePasswordForm').reset(); msg.style.display='none'; }, 3000); } else{ msg.className='alert alert-danger'; msg.textContent=data.message||'密碼更改失敗！'; msg.style.display='block'; } resetInactivityTimer(); }).catch(err=>{ msg.className='alert alert-danger'; msg.textContent='系統錯誤，請稍後再試'; msg.style.display='block'; console.error(err); }); });
 
         function showDashboard(){ loginSection.classList.add('hidden'); inventorySection.classList.add('hidden'); document.querySelector('.container').classList.remove('hidden'); dashboardSection.classList.remove('hidden'); document.querySelector('.container').style.maxWidth='500px'; resetInactivityTimer(); }
         function showLogin(){ dashboardSection.classList.add('hidden'); inventorySection.classList.add('hidden'); document.querySelector('.container').classList.remove('hidden'); loginSection.classList.remove('hidden'); usernameInput.value=''; passwordInput.value=''; errorMessage.textContent=''; document.querySelector('.container').style.maxWidth='500px'; clearTimeout(inactivityTimer); }
