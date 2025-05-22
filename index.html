@@ -1513,13 +1513,8 @@ function updateRiskTable(riskData) {
     localStorage.removeItem('userInfo');
     sessionStorage.removeItem('userInfo');
     
-    // 清除歡迎訊息
-    document.querySelector('.welcome-message').textContent = '';
-    // 或完全隱藏該元素
-    document.querySelector('.welcome-message').style.display = 'none';
-    
-    // 重定向到登入頁面
-    window.location.href = 'login.html';
+    // 強制重新載入頁面，而不是從快取載入
+    window.location.href = 'login.html?t=' + new Date().getTime();
 }
 
     </script>
