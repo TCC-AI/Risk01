@@ -1043,9 +1043,9 @@ function updateRiskTable(riskData) {
         
         // 根據風險係數決定燈號
         let lightIcon = '';
-        if (riskValue <= 20) {
+        if (riskValue <= 15) {
             lightIcon = '<span class="risk-light green-light">●</span>'; // 綠燈
-        } else if (riskValue <= 40) {
+        } else if (riskValue <= 30) {
             lightIcon = '<span class="risk-light yellow-light">●</span>'; // 黃燈
         } else {
             lightIcon = '<span class="risk-light red-light">●</span>'; // 紅燈
