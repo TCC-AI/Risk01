@@ -1,3 +1,8 @@
+# 修改後的完整程式碼
+
+## 前端程式碼 (HTML/JavaScript)
+
+```html
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -807,7 +812,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                         <h5 class="modal-title" id="changePasswordModalLabel">更改密碼</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
+                                        <div class="modal-body">
                         <form id="changePasswordForm">
                             <div class="mb-3">
                                 <label for="currentPassword" class="form-label">目前密碼</label>
@@ -824,7 +829,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                             <div id="passwordChangeMessage" class="alert" style="display: none;"></div>
                         </form>
                     </div>
-                                        <div class="modal-footer">
+                    <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
                         <button type="button" class="btn btn-primary" id="submitChangePassword">確認更改</button>
                     </div>
@@ -968,7 +973,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         });
         
         // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-        const scriptUrl = 'https://script.google.com/macros/s/AKfycbwXkfv5_IJ2vodqhvXIEE9PSvLkSsJ0pWcZ_u9bmeytJPXluicSjrBBzs9rW7irdLni/exec';
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbw59qaT8cEKwPd6tWs6wBTf6sq71hdTgU3NrjETNFNteQF86ll3HnhwWJ_SUE5rZVFF/exec';
         
         // 檢查是否已登入
         if (localStorage.getItem('isLoggedIn') === 'true') {
@@ -1396,14 +1401,34 @@ function updateRiskTable(riskData) {
         
         // 登出按鈕點擊事件
         logoutBtn.addEventListener('click', function() {
+            // 先呼叫後端 API
+            fetch(`${scriptUrl}?action=logout&username=${encodeURIComponent(localStorage.getItem('username') || '')}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('登出回應:', data);
+                    // 無論後端回應如何，都執行本地登出
+                    performLocalLogout();
+                })
+                .catch(error => {
+                    console.error('登出錯誤:', error);
+                    // 發生錯誤時也執行本地登出
+                    performLocalLogout();
+                });
+        });
+
+        // 本地登出處理
+        function performLocalLogout() {
             localStorage.removeItem('isLoggedIn');
             localStorage.removeItem('username');
             localStorage.removeItem('department');
             localStorage.removeItem('name');
+            sessionStorage.clear();
+            
             // 清除自動登出計時器
             clearTimeout(inactivityTimer);
+            
             showLogin();
-        });
+        }
         
         // 更改密碼按鈕點擊事件
         changePasswordBtn.addEventListener('click', function() {
@@ -1496,7 +1521,7 @@ function updateRiskTable(riskData) {
             clearTimeout(inactivityTimer);
         }
         
-        // 顯示部門週期盤點頁面
+                // 顯示部門週期盤點頁面
         function showInventorySection() {
             loginSection.classList.add('hidden');
             dashboardSection.classList.add('hidden');
@@ -1507,34 +1532,6 @@ function updateRiskTable(riskData) {
             resetInactivityTimer();
         }
     });
-
-        function logout() {
-    // 清除所有用戶相關的狀態
-    localStorage.removeItem('userInfo');
-    sessionStorage.removeItem('userInfo');
-    
-    // 強制重新載入頁面，而不是從快取載入
-    window.location.href = 'login.html?t=' + new Date().getTime();
-}
-        // 在登入頁面的 document.ready 或 window.onload 中
-window.onload = function() {
-    // 確保登入頁面載入時清除所有用戶狀態
-    localStorage.removeItem('userInfo');
-    sessionStorage.removeItem('userInfo');
-    
-    // 隱藏或清空歡迎訊息
-    const welcomeElement = document.querySelector('.welcome-message');
-    if (welcomeElement) {
-        welcomeElement.style.display = 'none';
-        welcomeElement.textContent = '';
-    }
-    
-    // 重置登入表單
-    document.getElementById('login-form').reset();
-}
-
-
     </script>
 </body>
 </html>
-
