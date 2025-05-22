@@ -1397,40 +1397,30 @@ function updateRiskTable(riskData) {
             resetInactivityTimer();
         });
         
-        / 登出按鈕點擊事件
-logoutBtn.addEventListener('click', function() {
-    // 立即執行本地登出
-    performLocalLogout();
-    
-    // 在背景發送登出請求到後端
-    const username = localStorage.getItem('username') || '';
-    fetch(`${apiUrl}?action=logout&username=${encodeURIComponent(username)}`)
-        .then(response => response.json())
-        .catch(error => console.error('登出請求失敗:', error));
-});
+        // 登出按鈕點擊事件
+        logoutBtn.addEventListener('click', function() {
+            // 先呼叫後端 API
+            fetch(`${scriptUrl}?action=logout&username=${encodeURIComponent(localStorage.getItem('username') || '')}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('登出回應:', data);
+                    // 無論後端回應如何，都執行本地登出
+                    performLocalLogout();
+                })
+                .catch(error => {
+                    console.error('登出錯誤:', error);
+                    // 發生錯誤時也執行本地登出
+                    performLocalLogout();
+                });
+        });
 
-// 本地登出函數
-function performLocalLogout() {
-    // 清除本地儲存的登入資訊
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('username');
-    localStorage.removeItem('department');
-    localStorage.removeItem('name');
-    
-    // 顯示登入頁面，隱藏其他頁面
-    loginSection.classList.remove('hidden');
-    dashboardSection.classList.add('hidden');
-    inventorySection.classList.add('hidden');
-    deptRiskIndexPage.style.display = 'none';
-    document.querySelector('.container').classList.remove('hidden');
-    
-    // 清空登入表單
-    document.getElementById('username').value = '';
-    document.getElementById('password').value = '';
-    
-    // 停止計時器
-    clearTimeout(inactivityTimeout);
-}
+        // 本地登出處理
+        function performLocalLogout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('username');
+            localStorage.removeItem('department');
+            localStorage.removeItem('name');
+            sessionStorage.clear();
             
             // 清除自動登出計時器
             clearTimeout(inactivityTimer);
