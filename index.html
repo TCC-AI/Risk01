@@ -1041,7 +1041,7 @@ function updateRiskTable(riskData) {
         // 解析風險係數值（去除 "R" 後綴）
         const riskValue = parseInt(item.riskIndex.replace('R', '')) || 0;
         
-        // 根據風險係數決定燈號
+        // 根據風險係數決定燈號(調整燈號)
         let lightIcon = '';
         if (riskValue <= 15) {
             lightIcon = '<span class="risk-light green-light">●</span>'; // 綠燈
@@ -1507,6 +1507,21 @@ function updateRiskTable(riskData) {
             resetInactivityTimer();
         }
     });
+
+        function logout() {
+    // 清除所有用戶相關的狀態
+    localStorage.removeItem('userInfo');
+    sessionStorage.removeItem('userInfo');
+    
+    // 清除歡迎訊息
+    document.querySelector('.welcome-message').textContent = '';
+    // 或完全隱藏該元素
+    document.querySelector('.welcome-message').style.display = 'none';
+    
+    // 重定向到登入頁面
+    window.location.href = 'login.html';
+}
+
     </script>
 </body>
 </html>
