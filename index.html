@@ -997,6 +997,8 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         backFromRiskBtn.addEventListener('click', function() {
             deptRiskIndexPage.style.display = 'none';
             dashboardSection.style.display = 'block';
+            // 強制重新整理頁面
+    window.location.reload();
             
             // 重置計時器
             resetInactivityTimer();
