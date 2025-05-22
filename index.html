@@ -374,6 +374,30 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     }
 }
 
+        /* 風險燈號樣式 */
+.risk-light {
+    display: inline-block;
+    font-size: 20px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.green-light {
+    color: #34a853;
+    text-shadow: 0 0 5px rgba(52, 168, 83, 0.7);
+}
+
+.yellow-light {
+    color: #fbbc05;
+    text-shadow: 0 0 5px rgba(251, 188, 5, 0.7);
+}
+
+.red-light {
+    color: #ea4335;
+    text-shadow: 0 0 5px rgba(234, 67, 53, 0.7);
+}
+
+
         
         
         /* 部門週期盤點頁面樣式 */
@@ -1003,26 +1027,41 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         }
         
         // 更新風險表格的函數
-        function updateRiskTable(riskData) {
-            const tableBody = document.getElementById('risk-index-table-body');
-            
-            if (riskData.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="2" class="text-center">無數據</td></tr>';
-                return;
-            }
-            
-            // 創建表格行
-            const rows = riskData.map(item => {
-                return `
-                    <tr>
-                        <td>${item.department}</td>
-                        <td>${item.riskIndex}</td>
-                    </tr>
-                `;
-            }).join('');
-            
-            tableBody.innerHTML = rows;
+       // 更新風險表格的函數
+function updateRiskTable(riskData) {
+    const tableBody = document.getElementById('risk-index-table-body');
+    
+    if (riskData.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="2" class="text-center">無數據</td></tr>';
+        return;
+    }
+    
+    // 創建表格行
+    const rows = riskData.map(item => {
+        // 解析風險係數值（去除 "R" 後綴）
+        const riskValue = parseInt(item.riskIndex.replace('R', '')) || 0;
+        
+        // 根據風險係數決定燈號
+        let lightIcon = '';
+        if (riskValue <= 20) {
+            lightIcon = '<span class="risk-light green-light">●</span>'; // 綠燈
+        } else if (riskValue <= 40) {
+            lightIcon = '<span class="risk-light yellow-light">●</span>'; // 黃燈
+        } else {
+            lightIcon = '<span class="risk-light red-light">●</span>'; // 紅燈
         }
+        
+        return `
+            <tr>
+                <td>${lightIcon} ${item.department}</td>
+                <td>${item.riskIndex}</td>
+            </tr>
+        `;
+    }).join('');
+    
+    tableBody.innerHTML = rows;
+}
+
 
         // 一鍵全否按鈕點擊事件
         const allNoBtn = document.getElementById('all-no-btn');
