@@ -866,7 +866,6 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                 padding: 15px;
                 font-size: 16px;
             }
-            
                         .inventory-table th, .inventory-table td {
                 padding: 8px;
                 font-size: 13px;
@@ -922,7 +921,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             </div>
             <h1>昶青實業<br>【AI企業風控中心】</h1>
             <div class="button-group">
-                 <button class="feature-btn" id="dept-risk-index-btn" style="background: linear-gradient(to right, #1a6fc4, #34c3aa);">部門風險係數</button>
+                <button class="feature-btn" id="dept-risk-index-btn" style="background: linear-gradient(to right, #1a6fc4, #34c3aa);">部門風險係數</button>
                 <button id="inventory-btn" class="feature-btn">部門週期盤點</button>
                 <button id="event-btn" class="feature-btn">事件登錄</button>
                 <button id="notification-btn" class="feature-btn">通知管理</button>
@@ -1144,6 +1143,9 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         // 通知檢查計時器
         let notificationCheckTimer;
         
+        // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbz_OFTMUBWdL9AJtP8r36lgIi0Y450pDNBaw-9JhxEAK1ihzuomnATlXRWdLvxSDG9c/exec';
+        
         // 監控用戶活動的函數
         function resetInactivityTimer() {
             // 清除現有計時器
@@ -1178,9 +1180,6 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             document.addEventListener(event, resetInactivityTimer, true);
         });
         
-        // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-        const scriptUrl = 'https://script.google.com/macros/s/AKfycby_NwSpFGOAMdnrQKw406veLwblwtVZr_ukoP2TzFpk2gNGhe4w66CMR-XYWuATXLxu/exec';
-        
         // 檢查是否已登入
         if (localStorage.getItem('isLoggedIn') === 'true') {
             // 顯示使用者資訊
@@ -1189,10 +1188,9 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             showDashboard();
             // 初始化自動登出計時器
             resetInactivityTimer();
-            // 載入通知設定和開始通知檢查
+            // 載入通知設定並開始檢查
             loadNotificationSettings();
             startNotificationCheck();
-            updateNotificationBadge();
         }
 
         // 通知管理功能
@@ -1538,60 +1536,54 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                 });
         }
         
-                // 更新風險係數表格的函數
+                // 更新風險表格的函數
         function updateRiskTable(data) {
-            // 清空表格內容
-            const tableBody = document.getElementById('risk-index-table-body');
-            tableBody.innerHTML = '';
+            let tableHtml = '';
             
-            // 如果沒有數據
-            if (!data || data.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="2" class="text-center">無數據</td></tr>';
-                return;
-            }
-            
-            // 填充表格數據
-            data.forEach(row => {
-                const tr = document.createElement('tr');
-                
-                // 部門名稱
-                const tdDept = document.createElement('td');
-                tdDept.textContent = row.department;
-                tr.appendChild(tdDept);
-                
-                // 風險係數（R值）和風險燈號
-                const tdRisk = document.createElement('td');
-                
-                // 根據R值決定風險燈號
+            // 遍歷數據並生成表格行
+            data.forEach(item => {
+                // 根據風險係數確定風險等級和對應的燈號
                 let riskLight = '';
-                if (row.riskIndex <= 20) {
-                    riskLight = '<span class="risk-light green-light">●</span>';
-                } else if (row.riskIndex <= 40) {
+                if (item.riskIndex >= 40) {
+                    riskLight = '<span class="risk-light red-light">●</span>';
+                } else if (item.riskIndex >= 30) {
                     riskLight = '<span class="risk-light yellow-light">●</span>';
                 } else {
-                    riskLight = '<span class="risk-light red-light">●</span>';
+                    riskLight = '<span class="risk-light green-light">●</span>';
                 }
                 
-                tdRisk.innerHTML = riskLight + row.riskIndex;
-                tr.appendChild(tdRisk);
-                
-                tableBody.appendChild(tr);
+                tableHtml += `
+                    <tr>
+                        <td>${item.department}</td>
+                        <td>${riskLight} ${item.riskIndex}</td>
+                    </tr>
+                `;
             });
+            
+            // 如果沒有數據，顯示提示訊息
+            if (data.length === 0) {
+                tableHtml = '<tr><td colspan="2" class="text-center">沒有可用的風險係數數據</td></tr>';
+            }
+            
+            // 更新表格內容
+            document.getElementById('risk-index-table-body').innerHTML = tableHtml;
         }
         
-        // 處理登入按鈕點擊事件
+        // 登入按鈕點擊事件
         loginBtn.addEventListener('click', function() {
             const username = usernameInput.value.trim();
             const password = passwordInput.value.trim();
             
-            // 簡單的前端驗證
+            // 檢查是否輸入了帳號和密碼
             if (!username || !password) {
                 errorMessage.textContent = '請輸入帳號和密碼';
                 return;
             }
             
-            // 顯示載入中訊息
+            // 清除錯誤訊息
             errorMessage.textContent = '';
+            
+            // 顯示載入訊息
             loadingMsg.classList.remove('hidden');
             loginBtn.disabled = true;
             
@@ -1599,11 +1591,12 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             fetch(`${scriptUrl}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
                 .then(response => response.json())
                 .then(result => {
+                    // 隱藏載入訊息
                     loadingMsg.classList.add('hidden');
                     loginBtn.disabled = false;
                     
                     if (result.success) {
-                        // 登入成功，保存用戶資訊
+                        // 登入成功
                         localStorage.setItem('isLoggedIn', 'true');
                         localStorage.setItem('username', username);
                         localStorage.setItem('department', result.department);
@@ -1613,30 +1606,259 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                         userDepartment.textContent = result.department;
                         userName.textContent = result.name;
                         
-                        // 顯示主頁面
+                        // 顯示儀表板
                         showDashboard();
                         
                         // 初始化自動登出計時器
                         resetInactivityTimer();
                         
-                        // 載入通知設定和開始通知檢查
+                        // 載入通知設定並開始檢查
                         loadNotificationSettings();
                         startNotificationCheck();
                         updateNotificationBadge();
                     } else {
                         // 登入失敗
-                        errorMessage.textContent = result.message || '登入失敗，請檢查帳號和密碼';
+                        errorMessage.textContent = result.message || '帳號或密碼錯誤';
                     }
                 })
                 .catch(error => {
-                    console.error('登入失敗:', error);
-                    errorMessage.textContent = '登入過程中發生錯誤，請稍後再試';
+                    console.error('登入錯誤:', error);
                     loadingMsg.classList.add('hidden');
                     loginBtn.disabled = false;
+                    errorMessage.textContent = '登入時發生錯誤，請稍後再試';
                 });
         });
         
-        // 處理登出按鈕點擊事件
+        // 部門週期盤點按鈕點擊事件
+        inventoryBtn.addEventListener('click', function() {
+            // 隱藏儀表板，顯示盤點頁面
+            dashboardSection.classList.add('hidden');
+            inventorySection.classList.remove('hidden');
+            
+            // 顯示載入中
+            inventoryLoading.classList.remove('hidden');
+            inventoryContent.classList.add('hidden');
+            
+            // 獲取部門風險項目
+            loadDepartmentRisks();
+            
+            // 重置計時器
+            resetInactivityTimer();
+        });
+        
+        // 事件登錄按鈕點擊事件
+        eventBtn.addEventListener('click', function() {
+            alert('事件登錄功能即將推出，敬請期待！');
+            // 重置計時器
+            resetInactivityTimer();
+        });
+        
+        // 返回按鈕點擊事件
+        backBtn.addEventListener('click', function() {
+            // 隱藏盤點頁面，顯示儀表板
+            inventorySection.classList.add('hidden');
+            dashboardSection.classList.remove('hidden');
+            // 強制重新整理頁面
+            window.location.reload();
+            
+            // 重置計時器
+            resetInactivityTimer();
+        });
+        
+        // 一鍵全否按鈕點擊事件
+        document.getElementById('all-no-btn').addEventListener('click', function() {
+            // 獲取所有的增加風險選項，並設置為"否"
+            const selectElements = document.querySelectorAll('.risk-increase-select');
+            selectElements.forEach(select => {
+                select.value = 'no';
+                // 觸發 change 事件
+                const event = new Event('change');
+                select.dispatchEvent(event);
+            });
+            
+            // 重置計時器
+            resetInactivityTimer();
+        });
+        
+        // 送出盤點按鈕點擊事件
+        submitInventoryBtn.addEventListener('click', function() {
+            // 收集盤點數據
+            const inventoryData = [];
+            
+            const rows = document.querySelectorAll('#inventory-table-body tr');
+            rows.forEach(row => {
+                const riskId = row.getAttribute('data-risk-id');
+                const increaseSelect = row.querySelector('.risk-increase-select');
+                const countInput = row.querySelector('.risk-count-input');
+                const reasonInput = row.querySelector('.risk-reason-input');
+                
+                // 只有當選擇了"是"時才需要填寫次數和原因
+                if (increaseSelect.value === 'yes') {
+                    // 驗證次數和原因是否已填寫
+                    if (!countInput.value.trim() || !reasonInput.value.trim()) {
+                        alert('請填寫所有選擇"是"的風險項目的發生次數和原因');
+                        return;
+                    }
+                    
+                    // 驗證次數是否為正整數
+                    const count = parseInt(countInput.value.trim());
+                    if (isNaN(count) || count <= 0) {
+                        alert('發生次數必須為正整數');
+                        return;
+                    }
+                }
+                
+                inventoryData.push({
+                    riskId: riskId,
+                    increase: increaseSelect.value,
+                    count: increaseSelect.value === 'yes' ? countInput.value.trim() : '',
+                    reason: increaseSelect.value === 'yes' ? reasonInput.value.trim() : ''
+                });
+            });
+            
+            // 禁用送出按鈕，防止重複提交
+            submitInventoryBtn.disabled = true;
+            submitInventoryBtn.textContent = '送出中...';
+            
+            // 調用後端API提交盤點數據
+            fetch(scriptUrl, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'submitInventory',
+                    username: localStorage.getItem('username'),
+                    department: localStorage.getItem('department'),
+                    inventoryData: inventoryData
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                submitInventoryBtn.disabled = false;
+                submitInventoryBtn.textContent = '送出';
+                
+                if (result.success) {
+                    alert('盤點數據已成功提交！');
+                    // 返回儀表板
+                    inventorySection.classList.add('hidden');
+                    dashboardSection.classList.remove('hidden');
+                    // 強制重新整理頁面
+                    window.location.reload();
+                } else {
+                    alert('提交失敗: ' + result.message);
+                }
+            })
+            .catch(error => {
+                console.error('提交盤點數據錯誤:', error);
+                submitInventoryBtn.disabled = false;
+                submitInventoryBtn.textContent = '送出';
+                alert('提交盤點數據時發生錯誤，請稍後再試');
+            });
+            
+            // 重置計時器
+            resetInactivityTimer();
+        });
+        
+        // 重置盤點按鈕點擊事件
+        resetInventoryBtn.addEventListener('click', function() {
+            if (confirm('確定要重置所有盤點數據嗎？')) {
+                // 重新載入部門風險項目
+                loadDepartmentRisks();
+            }
+            
+            // 重置計時器
+            resetInactivityTimer();
+        });
+        
+        // 載入部門風險項目的函數
+        function loadDepartmentRisks() {
+            const department = localStorage.getItem('department');
+            
+            // 調用後端API獲取部門風險項目
+            fetch(`${scriptUrl}?action=getDepartmentRisks&department=${encodeURIComponent(department)}`)
+                .then(response => response.json())
+                .then(result => {
+                    // 隱藏載入中
+                    inventoryLoading.classList.add('hidden');
+                    
+                    if (result.success) {
+                        // 顯示盤點內容
+                        inventoryContent.classList.remove('hidden');
+                        
+                        // 更新盤點表格
+                        updateInventoryTable(result.risks);
+                    } else {
+                        alert('獲取風險項目失敗: ' + result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('獲取風險項目錯誤:', error);
+                    inventoryLoading.classList.add('hidden');
+                    alert('獲取風險項目時發生錯誤，請稍後再試');
+                });
+        }
+        
+        // 更新盤點表格的函數
+        function updateInventoryTable(risks) {
+            let tableHtml = '';
+            
+            // 遍歷風險項目並生成表格行
+            risks.forEach(risk => {
+                tableHtml += `
+                    <tr data-risk-id="${risk.id}">
+                        <td>
+                            <div class="risk-info">
+                                <div class="risk-name">${risk.name}</div>
+                                <div class="risk-description">${risk.description}</div>
+                                <div class="risk-category">類別: ${risk.category}</div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="select-container">
+                                <select class="risk-increase-select">
+                                    <option value="">請選擇</option>
+                                    <option value="yes">是</option>
+                                    <option value="no">否</option>
+                                </select>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="input-container">
+                                <input type="number" class="risk-count-input" min="1" disabled>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="input-container">
+                                <input type="text" class="risk-reason-input" disabled>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            // 更新表格內容
+            inventoryTableBody.innerHTML = tableHtml;
+            
+            // 為每個風險增加選項添加change事件監聽器
+            document.querySelectorAll('.risk-increase-select').forEach(select => {
+                select.addEventListener('change', function() {
+                    const row = this.closest('tr');
+                    const countInput = row.querySelector('.risk-count-input');
+                    const reasonInput = row.querySelector('.risk-reason-input');
+                    
+                    // 如果選擇"是"，則啟用次數和原因輸入框
+                    if (this.value === 'yes') {
+                        countInput.disabled = false;
+                        reasonInput.disabled = false;
+                    } else {
+                        countInput.disabled = true;
+                        reasonInput.disabled = true;
+                        countInput.value = '';
+                        reasonInput.value = '';
+                    }
+                });
+            });
+        }
+        
+        // 登出按鈕點擊事件
         logoutBtn.addEventListener('click', function() {
             // 清除登入資訊
             localStorage.removeItem('isLoggedIn');
@@ -1651,9 +1873,19 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             showLogin();
         });
         
-        // 處理更改密碼按鈕點擊事件
+        // 更改密碼按鈕點擊事件
         changePasswordBtn.addEventListener('click', function() {
-            // 顯示更改密碼的彈出視窗
+            // 清除之前的訊息
+            document.getElementById('passwordChangeMessage').style.display = 'none';
+            document.getElementById('passwordChangeMessage').textContent = '';
+            document.getElementById('passwordChangeMessage').className = 'alert';
+            
+            // 清除表單
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            
+            // 顯示更改密碼視窗
             const changePasswordModal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
             changePasswordModal.show();
             
@@ -1661,30 +1893,26 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             resetInactivityTimer();
         });
         
-        // 處理提交更改密碼按鈕點擊事件
+        // 提交更改密碼按鈕點擊事件
         submitChangePasswordBtn.addEventListener('click', function() {
-            const currentPassword = document.getElementById('currentPassword').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
-            const messageDiv = document.getElementById('passwordChangeMessage');
+            const currentPassword = document.getElementById('currentPassword').value.trim();
+            const newPassword = document.getElementById('newPassword').value.trim();
+            const confirmPassword = document.getElementById('confirmPassword').value.trim();
+            const messageElement = document.getElementById('passwordChangeMessage');
             
-            // 清除之前的訊息
-            messageDiv.style.display = 'none';
-            messageDiv.className = 'alert';
-            messageDiv.textContent = '';
-            
-            // 驗證輸入
+            // 檢查是否填寫了所有欄位
             if (!currentPassword || !newPassword || !confirmPassword) {
-                messageDiv.className = 'alert alert-danger';
-                messageDiv.textContent = '請填寫所有欄位';
-                messageDiv.style.display = 'block';
+                messageElement.textContent = '請填寫所有欄位';
+                messageElement.className = 'alert alert-danger';
+                messageElement.style.display = 'block';
                 return;
             }
             
+            // 檢查新密碼和確認密碼是否一致
             if (newPassword !== confirmPassword) {
-                messageDiv.className = 'alert alert-danger';
-                messageDiv.textContent = '新密碼與確認密碼不符';
-                messageDiv.style.display = 'block';
+                messageElement.textContent = '新密碼和確認密碼不一致';
+                messageElement.className = 'alert alert-danger';
+                messageElement.style.display = 'block';
                 return;
             }
             
@@ -1692,9 +1920,10 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             submitChangePasswordBtn.disabled = true;
             
             // 調用後端API更改密碼
-            fetch(`${scriptUrl}?action=changePassword`, {
+            fetch(scriptUrl, {
                 method: 'POST',
                 body: JSON.stringify({
+                    action: 'changePassword',
                     username: localStorage.getItem('username'),
                     currentPassword: currentPassword,
                     newPassword: newPassword
@@ -1705,302 +1934,32 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                 submitChangePasswordBtn.disabled = false;
                 
                 if (result.success) {
-                    // 密碼更改成功
-                    messageDiv.className = 'alert alert-success';
-                    messageDiv.textContent = '密碼已成功更改';
-                    messageDiv.style.display = 'block';
+                    messageElement.textContent = '密碼已成功更改';
+                    messageElement.className = 'alert alert-success';
+                    messageElement.style.display = 'block';
                     
-                    // 清除輸入欄位
-                    document.getElementById('currentPassword').value = '';
-                    document.getElementById('newPassword').value = '';
-                    document.getElementById('confirmPassword').value = '';
-                    
-                    // 3秒後關閉彈出視窗
+                    // 3秒後關閉視窗
                     setTimeout(() => {
                         const changePasswordModal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
-                        if (changePasswordModal) {
-                            changePasswordModal.hide();
-                        }
+                        changePasswordModal.hide();
                     }, 3000);
                 } else {
-                    // 密碼更改失敗
-                    messageDiv.className = 'alert alert-danger';
-                    messageDiv.textContent = result.message || '密碼更改失敗';
-                    messageDiv.style.display = 'block';
+                    messageElement.textContent = result.message || '更改密碼失敗';
+                    messageElement.className = 'alert alert-danger';
+                    messageElement.style.display = 'block';
                 }
             })
             .catch(error => {
-                console.error('密碼更改失敗:', error);
-                messageDiv.className = 'alert alert-danger';
-                messageDiv.textContent = '密碼更改過程中發生錯誤，請稍後再試';
-                messageDiv.style.display = 'block';
+                console.error('更改密碼錯誤:', error);
                 submitChangePasswordBtn.disabled = false;
+                messageElement.textContent = '更改密碼時發生錯誤，請稍後再試';
+                messageElement.className = 'alert alert-danger';
+                messageElement.style.display = 'block';
             });
             
             // 重置計時器
             resetInactivityTimer();
         });
-        
-        // 處理部門週期盤點按鈕點擊事件
-        inventoryBtn.addEventListener('click', function() {
-            // 隱藏主頁面，顯示盤點頁面
-            dashboardSection.classList.add('hidden');
-            inventorySection.classList.remove('hidden');
-            
-            // 顯示載入中訊息，隱藏內容
-            inventoryLoading.classList.remove('hidden');
-            inventoryContent.classList.add('hidden');
-            
-            // 載入盤點項目
-            loadInventoryItems();
-            
-            // 重置計時器
-            resetInactivityTimer();
-        });
-        
-        // 處理返回按鈕點擊事件
-        backBtn.addEventListener('click', function() {
-            // 隱藏盤點頁面，顯示主頁面
-            inventorySection.classList.add('hidden');
-            dashboardSection.classList.remove('hidden');
-            
-            // 重置計時器
-            resetInactivityTimer();
-        });
-        
-        // 處理一鍵全否按鈕點擊事件
-        document.getElementById('all-no-btn').addEventListener('click', function() {
-            // 獲取所有的選擇框
-            const selects = document.querySelectorAll('.inventory-table select');
-            
-            // 將所有選擇框設為"否"
-            selects.forEach(select => {
-                select.value = '否';
-                // 如果選擇了"否"，禁用相關的輸入框
-                const row = select.closest('tr');
-                const countInput = row.querySelector('input[type="number"]');
-                const reasonInput = row.querySelector('input[type="text"]');
-                
-                if (countInput) countInput.disabled = true;
-                if (reasonInput) reasonInput.disabled = true;
-            });
-            
-            // 重置計時器
-            resetInactivityTimer();
-        });
-        
-        // 處理重置按鈕點擊事件
-        resetInventoryBtn.addEventListener('click', function() {
-            // 重新載入盤點項目
-            loadInventoryItems();
-            
-            // 重置計時器
-            resetInactivityTimer();
-        });
-        
-        // 處理提交按鈕點擊事件
-        submitInventoryBtn.addEventListener('click', function() {
-            // 收集所有盤點數據
-            const inventoryData = [];
-            const rows = inventoryTableBody.querySelectorAll('tr');
-            
-            rows.forEach(row => {
-                const riskNameElement = row.querySelector('.risk-name');
-                if (!riskNameElement) return; // 跳過沒有風險名稱的行
-                
-                const riskName = riskNameElement.textContent;
-                const isIncreased = row.querySelector('select').value;
-                const count = row.querySelector('input[type="number"]').value;
-                const reason = row.querySelector('input[type="text"]').value;
-                
-                // 驗證：如果選擇了"是"，必須填寫次數和原因
-                if (isIncreased === '是' && (!count || !reason)) {
-                    alert(`請為「${riskName}」填寫完整的次數和原因`);
-                    return;
-                }
-                
-                inventoryData.push({
-                    riskName,
-                    isIncreased,
-                    count: isIncreased === '是' ? count : '',
-                    reason: isIncreased === '是' ? reason : ''
-                });
-            });
-            
-            // 禁用提交按鈕，防止重複提交
-            submitInventoryBtn.disabled = true;
-            submitInventoryBtn.textContent = '提交中...';
-            
-            // 調用後端API提交盤點數據
-            fetch(`${scriptUrl}?action=submitInventory`, {
-                method: 'POST',
-                body: JSON.stringify({
-                    username: localStorage.getItem('username'),
-                    department: localStorage.getItem('department'),
-                    name: localStorage.getItem('name'),
-                    inventoryData
-                })
-            })
-            .then(response => response.json())
-            .then(result => {
-                submitInventoryBtn.disabled = false;
-                submitInventoryBtn.textContent = '送出';
-                
-                if (result.success) {
-                    // 提交成功
-                    alert('盤點數據已成功提交');
-                    
-                    // 返回主頁面
-                    inventorySection.classList.add('hidden');
-                    dashboardSection.classList.remove('hidden');
-                } else {
-                    // 提交失敗
-                    alert(result.message || '提交失敗，請稍後再試');
-                }
-            })
-            .catch(error => {
-                console.error('提交盤點數據失敗:', error);
-                alert('提交過程中發生錯誤，請稍後再試');
-                submitInventoryBtn.disabled = false;
-                submitInventoryBtn.textContent = '送出';
-            });
-            
-            // 重置計時器
-            resetInactivityTimer();
-        });
-        
-        // 載入盤點項目的函數
-        function loadInventoryItems() {
-            // 清空表格內容
-            inventoryTableBody.innerHTML = '';
-            
-            // 調用後端API獲取盤點項目
-            fetch(`${scriptUrl}?action=getInventoryItems&department=${encodeURIComponent(localStorage.getItem('department'))}`)
-                .then(response => response.json())
-                .then(result => {
-                    // 隱藏載入中訊息，顯示內容
-                    inventoryLoading.classList.add('hidden');
-                    inventoryContent.classList.remove('hidden');
-                    
-                    if (result.success) {
-                        // 更新表格
-                        updateInventoryTable(result.items);
-                    } else {
-                        console.error('獲取盤點項目失敗:', result.message);
-                        inventoryTableBody.innerHTML = `<tr><td colspan="4" class="text-center">獲取盤點項目失敗: ${result.message}</td></tr>`;
-                    }
-                })
-                .catch(error => {
-                    console.error('獲取盤點項目失敗:', error);
-                    inventoryLoading.classList.add('hidden');
-                    inventoryContent.classList.remove('hidden');
-                    inventoryTableBody.innerHTML = '<tr><td colspan="4" class="text-center">獲取盤點項目失敗</td></tr>';
-                });
-        }
-        
-        // 更新盤點表格的函數
-        function updateInventoryTable(items) {
-            // 清空表格內容
-            inventoryTableBody.innerHTML = '';
-            
-            // 如果沒有項目
-            if (!items || items.length === 0) {
-                inventoryTableBody.innerHTML = '<tr><td colspan="4" class="text-center">無盤點項目</td></tr>';
-                return;
-            }
-            
-            // 填充表格數據
-            items.forEach(item => {
-                const tr = document.createElement('tr');
-                
-                // 風險項目
-                const tdRisk = document.createElement('td');
-                const riskInfo = document.createElement('div');
-                riskInfo.className = 'risk-info';
-                
-                const riskName = document.createElement('div');
-                riskName.className = 'risk-name';
-                riskName.textContent = item.name;
-                riskInfo.appendChild(riskName);
-                
-                const riskDescription = document.createElement('div');
-                riskDescription.className = 'risk-description';
-                riskDescription.textContent = item.description;
-                riskInfo.appendChild(riskDescription);
-                
-                tdRisk.appendChild(riskInfo);
-                tr.appendChild(tdRisk);
-                
-                // 本月是否增加
-                const tdIncrease = document.createElement('td');
-                const selectContainer = document.createElement('div');
-                selectContainer.className = 'select-container';
-                
-                const select = document.createElement('select');
-                const optionYes = document.createElement('option');
-                optionYes.value = '是';
-                optionYes.textContent = '是';
-                const optionNo = document.createElement('option');
-                optionNo.value = '否';
-                optionNo.textContent = '否';
-                optionNo.selected = true;
-                
-                select.appendChild(optionYes);
-                select.appendChild(optionNo);
-                selectContainer.appendChild(select);
-                tdIncrease.appendChild(selectContainer);
-                tr.appendChild(tdIncrease);
-                
-                // 發生次數
-                const tdCount = document.createElement('td');
-                const inputContainerCount = document.createElement('div');
-                inputContainerCount.className = 'input-container';
-                
-                const inputCount = document.createElement('input');
-                inputCount.type = 'number';
-                inputCount.min = '1';
-                inputCount.value = '';
-                inputCount.disabled = true;
-                inputContainerCount.appendChild(inputCount);
-                tdCount.appendChild(inputContainerCount);
-                tr.appendChild(tdCount);
-                
-                // 原因
-                const tdReason = document.createElement('td');
-                const inputContainerReason = document.createElement('div');
-                inputContainerReason.className = 'input-container';
-                
-                const inputReason = document.createElement('input');
-                inputReason.type = 'text';
-                inputReason.value = '';
-                inputReason.disabled = true;
-                inputContainerReason.appendChild(inputReason);
-                tdReason.appendChild(inputContainerReason);
-                tr.appendChild(tdReason);
-                
-                // 添加到表格
-                inventoryTableBody.appendChild(tr);
-                
-                // 添加選擇框的變更事件
-                select.addEventListener('change', function() {
-                    const isYes = this.value === '是';
-                    inputCount.disabled = !isYes;
-                    inputReason.disabled = !isYes;
-                    
-                    // 如果選擇了"是"，設置默認值
-                    if (isYes) {
-                        inputCount.value = '1';
-                        inputCount.focus();
-                    } else {
-                        inputCount.value = '';
-                        inputReason.value = '';
-                    }
-                    
-                    // 重置計時器
-                    resetInactivityTimer();
-                });
-            });
-        }
         
         // 顯示登入頁面的函數
         function showLogin() {
@@ -2016,7 +1975,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             errorMessage.textContent = '';
         }
         
-        // 顯示主頁面的函數
+        // 顯示儀表板的函數
         function showDashboard() {
             loginSection.classList.add('hidden');
             dashboardSection.classList.remove('hidden');
@@ -2025,13 +1984,11 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             notificationPage.style.display = 'none';
         }
         
-        // 事件登錄按鈕點擊事件
-        eventBtn.addEventListener('click', function() {
-            // 目前尚未實現，顯示提示訊息
-            alert('事件登錄功能尚未開放，敬請期待');
-            
-            // 重置計時器
-            resetInactivityTimer();
+        // 按下Enter鍵時觸發登入按鈕
+        passwordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loginBtn.click();
+            }
         });
     });
     </script>
