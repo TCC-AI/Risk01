@@ -1,270 +1,2037 @@
+我將以【沒通知版】為基礎，融入【有通知版】的通知功能設計，同時保持其他部分不變。以下是整合後的代碼：
 
+```html
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>昶青實業<br>【AI企業風控中心】</title>
-    <!-- Bootstrap CSS (for dropdown & modal) -->
+    <!-- 新增 Bootstrap CSS 用於下拉選單 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* === 原來的樣式保持不動 === */
-        *{box-sizing:border-box;margin:0;padding:0;font-family:'微軟正黑體',Arial,sans-serif;}
-        body{background:linear-gradient(135deg,#1a6fc4 0%,#2a9dd9 25%,#34c3aa 50%,#3ed9a0 75%,#4aeb97 100%);min-height:100vh;position:relative;padding:20px;overflow-x:hidden;}
-        body::before{content:"";position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 20% 30%,rgba(255,255,255,.15) 0%,transparent 60%);z-index:-1;}
-        body::after{content:"";position:absolute;top:0;right:0;width:80%;height:100%;background:radial-gradient(circle at 80% 70%,rgba(0,100,150,.1) 0%,transparent 60%);z-index:-1;}
-        .container{width:100%;max-width:540px;padding:20px;margin:0 auto;position:relative;}
-        .logo-container{text-align:center;margin-bottom:0;}
-        .logo{max-width:400px;height:auto;display:inline-block;filter:drop-shadow(0 4px 6px rgba(0,0,0,.1));transition:transform .3s ease;}
-        .logo:hover{transform:scale(1.05);}        
-        /* 歡迎詞置中：沿用原設定 */
-        .welcome-message,div:contains("歡迎"),.dotted-box p,.user-greeting{width:100%;text-align:center!important;display:block;margin:0 auto;padding:0;}
-        .dotted-container,.dotted-box{display:flex;justify-content:center;align-items:center;text-align:center;width:100%;}
-        @media(max-width:767px){.welcome-message,div:contains("歡迎"),.dotted-box p,.user-greeting{padding:0!important;margin:0 auto!important;left:0!important;right:0!important;}}
+        /* 基礎樣式設定 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: '微軟正黑體', Arial, sans-serif;
+        }
 
-        /* 卡片樣式（原） */
-        .login-form,.dashboard{background:rgba(255,255,255,.9);padding:30px;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,.1),0 4px 8px rgba(31,38,135,.2),inset 0 0 0 1px rgba(255,255,255,.1);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.18);transition:all .3s ease;}
-        .login-form:hover,.dashboard:hover{box-shadow:0 12px 40px rgba(0,0,0,.15),0 6px 12px rgba(31,38,135,.25),inset 0 0 0 1px rgba(255,255,255,.2);transform:translateY(-5px);}        
-        h1{text-align:center;margin-bottom:10px;color:#1a6fc4;font-size:28px;font-weight:bold;text-shadow:0 1px 2px rgba(0,0,0,.1);}        
-        .form-group{margin-bottom:10px;}label{display:block;margin-bottom:8px;font-weight:bold;color:#2a6496;}        
-        input{width:100%;padding:12px 15px;border:1px solid rgba(0,100,150,.2);border-radius:8px;font-size:16px;background:rgba(255,255,255,.8);transition:all .3s ease;box-shadow:inset 0 1px 3px rgba(0,0,0,.1);}        
-        input:focus{outline:none;border-color:#34c3aa;box-shadow:0 0 0 3px rgba(52,195,170,.25),inset 0 1px 3px rgba(0,0,0,.1);}        
-        button:not(.btn){width:100%;padding:12px;background:linear-gradient(to right,#1a6fc4,#34c3aa);color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:bold;cursor:pointer;transition:all .3s ease;box-shadow:0 4px 6px rgba(0,0,0,.1),0 1px 3px rgba(0,0,0,.1);text-shadow:0 1px 2px rgba(0,0,0,.1);}        
-        button:hover:not(.btn){background:linear-gradient(to right,#1558a0,#2aa890);box-shadow:0 6px 12px rgba(0,0,0,.15),0 2px 4px rgba(0,0,0,.15);transform:translateY(-2px);}        
-        button:active:not(.btn){transform:translateY(0);box-shadow:0 2px 4px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.1);}        
-        .error-message{color:#d93025;margin-top:15px;text-align:center;font-weight:600;}        
-        .button-group{display:flex;flex-direction:column;gap:20px;margin-bottom:30px;}        
-        .feature-btn{padding:20px;font-size:18px;font-weight:bold;position:relative;overflow:hidden;}        
-        .feature-btn::after{content:"";position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(rgba(255,255,255,.2),rgba(255,255,255,0));opacity:0;transition:opacity .3s ease;}        
-        .feature-btn:hover::after{opacity:1;}        
-        #inventory-btn{background:linear-gradient(to right,#34a853,#4aeb97);}#inventory-btn:hover{background:linear-gradient(to right,#2d9249,#3ed9a0);}        
-        #event-btn{background:linear-gradient(to right,#ea4335,#ff6b58);}#event-btn:hover{background:linear-gradient(to right,#d33426,#e85a4a);}        
-        /* ====== 通知功能新增樣式 ====== */
-        #notification-btn{background:linear-gradient(to right,#ff9800,#ffb74d);}#notification-btn:hover{background:linear-gradient(to right,#f57c00,#ffa726);}        
-        .notification-icon{position:absolute;top:8px;left:12px;cursor:pointer;font-size:18px;color:#ff9800;transition:all .3s ease;}
-        .notification-icon:hover{color:#f57c00;transform:scale(1.1);}        
-        .notification-badge{position:absolute;top:-5px;right:-8px;background:#ea4335;color:#fff;border-radius:50%;width:18px;height:18px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:bold;}
-        /* 通知管理頁 */
-        .notification-page{background:#fff;border-radius:10px;box-shadow:0 4px 8px rgba(0,0,0,.1);padding:30px;margin-top:20px;width:100%;max-width:900px;margin-left:auto;margin-right:auto;}
-        .notification-item{border:1px solid #dee2e6;border-radius:8px;padding:15px;margin-bottom:15px;background:#f8f9fa;transition:all .3s ease;}
-        .notification-item:hover{box-shadow:0 4px 8px rgba(0,0,0,.1);}        
-        .notification-item.unread{background:#fff3cd;border-color:#ffeaa7;}
-        .notification-item.urgent{background:#f8d7da;border-color:#f5c6cb;}
-        .notification-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
-        .notification-title{font-weight:bold;color:#1a6fc4;margin:0;}
-        .notification-time{font-size:12px;color:#6c757d;}
-        .notification-content{color:#495057;margin-bottom:10px;}
-        .notification-settings{background:#f8f9fa;border-radius:8px;padding:20px;margin-bottom:20px;}
-        .notification-settings .setting-group{margin-bottom:15px;}        
-        .notification-settings label{display:block;margin-bottom:5px;font-weight:600;color:#495057;}
-        .notification-settings input,.notification-settings select{width:100%;padding:8px 12px;border:1px solid #ced4da;border-radius:4px;font-size:14px;}        
-        /* 其他原有樣式（inventory, table 等）略 ‧ 皆保留不動 */
+        /* 非對稱漸層背景 */
+        body {
+            background: linear-gradient(135deg, #1a6fc4 0%, #2a9dd9 25%, #34c3aa 50%, #3ed9a0 75%, #4aeb97 100%);
+            min-height: 100vh;
+            position: relative;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 0%, transparent 60%);
+            z-index: -1;
+        }
+
+        body::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 80%;
+            height: 100%;
+            background: radial-gradient(circle at 80% 70%, rgba(0, 100, 150, 0.1) 0%, transparent 60%);
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 540px;
+            padding: 20px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Logo 樣式 */
+        .logo-container {
+            text-align: center;
+            margin-bottom: 0px;
+        }
+
+        .logo {
+            max-width: 400px;
+            height: auto;
+            display: inline-block;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        /* 歡迎詞置中樣式 */
+.welcome-message, /* 假設的類名 */
+div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
+.dotted-box p, /* 如果歡迎詞在虛線框內 */
+.user-greeting { /* 另一個可能的類名 */
+    width: 100%;
+    text-align: center !important;
+    display: block;
+    margin: 0 auto;
+    padding: 0;
+}
+
+/* 針對虛線框內的所有文字 */
+.dotted-container, 
+.dotted-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    width: 100%;
+}
+
+/* 特別針對行動裝置的修正 */
+@media (max-width: 767px) {
+    .welcome-message,
+    div:contains("歡迎"),
+    .dotted-box p,
+    .user-greeting {
+        padding: 0 !important;
+        margin: 0 auto !important;
+        left: 0 !important;
+        right: 0 !important;
+    }
+}
+
+
+        /* 卡片樣式 */
+        .login-form, .dashboard {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 
+                        0 4px 8px rgba(31, 38, 135, 0.2),
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            transition: all 0.3s ease;
+        }
+
+        .login-form:hover, .dashboard:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 
+                        0 6px 12px rgba(31, 38, 135, 0.25),
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #1a6fc4;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #2a6496;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid rgba(0, 100, 150, 0.2);
+            border-radius: 8px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #34c3aa;
+            box-shadow: 0 0 0 3px rgba(52, 195, 170, 0.25), inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 按鈕樣式 */
+        button:not(.btn) {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, #1a6fc4, #34c3aa);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover:not(.btn) {
+            background: linear-gradient(to right, #1558a0, #2aa890);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        button:active:not(.btn) {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .error-message {
+            color: #d93025;
+            margin-top: 15px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .feature-btn {
+            padding: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-btn::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .feature-btn:hover::after {
+            opacity: 1;
+        }
+
+        #inventory-btn {
+            background: linear-gradient(to right, #34a853, #4aeb97);
+        }
+
+        #inventory-btn:hover {
+            background: linear-gradient(to right, #2d9249, #3ed9a0);
+        }
+
+        #event-btn {
+            background: linear-gradient(to right, #ea4335, #ff6b58);
+        }
+
+        #event-btn:hover {
+            background: linear-gradient(to right, #d33426, #e85a4a);
+        }
+
+        /* 新增通知按鈕樣式 */
+        #notification-btn {
+            background: linear-gradient(to right, #ff9800, #ffb74d);
+        }
+
+        #notification-btn:hover {
+            background: linear-gradient(to right, #f57c00, #ffa726);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            margin-top: 15px;
+            color: #1a6fc4;
+            font-weight: 600;
+        }
+
+        /* 使用者資訊區塊的樣式 */
+        .user-info {
+            text-align: right;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #2a6496;
+            background: rgba(255, 255, 255, 0.5);
+            padding: 8px 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .user-info strong {
+            color: #1a6fc4;
+            font-weight: 600;
+        }
+
+        /* 通知圖標樣式 */
+        .notification-icon {
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            color: #ff9800;
+            transition: all 0.3s ease;
+        }
+
+        .notification-icon:hover {
+            color: #f57c00;
+            transform: scale(1.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background: #ea4335;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* 下拉選單樣式 */
+        .dropdown {
+            margin-top: 20px;
+        }
+
+        .dropdown-toggle {
+            background: linear-gradient(to right, #6c757d, #495057);
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .dropdown-toggle:hover {
+            background: linear-gradient(to right, #5a6268, #3d4246);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .dropdown-menu {
+            border-radius: 8px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            border: none;
+            overflow: hidden;
+        }
+
+        .dropdown-item {
+            padding: 10px 15px;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-item:hover {
+            background-color: #f1f8ff;
+            color: #1a6fc4;
+        }
+
+        /* 部門風險係數頁面樣式 */
+.dashboard-page {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    margin-top: 20px;
+    width: 100%;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    margin-bottom: 20px;
+}
+
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: #212529;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 0.75rem;
+    vertical-align: top;
+    border-top: 1px solid #dee2e6;
+    text-align: center;
+}
+
+.table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.table-bordered {
+    border: 1px solid #dee2e6;
+}
+
+.table-bordered th,
+.table-bordered td {
+    border: 1px solid #dee2e6;
+}
+
+/* 確保在移動設備上也能正常顯示 */
+@media (max-width: 767px) {
+    .dashboard-page {
+        padding: 15px;
+    }
+    
+    .table th,
+    .table td {
+        padding: 0.5rem;
+    }
+}
+
+        /* 風險燈號樣式 */
+.risk-light {
+    display: inline-block;
+    font-size: 20px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.green-light {
+    color: #34a853;
+    text-shadow: 0 0 5px rgba(52, 168, 83, 0.7);
+}
+
+.yellow-light {
+    color: #fbbc05;
+    text-shadow: 0 0 5px rgba(251, 188, 5, 0.7);
+}
+
+.red-light {
+    color: #ea4335;
+    text-shadow: 0 0 5px rgba(234, 67, 53, 0.7);
+}
+
+        /* 通知頁面樣式 */
+        .notification-page {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .notification-item {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .notification-item:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-item.unread {
+            background: #fff3cd;
+            border-color: #ffeaa7;
+        }
+
+        .notification-item.urgent {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .notification-title {
+            font-weight: bold;
+            color: #1a6fc4;
+            margin: 0;
+        }
+
+        .notification-time {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .notification-content {
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        /* 通知設定樣式 */
+        .notification-settings {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .setting-group {
+            margin-bottom: 15px;
+        }
+
+        .setting-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .setting-group input, .setting-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        /* 部門週期盤點頁面樣式 */
+        .inventory-section {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1), 
+                        0 4px 8px rgba(31, 38, 135, 0.2),
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            width: 100%;
+            max-width: 900px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .inventory-section:hover {
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15), 
+                        0 6px 12px rgba(31, 38, 135, 0.25),
+                        inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+
+        /* 容器樣式，當切換到盤點頁面時不需要 */
+        .container.hidden {
+            display: none;
+        }
+
+        /* 標題和按鈕容器 */
+        .centered-title {
+            text-align: center;
+            width: 100%;
+            margin-bottom: 20px;
+            color: #1a6fc4;
+            font-size: 28px;
+            font-weight: bold;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+            margin-bottom: 25px;
+        }
+        
+        .half-width-btn {
+            width: 25%; /* 按鈕寬度設為原來的一半 */
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        #all-no-btn {
+            background: linear-gradient(to right, #1a6fc4, #2a9dd9);
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        #all-no-btn:hover {
+            background: linear-gradient(to right, #1558a0, #2389c0);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        #back-btn {
+            background: linear-gradient(to right, #6c757d, #495057);
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        #back-btn:hover {
+            background: linear-gradient(to right, #5a6268, #3d4246);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 3px 6px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .inventory-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        /* 表格樣式 */
+        .inventory-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-bottom: 25px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .inventory-table th, .inventory-table td {
+            border: none;
+            padding: 15px;
+            text-align: left;
+        }
+
+        .inventory-table th {
+            background: linear-gradient(to right, #1a6fc4, #2a9dd9);
+            color: white;
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .inventory-table tr {
+            transition: all 0.2s ease;
+        }
+
+        .inventory-table tr:nth-child(even) {
+            background-color: rgba(240, 248, 255, 0.7);
+        }
+
+        .inventory-table tr:nth-child(odd) {
+            background-color: rgba(255, 255, 255, 0.7);
+        }
+
+        .inventory-table tr:hover {
+            background-color: rgba(220, 240, 250, 0.9);
+        }
+
+        .inventory-actions {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .submit-btn, .reset-btn {
+            width: 150px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .submit-btn {
+            background: linear-gradient(to right, #34a853, #4aeb97);
+        }
+
+        .submit-btn:hover {
+            background: linear-gradient(to right, #2d9249, #3ed9a0);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .reset-btn {
+            background: linear-gradient(to right, #ea4335, #ff6b58);
+        }
+
+        .reset-btn:hover {
+            background: linear-gradient(to right, #d33426, #e85a4a);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* 表單元素樣式 */
+        .select-container select, .input-container input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(0, 100, 150, 0.2);
+            border-radius: 8px;
+            font-size: 14px;
+            background: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .select-container select:focus, .input-container input:focus {
+            outline: none;
+            border-color: #34c3aa;
+            box-shadow: 0 0 0 3px rgba(52, 195, 170, 0.25), inset 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .input-container input[disabled] {
+            background-color: rgba(233, 236, 239, 0.6);
+            cursor: not-allowed;
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+                /* 行動裝置特定修正 */
+        @media (max-width: 767px) {
+            img[src*="LOGO.png"] {
+                position: relative;
+                left: 50%;
+                transform: translateX(-50%); /* 這個技巧可以確保完美置中 */
+                margin: 0; /* 重設可能的邊距 */
+            }
+            
+            /* 確保容器沒有額外的內邊距或邊距 */
+            .logo-container, div:has(> img[src*="LOGO.png"]) {
+                padding: 0;
+                margin: 0;
+                width: 100%;
+                position: relative;
+            }
+        }
+
+
+        /* 風險項目樣式 */
+        .risk-info {
+            margin-bottom: 10px;
+        }
+
+        .risk-name {
+            font-weight: bold;
+            color: #1a6fc4;
+            margin-bottom: 5px;
+        }
+
+        .risk-description {
+            color: #495057;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .risk-category, .risk-level, .related-departments {
+            font-size: 13px;
+            color: #6c757d;
+            margin-top: 3px;
+        }
+
+        /* 模態框樣式 */
+        .modal-content {
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(to right, #1a6fc4, #2a9dd9);
+            color: white;
+            border-bottom: none;
+        }
+
+        .modal-title {
+            font-weight: 600;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-footer {
+            border-top: none;
+            padding: 15px 20px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #1a6fc4, #2a9dd9);
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to right, #1558a0, #2389c0);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(to right, #6c757d, #495057);
+            border: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(to right, #5a6268, #3d4246);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .inventory-section {
+                padding: 20px;
+            }
+            
+            .inventory-table th, .inventory-table td {
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            .inventory-actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .submit-btn, .reset-btn {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .half-width-btn {
+                width: 45%;
+            }
+            
+            .logo {
+                max-width: 280px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 0px;
+                 max-width: 99%; /* 增加到螢幕寬度的95% */
+        width: 99%;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .feature-btn {
+                padding: 15px;
+                font-size: 16px;
+            }
+                        .inventory-table th, .inventory-table td {
+                padding: 8px;
+                font-size: 13px;
+            }
+            
+            .half-width-btn {
+                width: 48%;
+                font-size: 14px;
+                padding: 8px;
+            }
+            
+            .logo {
+                max-width: 280px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- ======== 登入區 ======== -->
+        <!-- 登入表單 -->
         <div id="login-section" class="login-form">
-            <div class="logo-container"><img src="LOGO.png" alt="昶青實業 Logo" class="logo"></div>
+            <div class="logo-container">
+                <img src="LOGO.png" alt="昶青實業 Logo" class="logo">
+            </div>
             <h1>昶青實業<br>【AI企業風控中心】</h1>
-            <div class="form-group"><label for="username">帳號</label><input type="text" id="username" placeholder="請輸入帳號"></div>
-            <div class="form-group"><label for="password">密碼</label><input type="password" id="password" placeholder="請輸入密碼"></div>
+            <div class="form-group">
+                <label for="username">帳號</label>
+                <input type="text" id="username" placeholder="請輸入帳號">
+            </div>
+            <div class="form-group">
+                <label for="password">密碼</label>
+                <input type="password" id="password" placeholder="請輸入密碼">
+            </div>
             <button id="login-btn">登入</button>
-            <p id="loading" class="loading hidden">驗證中...</p><p id="error-message" class="error-message"></p>
+            <p id="loading" class="loading hidden">驗證中...</p>
+            <p id="error-message" class="error-message"></p>
         </div>
 
-        <!-- ======== 主功能頁 ======== -->
+        <!-- 主頁面 -->
         <div id="dashboard-section" class="dashboard hidden">
-            <!-- 使用者資訊 + 通知 bell -->
-            <div id="user-info" class="user-info" style="width:100%;text-align:center;">
-                <div id="notification-icon" class="notification-icon" title="查看通知">🔔<span id="notification-badge" class="notification-badge hidden">0</span></div>
-                歡迎：<strong id="user-department"></strong> - <strong id="user-name"></strong>
+            <!-- 使用者資訊區塊 -->
+            <div id="user-info" class="user-info" style="width: 100%; text-align: center;">
+                <!-- 通知圖標 -->
+                <div class="notification-icon" id="notification-icon" title="查看通知">
+                    🔔
+                    <span class="notification-badge hidden" id="notification-badge">0</span>
+                </div>
+                歡迎： <strong id="user-department"></strong> - <strong id="user-name"></strong>
             </div>
-            <div class="logo-container"><img src="LOGO.png" alt="昶青實業 Logo" class="logo"></div>
+
+            <div class="logo-container">
+                <img src="LOGO.png" alt="昶青實業 Logo" class="logo">
+            </div>
             <h1>昶青實業<br>【AI企業風控中心】</h1>
             <div class="button-group">
-                <button class="feature-btn" id="dept-risk-index-btn" style="background:linear-gradient(to right,#1a6fc4,#34c3aa);">部門風險係數</button>
+                 <button class="feature-btn" id="dept-risk-index-btn" style="background: linear-gradient(to right, #1a6fc4, #34c3aa);">部門風險係數</button>
                 <button id="inventory-btn" class="feature-btn">部門週期盤點</button>
                 <button id="event-btn" class="feature-btn">事件登錄</button>
                 <button id="notification-btn" class="feature-btn">通知管理</button>
             </div>
-            <!-- 登出 dropdown (沿用原) -->
+            
+            <!-- 登出下拉選單 -->
             <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle w-100 py-2" type="button" id="logoutDropdown" data-bs-toggle="dropdown" aria-expanded="false">登出選項</button>
+                <button class="btn btn-secondary dropdown-toggle w-100 py-2" type="button" id="logoutDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    登出選項
+                </button>
                 <ul class="dropdown-menu w-100" aria-labelledby="logoutDropdown">
                     <li><a class="dropdown-item" href="#" id="changePasswordBtn">更改密碼</a></li>
                     <li><a class="dropdown-item" href="#" id="logoutBtn">登出</a></li>
                 </ul>
             </div>
         </div>
-
-        <!-- ======== 通知管理頁 ======== -->
-        <div id="notification-page" class="notification-page" style="display:none;">
-            <div class="logo-container"><img src="LOGO.png" class="logo" alt="昶青實業 Logo"></div>
-            <h2 class="text-center mb-4">通知管理</h2>
-            <!-- 設定 -->
-            <div class="notification-settings">
-                <h4>通知設定</h4>
-                <div class="row">
-                    <div class="col-md-6 setting-group"><label for="risk-threshold">風險閾值設定</label>
-                        <select id="risk-threshold"><option value="20">低風險 (R值 >20)</option><option value="30" selected>中風險 (R值 >30)</option><option value="40">高風險 (R值 >40)</option></select></div>
-                    <div class="col-md-6 setting-group"><label for="notification-frequency">檢查頻率</label>
-                        <select id="notification-frequency"><option value="realtime" selected>即時</option><option value="hourly">每小時</option><option value="daily">每日</option></select></div>
+        
+        <!-- 更改密碼的彈出視窗 -->
+        <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="changePasswordModalLabel">更改密碼</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                                        <div class="modal-body">
+                        <form id="changePasswordForm">
+                            <div class="mb-3">
+                                <label for="currentPassword" class="form-label">目前密碼</label>
+                                <input type="password" class="form-control" id="currentPassword" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="newPassword" class="form-label">新密碼</label>
+                                <input type="password" class="form-control" id="newPassword" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">確認新密碼</label>
+                                <input type="password" class="form-control" id="confirmPassword" required>
+                            </div>
+                            <div id="passwordChangeMessage" class="alert" style="display: none;"></div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="submitChangePassword">確認更改</button>
+                    </div>
                 </div>
-                <button class="btn btn-primary" id="save-settings-btn">儲存設定</button>
-                <button class="btn btn-info" id="check-risk-now-btn">立即檢查風險</button>
             </div>
-            <!-- 通知列表視圖 -->
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4>通知記錄</h4>
-                <div>
-                    <button class="btn btn-sm btn-outline-primary" id="mark-all-read-btn">全部標為已讀</button>
-                    <button class="btn btn-sm btn-outline-danger" id="clear-notifications-btn">清除所有通知</button>
-                </div>
-            </div>
-            <div id="notifications-container"><div class="text-center"><p>載入通知中...</p></div></div>
-            <button class="btn btn-secondary mt-3" id="back-to-dashboard-from-notification">返回</button>
         </div>
-
-        <!-- 其餘頁面 (dept‑risk‑index, inventory 等) 完全照原檔保留，此處省略以縮短。 -->
-        <!-- ... 原本的部門風險係數頁、部門週期盤點頁、ChangePassword Modal 等 ... -->
     </div>
 
-    <!-- Bootstrap / Popper JS -->
+    <!-- 部門風險係數頁面 -->
+    <div id="dept-risk-index-page" class="dashboard-page" style="display: none;">
+        <div class="logo-container">
+            <img src="LOGO.png" alt="TCC.AI Logo" class="logo">
+        </div>
+        <h2 class="text-center mb-4">部門風險係數</h2>
+        
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>部門</th>
+                        <th>風險係數(R值)</th>
+                    </tr>
+                </thead>
+                <tbody id="risk-index-table-body">
+                    <!-- 數據將通過JavaScript動態填充 -->
+                    <tr>
+                        <td colspan="2" class="text-center">載入中...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <button class="btn btn-secondary mt-3" id="back-to-dashboard-from-risk">返回</button>
+    </div>
+
+    <!-- 通知管理頁面 -->
+    <div id="notification-page" class="notification-page" style="display: none;">
+        <div class="logo-container">
+            <img src="LOGO.png" alt="昶青實業 Logo" class="logo">
+        </div>
+        <h2 class="text-center mb-4">通知管理</h2>
+        
+        <!-- 通知設定區域 -->
+        <div class="notification-settings">
+            <h4>通知設定</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="setting-group">
+                        <label for="risk-threshold">風險閾值設定</label>
+                        <select id="risk-threshold">
+                            <option value="20">低風險 (R值 > 20)</option>
+                            <option value="30" selected>中風險 (R值 > 30)</option>
+                            <option value="40">高風險 (R值 > 40)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="setting-group">
+                        <label for="notification-frequency">檢查頻率</label>
+                        <select id="notification-frequency">
+                            <option value="realtime" selected>即時</option>
+                            <option value="hourly">每小時</option>
+                            <option value="daily">每日</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary" id="save-settings-btn">儲存設定</button>
+            <button class="btn btn-info" id="check-risk-now-btn">立即檢查風險</button>
+        </div>
+
+        <!-- 通知列表 -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>通知記錄</h4>
+            <div>
+                <button class="btn btn-sm btn-outline-primary" id="mark-all-read-btn">全部標為已讀</button>
+                <button class="btn btn-sm btn-outline-danger" id="clear-notifications-btn">清除所有通知</button>
+            </div>
+        </div>
+
+        <div id="notifications-container">
+            <div class="text-center">
+                <p>載入通知中...</p>
+            </div>
+        </div>
+
+        <button class="btn btn-secondary mt-3" id="back-to-dashboard-from-notification">返回</button>
+    </div>
+    
+    <!-- 部門週期盤點頁面 -->
+    <div id="inventory-section" class="inventory-section hidden">
+        <div class="inventory-header">
+            <div class="logo-container">
+                <img src="LOGO.png" alt="昶青實業 Logo" class="logo" style="text-align: center;">
+            </div>
+            <h1 class="centered-title">部門週期盤點</h1>
+            <div class="button-container">
+                <button id="all-no-btn" class="half-width-btn">一鍵全否</button>
+                <button id="back-btn" class="half-width-btn">返回前頁</button>
+            </div>
+        </div>
+        
+        <div id="inventory-loading" class="loading">載入中，請稍候...</div>
+        
+        <div id="inventory-content" class="hidden">
+            <table class="inventory-table">
+                <thead>
+                    <tr>
+                        <th style="width: 40%">風險項目</th>
+                        <th style="width: 20%">本月是否增加</th>
+                        <th style="width: 15%">發生次數</th>
+                        <th style="width: 25%">原因</th>
+                    </tr>
+                </thead>
+                <tbody id="inventory-table-body">
+                    <!-- 風險項目將在JavaScript中動態生成 -->
+                </tbody>
+            </table>
+            
+            <div class="inventory-actions">
+                <button id="submit-inventory-btn" class="submit-btn">送出</button>
+                <button id="reset-inventory-btn" class="reset-btn">重置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增 Bootstrap JS 和 Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
-    <!-- ========= 主 JavaScript ========= -->
     <script>
-    document.addEventListener('DOMContentLoaded',function(){
-        /* 原本變數宣告 */
-        const loginSection=document.getElementById('login-section');
-        const dashboardSection=document.getElementById('dashboard-section');
-        const notificationPage=document.getElementById('notification-page');
-        // 其他舊有節點... (inventorySection, deptRiskIndexPage 等)
-        const notificationBtn=document.getElementById('notification-btn');
-        const notificationIcon=document.getElementById('notification-icon');
-        const notificationBadge=document.getElementById('notification-badge');
-        // 通知頁元件
-        const saveSettingsBtn=document.getElementById('save-settings-btn');
-        const checkRiskNowBtn=document.getElementById('check-risk-now-btn');
-        const markAllReadBtn=document.getElementById('mark-all-read-btn');
-        const clearNotificationsBtn=document.getElementById('clear-notifications-btn');
-        const notificationsContainer=document.getElementById('notifications-container');
-        const riskThresholdSelect=document.getElementById('risk-threshold');
-        const notificationFrequencySelect=document.getElementById('notification-frequency');
-        const backFromNotificationBtn=document.getElementById('back-to-dashboard-from-notification');
-
-        /* 其他原本變數... (usernameInput, passwordInput, inventoryBtn 等) 保留不動 */
-
-        /* 基本設定 */
-        const inactivityTimeout=10*60*1000; // 10 分鐘
-        let inactivityTimer, notificationCheckTimer;
-        const scriptUrl='https://script.google.com/macros/s/AKfycbz6PrP-XVs2HkaPQFKArWyVKdT0tfMWU_7mR02dQhqHNnd64O3sQi6qCF2QcTIF88-x/exec'; // 與沒通知版相同
-
-        /* ========== 通知相關函式 ========== */
-        function loadNotificationSettings(){
-            riskThresholdSelect.value=localStorage.getItem('riskThreshold')||'30';
-            notificationFrequencySelect.value=localStorage.getItem('notificationFrequency')||'realtime';
+    document.addEventListener('DOMContentLoaded', function() {
+        const loginSection = document.getElementById('login-section');
+        const dashboardSection = document.getElementById('dashboard-section');
+        const inventorySection = document.getElementById('inventory-section');
+        const deptRiskIndexPage = document.getElementById('dept-risk-index-page');
+        const notificationPage = document.getElementById('notification-page');
+        const loginBtn = document.getElementById('login-btn');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const errorMessage = document.getElementById('error-message');
+        const loadingMsg = document.getElementById('loading');
+        const inventoryBtn = document.getElementById('inventory-btn');
+        const eventBtn = document.getElementById('event-btn');
+        const notificationBtn = document.getElementById('notification-btn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const changePasswordBtn = document.getElementById('changePasswordBtn');
+        const submitChangePasswordBtn = document.getElementById('submitChangePassword');
+        const userDepartment = document.getElementById('user-department');
+        const userName = document.getElementById('user-name');
+        const backBtn = document.getElementById('back-btn');
+        const submitInventoryBtn = document.getElementById('submit-inventory-btn');
+        const resetInventoryBtn = document.getElementById('reset-inventory-btn');
+        const inventoryTableBody = document.getElementById('inventory-table-body');
+        const inventoryLoading = document.getElementById('inventory-loading');
+        const inventoryContent = document.getElementById('inventory-content');
+        const deptRiskIndexBtn = document.getElementById('dept-risk-index-btn');
+        const backFromRiskBtn = document.getElementById('back-to-dashboard-from-risk');
+        const backFromNotificationBtn = document.getElementById('back-to-dashboard-from-notification');
+        const notificationIcon = document.getElementById('notification-icon');
+        const notificationBadge = document.getElementById('notification-badge');
+        
+        // 通知相關元素
+        const saveSettingsBtn = document.getElementById('save-settings-btn');
+        const checkRiskNowBtn = document.getElementById('check-risk-now-btn');
+        const markAllReadBtn = document.getElementById('mark-all-read-btn');
+        const clearNotificationsBtn = document.getElementById('clear-notifications-btn');
+        const notificationsContainer = document.getElementById('notifications-container');
+        const riskThresholdSelect = document.getElementById('risk-threshold');
+        const notificationFrequencySelect = document.getElementById('notification-frequency');
+        
+        // 自動登出相關變數
+        let inactivityTimer;
+        const inactivityTimeout = 10 * 60 * 1000; // 10分鐘，以毫秒為單位
+        
+        // 通知檢查計時器
+        let notificationCheckTimer;
+        
+        // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbw59qaT8cEKwPd6tWs6wBTf6sq71hdTgU3NrjETNFNteQF86ll3HnhwWJ_SUE5rZVFF/exec';
+        
+        // 監控用戶活動的函數
+        function resetInactivityTimer() {
+            // 清除現有計時器
+            clearTimeout(inactivityTimer);
+            
+            // 如果用戶已登入，則設置新的計時器
+            if (localStorage.getItem('isLoggedIn') === 'true') {
+                inactivityTimer = setTimeout(autoLogout, inactivityTimeout);
+            }
         }
-
-        function saveNotificationSettingsToBackend(){
-            const payload={
-                username:localStorage.getItem('username'),
-                riskThreshold:riskThresholdSelect.value,
-                notificationFrequency:notificationFrequencySelect.value
-            };
-            return fetch(`${scriptUrl}?action=saveNotificationSettings`,{method:'POST',body:JSON.stringify(payload)}).then(r=>r.json());
+        
+        // 自動登出函數
+        function autoLogout() {
+            // 只有在用戶已登入的情況下執行登出
+            if (localStorage.getItem('isLoggedIn') === 'true') {
+                // 顯示提示訊息
+                alert('因長時間未操作，系統已自動登出');
+                
+                // 清除登入資訊
+                localStorage.removeItem('isLoggedIn');
+                localStorage.removeItem('username');
+                localStorage.removeItem('department');
+                localStorage.removeItem('name');
+                
+                // 返回登入頁面
+                showLogin();
+            }
         }
-
-        function updateNotificationBadge(){
-            fetch(`${scriptUrl}?action=getUnreadNotificationCount&username=${encodeURIComponent(localStorage.getItem('username'))}`)
-              .then(r=>r.json()).then(d=>{
-                if(d.success){
-                  const c=d.count;
-                  if(c>0){notificationBadge.textContent=c>99?'99+':c;notificationBadge.classList.remove('hidden');}
-                  else notificationBadge.classList.add('hidden');
-                }
-              }).catch(console.error);
-        }
-
-        function startNotificationCheck(){
-            clearInterval(notificationCheckTimer);
-            const freq=notificationFrequencySelect.value;
-            let interval=30000; // default realtime 30s
-            if(freq==='hourly') interval=3600000;
-            else if(freq==='daily') interval=86400000;
-            notificationCheckTimer=setInterval(()=>{
-                if(localStorage.getItem('isLoggedIn')==='true'){
-                    updateNotificationBadge();
-                    fetch(`${scriptUrl}?action=checkRiskThreshold&username=${encodeURIComponent(localStorage.getItem('username'))}`).catch(console.error);
-                }
-            },interval);
-        }
-
-        function renderNotifications(list){
-            if(!list.length){notificationsContainer.innerHTML='<div class="text-center"><p>目前沒有通知</p></div>';return;}
-            notificationsContainer.innerHTML=list.map(n=>{
-                const unread=!n.isRead?'unread':'';const urgent=n.priority==='urgent'?'urgent':'';
-                return `<div class="notification-item ${unread} ${urgent}" data-id="${n.id}">
-                    <div class="notification-header"><h5 class="notification-title">${n.title}</h5><span class="notification-time">${n.time}</span></div>
-                    <div class="notification-content">${n.content}</div>
-                    <div class="notification-actions">
-                        ${!n.isRead?`<button class="btn btn-sm btn-primary mark-read-btn" data-id="${n.id}">標為已讀</button>`:''}
-                        <button class="btn btn-sm btn-danger delete-notification-btn" data-id="${n.id}">刪除</button>
-                    </div></div>`;}).join('');
-            // 綁事件
-            notificationsContainer.querySelectorAll('.mark-read-btn').forEach(btn=>btn.addEventListener('click',()=>markNotificationAsRead(btn.dataset.id)));
-            notificationsContainer.querySelectorAll('.delete-notification-btn').forEach(btn=>btn.addEventListener('click',()=>deleteNotification(btn.dataset.id)));
-        }
-
-        function loadNotifications(){
-            notificationsContainer.innerHTML='<div class="text-center"><p>載入通知中...</p></div>';
-            fetch(`${scriptUrl}?action=getNotifications&username=${encodeURIComponent(localStorage.getItem('username'))}`)
-              .then(r=>r.json()).then(d=>{if(d.success)renderNotifications(d.notifications);else notificationsContainer.innerHTML='<div class="text-danger text-center">載入失敗</div>';})
-              .catch(e=>{console.error(e);notificationsContainer.innerHTML='<div class="text-danger text-center">錯誤</div>';});
-        }
-
-        function markNotificationAsRead(id){
-            fetch(`${scriptUrl}?action=markNotificationRead&notificationId=${id}&username=${encodeURIComponent(localStorage.getItem('username'))}`)
-              .then(r=>r.json()).then(()=>{loadNotifications();updateNotificationBadge();});
-        }
-        function deleteNotification(id){
-            if(!confirm('確定刪除？'))return;
-            fetch(`${scriptUrl}?action=deleteNotification&notificationId=${id}&username=${encodeURIComponent(localStorage.getItem('username'))}`)
-              .then(r=>r.json()).then(()=>{loadNotifications();updateNotificationBadge();});
-        }
-
-        /* ========== 事件繫結 (只列新增/改動部分) ========== */
-        notificationBtn.addEventListener('click',()=>{dashboardSection.style.display='none';notificationPage.style.display='block';loadNotifications();});
-        notificationIcon.addEventListener('click',()=>{dashboardSection.style.display='none';notificationPage.style.display='block';loadNotifications();});
-        backFromNotificationBtn.addEventListener('click',()=>{notificationPage.style.display='none';dashboardSection.style.display='block';});
-
-        saveSettingsBtn.addEventListener('click',()=>{
-            localStorage.setItem('riskThreshold',riskThresholdSelect.value);
-            localStorage.setItem('notificationFrequency',notificationFrequencySelect.value);
-            saveNotificationSettingsToBackend().then(d=>{if(d.success){alert('設定已儲存');startNotificationCheck();}else alert('儲存失敗');});
+        
+        // 監聽用戶活動事件
+        ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(event => {
+            document.addEventListener(event, resetInactivityTimer, true);
         });
-        checkRiskNowBtn.addEventListener('click',()=>{
-            checkRiskNowBtn.disabled=true;checkRiskNowBtn.textContent='檢查中...';
+        
+        // 檢查是否已登入
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            // 顯示使用者資訊
+            userDepartment.textContent = localStorage.getItem('department') || '';
+            userName.textContent = localStorage.getItem('name') || '';
+            showDashboard();
+            // 初始化自動登出計時器
+            resetInactivityTimer();
+            // 載入通知設定和啟動通知檢查
+            loadNotificationSettings();
+            startNotificationCheck();
+            updateNotificationBadge();
+        }
+
+        // 通知管理功能
+        notificationBtn.addEventListener('click', function() {
+            dashboardSection.style.display = 'none';
+            notificationPage.style.display = 'block';
+            loadNotifications();
+            resetInactivityTimer();
+        });
+
+        notificationIcon.addEventListener('click', function() {
+            dashboardSection.style.display = 'none';
+            notificationPage.style.display = 'block';
+            loadNotifications();
+            resetInactivityTimer();
+        });
+
+        backFromNotificationBtn.addEventListener('click', function() {
+            notificationPage.style.display = 'none';
+            dashboardSection.style.display = 'block';
+            resetInactivityTimer();
+        });
+
+        // 儲存通知設定
+        saveSettingsBtn.addEventListener('click', function() {
+            const threshold = riskThresholdSelect.value;
+            const frequency = notificationFrequencySelect.value;
+            
+            // 儲存到本地存儲
+            localStorage.setItem('riskThreshold', threshold);
+            localStorage.setItem('notificationFrequency', frequency);
+            
+            // 發送到後端
+            fetch(`${scriptUrl}?action=saveNotificationSettings`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    username: localStorage.getItem('username'),
+                    riskThreshold: threshold,
+                    notificationFrequency: frequency
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('通知設定已儲存');
+                    // 重新啟動通知檢查
+                    startNotificationCheck();
+                } else {
+                    alert('儲存設定失敗: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('儲存設定錯誤:', error);
+                alert('儲存設定時發生錯誤');
+            });
+            
+            resetInactivityTimer();
+        });
+
+        // 立即檢查風險
+        checkRiskNowBtn.addEventListener('click', function() {
+            checkRiskNowBtn.disabled = true;
+            checkRiskNowBtn.textContent = '檢查中...';
+            
             fetch(`${scriptUrl}?action=checkRiskThreshold&username=${encodeURIComponent(localStorage.getItem('username'))}`)
-              .then(r=>r.json()).then(d=>{
-                checkRiskNowBtn.disabled=false;checkRiskNowBtn.textContent='立即檢查風險';
-                if(d.success){if(d.notifications.length){alert(`發現 ${d.notifications.length} 個風險警告`);}else alert('目前沒有風險警告');loadNotifications();updateNotificationBadge();}
-              }).catch(()=>{checkRiskNowBtn.disabled=false;checkRiskNowBtn.textContent='立即檢查風險';});
-        });
-        markAllReadBtn.addEventListener('click',()=>{
-            fetch(`${scriptUrl}?action=markAllNotificationsRead&username=${encodeURIComponent(localStorage.getItem('username'))}`)
-              .then(()=>{loadNotifications();updateNotificationBadge();});
-        });
-        clearNotificationsBtn.addEventListener('click',()=>{
-            if(!confirm('確定要清除所有通知嗎？此操作無法復原。'))return;
-            fetch(`${scriptUrl}?action=clearAllNotifications&username=${encodeURIComponent(localStorage.getItem('username'))}`)
-              .then(()=>{loadNotifications();updateNotificationBadge();});
+                .then(response => response.json())
+                .then(data => {
+                    checkRiskNowBtn.disabled = false;
+                    checkRiskNowBtn.textContent = '立即檢查風險';
+                    
+                    if (data.success) {
+                        if (data.notifications && data.notifications.length > 0) {
+                            alert(`發現 ${data.notifications.length} 個風險警告`);
+                            loadNotifications(); // 重新載入通知列表
+                            updateNotificationBadge();
+                        } else {
+                            alert('目前沒有風險警告');
+                        }
+                    } else {
+                        alert('檢查失敗: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    checkRiskNowBtn.disabled = false;
+                    checkRiskNowBtn.textContent = '立即檢查風險';
+                    console.error('檢查風險錯誤:', error);
+                    alert('檢查風險時發生錯誤');
+                });
+            
+            resetInactivityTimer();
         });
 
-        /* ======= 下方其餘原有 JS（登入、inventory、dept‑risk 等函式）照舊，僅在 submitInventory 成功後多呼叫 updateNotificationBadge() ======= */
-        // ... (保持原碼不改動，僅在對應位置插入 updateNotificationBadge();)
+        // 全部標為已讀
+        markAllReadBtn.addEventListener('click', function() {
+            fetch(`${scriptUrl}?action=markAllNotificationsRead&username=${encodeURIComponent(localStorage.getItem('username'))}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadNotifications();
+                        updateNotificationBadge();
+                        alert('所有通知已標為已讀');
+                    } else {
+                        alert('操作失敗: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('標記已讀錯誤:', error);
+                    alert('操作時發生錯誤');
+                });
+            
+            resetInactivityTimer();
+        });
+
+        // 清除所有通知
+        clearNotificationsBtn.addEventListener('click', function() {
+            if (confirm('確定要清除所有通知嗎？此操作無法復原。')) {
+                fetch(`${scriptUrl}?action=clearAllNotifications&username=${encodeURIComponent(localStorage.getItem('username'))}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadNotifications();
+                            updateNotificationBadge();
+                            alert('所有通知已清除');
+                        } else {
+                            alert('清除失敗: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('清除通知錯誤:', error);
+                        alert('清除時發生錯誤');
+                    });
+            }
+            
+            resetInactivityTimer();
+        });
+
+        // 載入通知設定
+        function loadNotificationSettings() {
+            const threshold = localStorage.getItem('riskThreshold') || '30';
+            const frequency = localStorage.getItem('notificationFrequency') || 'realtime';
+            
+            riskThresholdSelect.value = threshold;
+            notificationFrequencySelect.value = frequency;
+        }
+
+        // 載入通知列表
+        function loadNotifications() {
+            notificationsContainer.innerHTML = '<div class="text-center"><p>載入通知中...</p></div>';
+            
+            fetch(`${scriptUrl}?action=getNotifications&username=${encodeURIComponent(localStorage.getItem('username'))}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        renderNotifications(data.notifications);
+                    } else {
+                        notificationsContainer.innerHTML = '<div class="text-center text-danger"><p>載入通知失敗</p></div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('載入通知錯誤:', error);
+                    notificationsContainer.innerHTML = '<div class="text-center text-danger"><p>載入通知時發生錯誤</p></div>';
+                });
+        }
+
+        // 渲染通知列表
+        function renderNotifications(notifications) {
+            if (notifications.length === 0) {
+                notificationsContainer.innerHTML = '<div class="text-center"><p>目前沒有通知</p></div>';
+                return;
+            }
+
+            const notificationHtml = notifications.map(notification => {
+                const isUrgent = notification.priority === 'urgent';
+                const isUnread = !notification.isRead;
+                
+                return `
+                    <div class="notification-item ${isUnread ? 'unread' : ''} ${isUrgent ? 'urgent' : ''}" data-id="${notification.id}">
+                        <div class="notification-header">
+                            <h5 class="notification-title">${notification.title}</h5>
+                            <span class="notification-time">${notification.time}</span>
+                        </div>
+                        <div class="notification-content">${notification.content}</div>
+                        <div class="notification-actions">
+                            ${isUnread ? `<button class="btn btn-sm btn-primary mark-read-btn" data-id="${notification.id}">標為已讀</button>` : ''}
+                            <button class="btn btn-sm btn-danger delete-notification-btn" data-id="${notification.id}">刪除</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            notificationsContainer.innerHTML = notificationHtml;
+
+            // 綁定按鈕事件
+            document.querySelectorAll('.mark-read-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const notificationId = this.getAttribute('data-id');
+                    markNotificationAsRead(notificationId);
+                });
+            });
+
+            document.querySelectorAll('.delete-notification-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const notificationId = this.getAttribute('data-id');
+                    deleteNotification(notificationId);
+                });
+            });
+        }
+
+        // 標記單個通知為已讀
+        function markNotificationAsRead(notificationId) {
+            fetch(`${scriptUrl}?action=markNotificationRead&notificationId=${notificationId}&username=${encodeURIComponent(localStorage.getItem('username'))}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadNotifications();
+                        updateNotificationBadge();
+                    } else {
+                        alert('操作失敗: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('標記已讀錯誤:', error);
+                    alert('操作時發生錯誤');
+                });
+        }
+
+        // 刪除單個通知
+        function deleteNotification(notificationId) {
+            if (confirm('確定要刪除這個通知嗎？')) {
+                fetch(`${scriptUrl}?action=deleteNotification&notificationId=${notificationId}&username=${encodeURIComponent(localStorage.getItem('username'))}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadNotifications();
+                            updateNotificationBadge();
+                        } else {
+                            alert('刪除失敗: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('刪除通知錯誤:', error);
+                        alert('刪除時發生錯誤');
+                    });
+            }
+        }
+
+        // 更新通知徽章
+        function updateNotificationBadge() {
+            fetch(`${scriptUrl}?action=getUnreadNotificationCount&username=${encodeURIComponent(localStorage.getItem('username'))}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const count = data.count;
+                        if (count > 0) {
+                            notificationBadge.textContent = count > 99 ? '99+' : count;
+                            notificationBadge.classList.remove('hidden');
+                        } else {
+                            notificationBadge.classList.add('hidden');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('更新通知徽章錯誤:', error);
+                });
+        }
+
+        // 開始通知檢查
+        function startNotificationCheck() {
+            clearInterval(notificationCheckTimer);
+            
+            const frequency = localStorage.getItem('notificationFrequency') || 'realtime';
+            let interval;
+            
+            switch (frequency) {
+                case 'realtime':
+                    interval = 30000; // 30秒
+                    break;
+                case 'hourly':
+                    interval = 3600000; // 1小時
+                    break;
+                case 'daily':
+                    interval = 86400000; // 24小時
+                    break;
+                default:
+                    interval = 30000;
+            }
+            
+            notificationCheckTimer = setInterval(() => {
+                if (localStorage.getItem('isLoggedIn') === 'true') {
+                    updateNotificationBadge();
+                    // 背景檢查風險
+                    fetch(`${scriptUrl}?action=checkRiskThreshold&username=${encodeURIComponent(localStorage.getItem('username'))}`)
+                        .catch(error => console.error('背景風險檢查錯誤:', error));
+                }
+            }, interval);
+        }
+
+        // 添加部門風險係數按鈕點擊事件
+        deptRiskIndexBtn.addEventListener('click', function() {
+            dashboardSection.style.display = 'none';
+            deptRiskIndexPage.style.display = 'block';
+            
+            // 載入風險係數數據
+            loadRiskIndexData();
+            
+            // 重置計時器
+            resetInactivityTimer();
+        });
+        
+        // 返回按鈕點擊事件
+        backFromRiskBtn.addEventListener('click', function() {
+            deptRiskIndexPage.style.display = 'none';
+            dashboardSection.style.display = 'block';
+            // 強制重新整理頁面
+            window.location.reload();
+            
+            // 重置計時器
+            resetInactivityTimer();
+        });
+        
+        // 載入風險係數數據的函數
+        function loadRiskIndexData() {
+            // 顯示載入中訊息
+            document.getElementById('risk-index-table-body').innerHTML = '<tr><td colspan="2" class="text-center">載入中...</td></tr>';
+            
+            // 調用後端API獲取數據，現在從"R值"工作表獲取
+            fetch(`${scriptUrl}?action=getDepartmentRiskIndexFromRSheet`)
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        // 更新表格
+                        updateRiskTable(result.data);
+                    } else {
+                        console.error('獲取數據失敗:', result.message);
+                        document.getElementById('risk-index-table-body').innerHTML = 
+                            '<tr><td colspan="2" class="text-center text-danger">獲取數據失敗: ' + result.message + '</td></tr>';
+                    }
+                })
+                .catch(error => {
+                    console.error('獲取數據失敗:', error);
+                    document.getElementById('risk-index-table-body').innerHTML = 
+                        '<tr><td colspan="2" class="text-center text-danger">獲取數據失敗</td></tr>';
+                });
+        }
+        // 更新風險係數表格的函數
+        function updateRiskTable(data) {
+            const tableBody = document.getElementById('risk-index-table-body');
+            
+            // 如果沒有數據，顯示提示訊息
+            if (!data || data.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="2" class="text-center">沒有可用的風險係數數據</td></tr>';
+                return;
+            }
+            
+            // 清空表格
+            tableBody.innerHTML = '';
+            
+            // 填充表格數據
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                // 部門名稱
+                const deptCell = document.createElement('td');
+                deptCell.textContent = row.department;
+                tr.appendChild(deptCell);
+                
+                // 風險係數(R值)
+                const riskCell = document.createElement('td');
+                const rValue = parseFloat(row.rValue);
+                
+                // 添加風險燈號
+                const riskLight = document.createElement('span');
+                riskLight.classList.add('risk-light');
+                
+                if (rValue >= 40) {
+                    riskLight.textContent = '🔴';
+                    riskLight.classList.add('red-light');
+                } else if (rValue >= 20) {
+                    riskLight.textContent = '🟡';
+                    riskLight.classList.add('yellow-light');
+                } else {
+                    riskLight.textContent = '🟢';
+                    riskLight.classList.add('green-light');
+                }
+                
+                riskCell.appendChild(riskLight);
+                riskCell.appendChild(document.createTextNode(' ' + rValue.toFixed(2)));
+                tr.appendChild(riskCell);
+                
+                tableBody.appendChild(tr);
+            });
+        }
+
+        // 登入按鈕點擊事件
+        loginBtn.addEventListener('click', function() {
+            const username = usernameInput.value.trim();
+            const password = passwordInput.value.trim();
+            
+            // 簡單的前端驗證
+            if (!username || !password) {
+                errorMessage.textContent = '請輸入帳號和密碼';
+                return;
+            }
+            
+            // 顯示載入中訊息
+            errorMessage.textContent = '';
+            loadingMsg.classList.remove('hidden');
+            loginBtn.disabled = true;
+            
+            // 調用後端API驗證登入
+            fetch(`${scriptUrl}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
+                .then(response => response.json())
+                .then(result => {
+                    loadingMsg.classList.add('hidden');
+                    loginBtn.disabled = false;
+                    
+                    if (result.success) {
+                        // 儲存登入狀態和用戶資訊
+                        localStorage.setItem('isLoggedIn', 'true');
+                        localStorage.setItem('username', username);
+                        localStorage.setItem('department', result.department);
+                        localStorage.setItem('name', result.name);
+                        
+                        // 顯示使用者資訊
+                        userDepartment.textContent = result.department;
+                        userName.textContent = result.name;
+                        
+                        // 顯示主頁面
+                        showDashboard();
+                        
+                        // 初始化自動登出計時器
+                        resetInactivityTimer();
+                        
+                        // 載入通知設定和啟動通知檢查
+                        loadNotificationSettings();
+                        startNotificationCheck();
+                        updateNotificationBadge();
+                    } else {
+                        errorMessage.textContent = result.message || '登入失敗，請檢查帳號和密碼';
+                    }
+                })
+                .catch(error => {
+                    console.error('登入錯誤:', error);
+                    loadingMsg.classList.add('hidden');
+                    loginBtn.disabled = false;
+                    errorMessage.textContent = '登入時發生錯誤，請稍後再試';
+                });
+        });
+        
+        // 登出按鈕點擊事件
+        logoutBtn.addEventListener('click', function() {
+            // 清除登入狀態和用戶資訊
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('username');
+            localStorage.removeItem('department');
+            localStorage.removeItem('name');
+            
+            // 清除通知檢查計時器
+            clearInterval(notificationCheckTimer);
+            
+            // 返回登入頁面
+            showLogin();
+        });
+        
+        // 更改密碼按鈕點擊事件
+        changePasswordBtn.addEventListener('click', function() {
+            // 清空表單和訊息
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            document.getElementById('passwordChangeMessage').style.display = 'none';
+            
+            // 顯示彈出視窗
+            const changePasswordModal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+            changePasswordModal.show();
+            
+            // 重置計時器
+            resetInactivityTimer();
+        });
+        
+        // 提交更改密碼
+        submitChangePasswordBtn.addEventListener('click', function() {
+            const currentPassword = document.getElementById('currentPassword').value.trim();
+            const newPassword = document.getElementById('newPassword').value.trim();
+            const confirmPassword = document.getElementById('confirmPassword').value.trim();
+            const messageElement = document.getElementById('passwordChangeMessage');
+            
+            // 前端驗證
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                messageElement.textContent = '請填寫所有欄位';
+                messageElement.className = 'alert alert-danger';
+                messageElement.style.display = 'block';
+                return;
+            }
+            
+            if (newPassword !== confirmPassword) {
+                messageElement.textContent = '新密碼與確認密碼不符';
+                messageElement.className = 'alert alert-danger';
+                messageElement.style.display = 'block';
+                return;
+            }
+            
+            if (newPassword.length < 6) {
+                messageElement.textContent = '新密碼長度至少需要6個字符';
+                messageElement.className = 'alert alert-danger';
+                messageElement.style.display = 'block';
+                return;
+            }
+            
+            // 禁用按鈕，防止重複提交
+            submitChangePasswordBtn.disabled = true;
+            submitChangePasswordBtn.textContent = '處理中...';
+            
+            // 調用後端API更改密碼
+            const username = localStorage.getItem('username');
+            
+            fetch(`${scriptUrl}?action=changePassword`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    currentPassword: currentPassword,
+                    newPassword: newPassword
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                submitChangePasswordBtn.disabled = false;
+                submitChangePasswordBtn.textContent = '確認更改';
+                
+                if (result.success) {
+                    messageElement.textContent = '密碼更改成功';
+                    messageElement.className = 'alert alert-success';
+                    messageElement.style.display = 'block';
+                    
+                    // 3秒後關閉彈出視窗
+                    setTimeout(() => {
+                        bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
+                    }, 3000);
+                } else {
+                    messageElement.textContent = result.message || '密碼更改失敗';
+                    messageElement.className = 'alert alert-danger';
+                    messageElement.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('更改密碼錯誤:', error);
+                submitChangePasswordBtn.disabled = false;
+                submitChangePasswordBtn.textContent = '確認更改';
+                messageElement.textContent = '更改密碼時發生錯誤，請稍後再試';
+                messageElement.className = 'alert alert-danger';
+                messageElement.style.display = 'block';
+            });
+            
+            // 重置計時器
+            resetInactivityTimer();
+        });
+        
+        // 部門週期盤點按鈕點擊事件
+        inventoryBtn.addEventListener('click', function() {
+            // 隱藏主頁面，顯示盤點頁面
+            dashboardSection.classList.add('hidden');
+            inventorySection.classList.remove('hidden');
+            
+            // 顯示載入中
+            inventoryLoading.classList.remove('hidden');
+            inventoryContent.classList.add('hidden');
+            
+            // 調用後端API獲取風險項目
+            const department = localStorage.getItem('department');
+            fetch(`${scriptUrl}?action=getRiskItems&department=${encodeURIComponent(department)}`)
+                .then(response => response.json())
+                .then(result => {
+                    if (result.success) {
+                        // 生成風險項目表格
+                        generateRiskItemsTable(result.items);
+                        
+                        // 隱藏載入中，顯示內容
+                        inventoryLoading.classList.add('hidden');
+                        inventoryContent.classList.remove('hidden');
+                    } else {
+                        console.error('獲取風險項目失敗:', result.message);
+                        inventoryLoading.textContent = '獲取風險項目失敗: ' + result.message;
+                    }
+                })
+                .catch(error => {
+                    console.error('獲取風險項目錯誤:', error);
+                    inventoryLoading.textContent = '獲取風險項目時發生錯誤';
+                });
+            
+            // 重置計時器
+            resetInactivityTimer();
+        });
+        
+        // 返回按鈕點擊事件
+        backBtn.addEventListener('click', function() {
+            // 隱藏盤點頁面，顯示主頁面
+            inventorySection.classList.add('hidden');
+            dashboardSection.classList.remove('hidden');
+            
+            // 重置計時器
+            resetInactivityTimer();
+        });
+        
+        // 一鍵全否按鈕點擊事件
+        document.getElementById('all-no-btn').addEventListener('click', function() {
+            // 獲取所有的"是否增加"選擇框
+            const increaseSelects = document.querySelectorAll('.increase-select');
+            
+            // 將所有選擇框設為"否"
+            increaseSelects.forEach(select => {
+                select.value = 'no';
+                
+                // 觸發change事件，以便更新相關欄位的狀態
+                const event = new Event('change');
+                select.dispatchEvent(event);
+            });
+            
+            // 重置計時器
+            resetInactivityTimer();
+        });
+        
+        // 重置按鈕點擊事件
+        resetInventoryBtn.addEventListener('click', function() {
+            // 獲取所有的選擇框和輸入框
+            const increaseSelects = document.querySelectorAll('.increase-select');
+            const countInputs = document.querySelectorAll('.count-input');
+            const reasonInputs = document.querySelectorAll('.reason-input');
+            
+            // 重置所有表單元素
+            increaseSelects.forEach(select => {
+                select.value = 'no';
+                
+                // 觸發change事件，以便更新相關欄位的狀態
+                const event = new Event('change');
+                select.dispatchEvent(event);
+            });
+            
+            countInputs.forEach(input => {
+                input.value = '0';
+                input.disabled = true;
+            });
+            
+            reasonInputs.forEach(input => {
+                input.value = '';
+                input.disabled = true;
+            });
+            
+            // 重置計時器
+            resetInactivityTimer();
+        });
+        
+        // 送出按鈕點擊事件
+        submitInventoryBtn.addEventListener('click', function() {
+            // 獲取所有風險項目的數據
+            const rows = document.querySelectorAll('#inventory-table-body tr');
+            const inventoryData = [];
+            
+            rows.forEach(row => {
+                const itemId = row.getAttribute('data-item-id');
+                const itemName = row.querySelector('.item-name').textContent;
+                const increaseValue = row.querySelector('.increase-select').value;
+                const countValue = row.querySelector('.count-input').value;
+                const reasonValue = row.querySelector('.reason-input').value;
+                
+                // 檢查必填欄位
+                if (increaseValue === 'yes' && (!countValue || countValue === '0' || !reasonValue)) {
+                    alert(`請完整填寫「${itemName}」的發生次數和原因`);
+                    return;
+                }
+                
+                inventoryData.push({
+                    itemId: itemId,
+                    increase: increaseValue === 'yes',
+                    count: increaseValue === 'yes' ? parseInt(countValue) : 0,
+                    reason: increaseValue === 'yes' ? reasonValue : ''
+                });
+            });
+            
+            // 如果有驗證失敗，不繼續執行
+            if (inventoryData.length !== rows.length) {
+                return;
+            }
+            
+            // 禁用送出按鈕，防止重複提交
+            submitInventoryBtn.disabled = true;
+            submitInventoryBtn.textContent = '處理中...';
+            
+            // 調用後端API提交盤點數據
+            const username = localStorage.getItem('username');
+            const department = localStorage.getItem('department');
+            
+            fetch(`${scriptUrl}?action=submitInventory`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    username: username,
+                    department: department,
+                    inventoryData: inventoryData
+                })
+            })
+            .then(response => response.json())
+            .then(result => {
+                submitInventoryBtn.disabled = false;
+                submitInventoryBtn.textContent = '送出';
+                
+                if (result.success) {
+                    alert('盤點數據已成功提交');
+                    
+                    // 返回主頁面
+                    inventorySection.classList.add('hidden');
+                    dashboardSection.classList.remove('hidden');
+                } else {
+                    alert('提交失敗: ' + (result.message || '未知錯誤'));
+                }
+            })
+            .catch(error => {
+                console.error('提交盤點數據錯誤:', error);
+                submitInventoryBtn.disabled = false;
+                submitInventoryBtn.textContent = '送出';
+                alert('提交盤點數據時發生錯誤，請稍後再試');
+            });
+            
+            // 重置計時器
+            resetInactivityTimer();
+        });
+        
+        // 事件登錄按鈕點擊事件
+        eventBtn.addEventListener('click', function() {
+            alert('事件登錄功能正在開發中，敬請期待！');
+            
+            // 重置計時器
+            resetInactivityTimer();
+        });
+        
+        // 生成風險項目表格
+        function generateRiskItemsTable(items) {
+            // 清空表格
+            inventoryTableBody.innerHTML = '';
+            
+            // 如果沒有風險項目，顯示提示訊息
+            if (!items || items.length === 0) {
+                inventoryTableBody.innerHTML = '<tr><td colspan="4" class="text-center">沒有可用的風險項目</td></tr>';
+                return;
+            }
+            
+            // 為每個風險項目創建表格行
+            items.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.setAttribute('data-item-id', item.id);
+                
+                // 風險項目名稱
+                const nameCell = document.createElement('td');
+                nameCell.className = 'item-name';
+                nameCell.textContent = item.name;
+                tr.appendChild(nameCell);
+                
+                // 本月是否增加
+                const increaseCell = document.createElement('td');
+                const increaseSelect = document.createElement('select');
+                increaseSelect.className = 'increase-select';
+                increaseSelect.innerHTML = `
+                    <option value="no">否</option>
+                    <option value="yes">是</option>
+                `;
+                
+                // 增加change事件監聽器
+                increaseSelect.addEventListener('change', function() {
+                    const isIncrease = this.value === 'yes';
+                    const countInput = tr.querySelector('.count-input');
+                    const reasonInput = tr.querySelector('.reason-input');
+                    
+                    // 根據選擇啟用或禁用其他欄位
+                    countInput.disabled = !isIncrease;
+                    reasonInput.disabled = !isIncrease;
+                    
+                    // 如果選擇"否"，重置其他欄位的值
+                    if (!isIncrease) {
+                        countInput.value = '0';
+                        reasonInput.value = '';
+                    }
+                });
+                
+                increaseCell.appendChild(increaseSelect);
+                tr.appendChild(increaseCell);
+                
+                // 發生次數
+                const countCell = document.createElement('td');
+                const countInput = document.createElement('input');
+                countInput.type = 'number';
+                countInput.min = '0';
+                countInput.value = '0';
+                countInput.className = 'count-input';
+                countInput.disabled = true;
+                countCell.appendChild(countInput);
+                tr.appendChild(countCell);
+                
+                // 原因
+                const reasonCell = document.createElement('td');
+                const reasonInput = document.createElement('input');
+                reasonInput.type = 'text';
+                reasonInput.className = 'reason-input';
+                reasonInput.disabled = true;
+                reasonCell.appendChild(reasonInput);
+                tr.appendChild(reasonCell);
+                
+                // 添加到表格
+                inventoryTableBody.appendChild(tr);
+            });
+        }
+        
+        // 顯示登入頁面
+        function showLogin() {
+            loginSection.classList.remove('hidden');
+            dashboardSection.classList.add('hidden');
+            inventorySection.classList.add('hidden');
+            deptRiskIndexPage.style.display = 'none';
+            notificationPage.style.display = 'none';
+            
+            // 清空輸入框和錯誤訊息
+            usernameInput.value = '';
+            passwordInput.value = '';
+            errorMessage.textContent = '';
+        }
+        
+        // 顯示主頁面
+        function showDashboard() {
+            loginSection.classList.add('hidden');
+            dashboardSection.classList.remove('hidden');
+            inventorySection.classList.add('hidden');
+            deptRiskIndexPage.style.display = 'none';
+            notificationPage.style.display = 'none';
+        }
     });
     </script>
 </body>
