@@ -1680,66 +1680,64 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             resetInactivityTimer();
         });
         
-// 送出盤點按鈕點擊事件
+// 送出按鈕點擊事件
 submitInventoryBtn.addEventListener('click', function() {
     // 驗證所有必填欄位
     let isValid = true;
     const responses = [];
     
-    document.querySelectorAll('.risk-increase-select').forEach(select => {
-        const row = select.closest('tr');
-        const riskId = row.getAttribute('data-risk-id');
-        const countInput = row.querySelector('.risk-count-input');
-        const reasonInput = row.querySelector('.risk-reason-input');
+    document.querySelectorAll('.increase-select').forEach(select => {
+        const index = select.getAttribute('data-index');
+        const occurrenceInput = document.querySelector(`.occurrence-input[data-index="${index}"]`);
+        const reasonInput = document.querySelector(`.reason-input[data-index="${index}"]`);
         
-        // 取得風險項目資訊
-        const riskInfo = row.querySelector('.risk-info');
-        const riskName = riskInfo.querySelector('.risk-name').textContent;
-        const riskDescription = riskInfo.querySelector('.risk-description').textContent;
-        const riskCategory = riskInfo.querySelector('.risk-category').textContent.replace('類別: ', '');
+        // 取得風險項目名稱和其他資訊
+        const riskRow = document.querySelector(`tr[data-risk-id="${index}"]`);
+        const riskName = riskRow.querySelector('.risk-name').textContent;
+        const riskDescription = riskRow.querySelector('.risk-description').textContent;
+        const riskCategory = riskRow.querySelector('.risk-category').textContent.replace('類別: ', '');
+        const riskLevel = riskRow.querySelector('.risk-level').textContent.replace('風險等級: ', '');
+        const relatedDepartments = riskRow.querySelector('.related-departments').textContent.replace('相關聯部門: ', '');
         
-        // 檢查是否選擇了選項
         if (select.value === '') {
             isValid = false;
-            select.style.border = '2px solid red'; // 使用更明顯的紅色邊框
+            select.style.borderColor = 'red';
         } else {
-            select.style.border = '';
+            select.style.borderColor = '';
             
-            // 如果選擇了「是」，則檢查發生次數和原因是否已填寫
             if (select.value === 'yes') {
-                // 驗證次數是否已填寫且為正整數
-                const count = parseInt(countInput.value.trim());
-                if (!countInput.value.trim() || isNaN(count) || count <= 0) {
+                if (!occurrenceInput.value) {
                     isValid = false;
-                    countInput.style.border = '2px solid red';
+                    occurrenceInput.style.borderColor = 'red';
                 } else {
-                    countInput.style.border = '';
+                    occurrenceInput.style.borderColor = '';
                 }
                 
-                // 驗證原因是否已填寫
-                if (!reasonInput.value.trim()) {
+                if (!reasonInput.value) {
                     isValid = false;
-                    reasonInput.style.border = '2px solid red';
+                    reasonInput.style.borderColor = 'red';
                 } else {
-                    reasonInput.style.border = '';
+                    reasonInput.style.borderColor = '';
                 }
             }
             
-            // 收集回應
+            // 收集回應，包含更多風險項目資訊
             responses.push({
-                index: riskId,
+                index: index,
                 riskName: riskName,
                 riskDescription: riskDescription,
                 riskCategory: riskCategory,
+                riskLevel: riskLevel,
+                relatedDepartments: relatedDepartments,
                 increased: select.value === 'yes',
-                occurrences: select.value === 'yes' ? parseInt(countInput.value) || 0 : 0,
-                reason: select.value === 'yes' ? reasonInput.value.trim() : ''
+                occurrences: select.value === 'yes' ? occurrenceInput.value : 0,
+                reason: select.value === 'yes' ? reasonInput.value : ''
             });
         }
     });
     
     if (!isValid) {
-        alert('請填寫所有必填欄位，選擇"是"的項目必須填寫有效的發生次數(正整數)和原因');
+        alert('請填寫所有必填欄位');
         return;
     }
     
@@ -1754,16 +1752,20 @@ submitInventoryBtn.addEventListener('click', function() {
     submitInventoryBtn.disabled = true;
     submitInventoryBtn.textContent = '送出中...';
     
-    fetch(`${scriptUrl}?action=submitInventory`, {
+    // 使用正確的請求格式
+    fetch(scriptUrl, {
         method: 'POST',
-        body: JSON.stringify({
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `action=submitInventory&data=${encodeURIComponent(JSON.stringify({
             timestamp: currentTime,
             department: department,
             username: username,
             name: name,
             responses: responses,
-            sheetName: '部門週期盤點紀錄' // 指定要寫入的工作表名稱
-        })
+            sheetName: '定期紀錄'
+        }))}`
     })
     .then(response => response.json())
     .then(data => {
@@ -1786,6 +1788,7 @@ submitInventoryBtn.addEventListener('click', function() {
         console.error('Error:', error);
     });
 });
+
         
         // 重置盤點按鈕點擊事件
         resetInventoryBtn.addEventListener('click', function() {
