@@ -1721,7 +1721,7 @@ submitInventoryBtn.addEventListener('click', function() {
                 }
             }
             
-            // 收集回應，包含更多風險項目資訊
+            // 收集回應
             responses.push({
                 index: index,
                 riskName: riskName,
@@ -1752,20 +1752,20 @@ submitInventoryBtn.addEventListener('click', function() {
     submitInventoryBtn.disabled = true;
     submitInventoryBtn.textContent = '送出中...';
     
-    // 使用正確的請求格式
+    // 創建表單數據對象
+    const formData = new FormData();
+    formData.append('action', 'submitInventory');
+    formData.append('timestamp', currentTime);
+    formData.append('department', department);
+    formData.append('username', username);
+    formData.append('name', name);
+    formData.append('responses', JSON.stringify(responses));
+    formData.append('sheetName', '定期紀錄');
+    
+    // 使用 fetch 發送表單數據
     fetch(scriptUrl, {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `action=submitInventory&data=${encodeURIComponent(JSON.stringify({
-            timestamp: currentTime,
-            department: department,
-            username: username,
-            name: name,
-            responses: responses,
-            sheetName: '定期紀錄'
-        }))}`
+        body: formData
     })
     .then(response => response.json())
     .then(data => {
@@ -1788,6 +1788,7 @@ submitInventoryBtn.addEventListener('click', function() {
         console.error('Error:', error);
     });
 });
+
 
         
         // 重置盤點按鈕點擊事件
