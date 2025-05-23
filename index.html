@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -74,40 +73,37 @@
         }
 
         /* 歡迎詞置中樣式 */
-.welcome-message, /* 假設的類名 */
-div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
-.dotted-box p, /* 如果歡迎詞在虛線框內 */
-.user-greeting { /* 另一個可能的類名 */
-    width: 100%;
-    text-align: center !important;
-    display: block;
-    margin: 0 auto;
-    padding: 0;
-}
+        .welcome-message, 
+        div:contains("歡迎"), 
+        .dotted-box p, 
+        .user-greeting { 
+            width: 100%;
+            text-align: center !important;
+            display: block;
+            margin: 0 auto;
+            padding: 0;
+        }
 
-/* 針對虛線框內的所有文字 */
-.dotted-container, 
-.dotted-box {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    width: 100%;
-}
+        .dotted-container, 
+        .dotted-box {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            width: 100%;
+        }
 
-/* 特別針對行動裝置的修正 */
-@media (max-width: 767px) {
-    .welcome-message,
-    div:contains("歡迎"),
-    .dotted-box p,
-    .user-greeting {
-        padding: 0 !important;
-        margin: 0 auto !important;
-        left: 0 !important;
-        right: 0 !important;
-    }
-}
-
+        @media (max-width: 767px) {
+            .welcome-message,
+            div:contains("歡迎"),
+            .dotted-box p,
+            .user-greeting {
+                padding: 0 !important;
+                margin: 0 auto !important;
+                left: 0 !important;
+                right: 0 !important;
+            }
+        }
 
         /* 卡片樣式 */
         .login-form, .dashboard {
@@ -248,6 +244,15 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             background: linear-gradient(to right, #d33426, #e85a4a);
         }
 
+        /* 新增通知按鈕樣式 */
+        #notification-btn {
+            background: linear-gradient(to right, #ff9800, #ffb74d);
+        }
+
+        #notification-btn:hover {
+            background: linear-gradient(to right, #f57c00, #ffa726);
+        }
+
         .hidden {
             display: none;
         }
@@ -269,11 +274,44 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             padding: 8px 12px;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            position: relative;
         }
 
         .user-info strong {
             color: #1a6fc4;
             font-weight: 600;
+        }
+
+        /* 通知圖標樣式 */
+        .notification-icon {
+            position: absolute;
+            top: 8px;
+            left: 12px;
+            cursor: pointer;
+            font-size: 18px;
+            color: #ff9800;
+            transition: all 0.3s ease;
+        }
+
+        .notification-icon:hover {
+            color: #f57c00;
+            transform: scale(1.1);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -8px;
+            background: #ea4335;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
         }
 
         /* 下拉選單樣式 */
@@ -311,96 +349,188 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         }
 
         /* 部門風險係數頁面樣式 */
-.dashboard-page {
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 30px;
-    margin-top: 20px;
-    width: 100%;
-    max-width: 800px;
-    margin-left: auto;
-    margin-right: auto;
-}
+        .dashboard-page {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
-.table-responsive {
-    overflow-x: auto;
-    margin-bottom: 20px;
-}
+        .table-responsive {
+            overflow-x: auto;
+            margin-bottom: 20px;
+        }
 
-.table {
-    width: 100%;
-    margin-bottom: 1rem;
-    color: #212529;
-    border-collapse: collapse;
-}
+        .table {
+            width: 100%;
+            margin-bottom: 1rem;
+            color: #212529;
+            border-collapse: collapse;
+        }
 
-.table th,
-.table td {
-    padding: 0.75rem;
-    vertical-align: top;
-    border-top: 1px solid #dee2e6;
-    text-align: center;
-}
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            vertical-align: top;
+            border-top: 1px solid #dee2e6;
+            text-align: center;
+        }
 
-.table thead th {
-    vertical-align: bottom;
-    border-bottom: 2px solid #dee2e6;
-    background-color: #f8f9fa;
-    font-weight: bold;
-}
+        .table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid #dee2e6;
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
 
-.table-striped tbody tr:nth-of-type(odd) {
-    background-color: rgba(0, 0, 0, 0.05);
-}
+        .table-striped tbody tr:nth-of-type(odd) {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
 
-.table-bordered {
-    border: 1px solid #dee2e6;
-}
+        .table-bordered {
+            border: 1px solid #dee2e6;
+        }
 
-.table-bordered th,
-.table-bordered td {
-    border: 1px solid #dee2e6;
-}
+        .table-bordered th,
+        .table-bordered td {
+            border: 1px solid #dee2e6;
+        }
 
-/* 確保在移動設備上也能正常顯示 */
-@media (max-width: 767px) {
-    .dashboard-page {
-        padding: 15px;
-    }
-    
-    .table th,
-    .table td {
-        padding: 0.5rem;
-    }
-}
+        @media (max-width: 767px) {
+            .dashboard-page {
+                padding: 15px;
+            }
+            
+            .table th,
+            .table td {
+                padding: 0.5rem;
+            }
+        }
 
         /* 風險燈號樣式 */
-.risk-light {
-    display: inline-block;
-    font-size: 20px;
-    margin-right: 8px;
-    vertical-align: middle;
-}
+        .risk-light {
+            display: inline-block;
+            font-size: 20px;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
 
-.green-light {
-    color: #34a853;
-    text-shadow: 0 0 5px rgba(52, 168, 83, 0.7);
-}
+        .green-light {
+            color: #34a853;
+            text-shadow: 0 0 5px rgba(52, 168, 83, 0.7);
+        }
 
-.yellow-light {
-    color: #fbbc05;
-    text-shadow: 0 0 5px rgba(251, 188, 5, 0.7);
-}
+        .yellow-light {
+            color: #fbbc05;
+            text-shadow: 0 0 5px rgba(251, 188, 5, 0.7);
+        }
 
-.red-light {
-    color: #ea4335;
-    text-shadow: 0 0 5px rgba(234, 67, 53, 0.7);
-}
+        .red-light {
+            color: #ea4335;
+            text-shadow: 0 0 5px rgba(234, 67, 53, 0.7);
+        }
 
+        /* 通知頁面樣式 */
+        .notification-page {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-top: 20px;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+        }
 
-        
-        
+        .notification-item {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+        }
+
+        .notification-item:hover {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .notification-item.unread {
+            background: #fff3cd;
+            border-color: #ffeaa7;
+        }
+
+        .notification-item.urgent {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .notification-title {
+            font-weight: bold;
+            color: #1a6fc4;
+            margin: 0;
+        }
+
+        .notification-time {
+            font-size: 12px;
+            color: #6c757d;
+        }
+
+        .notification-content {
+            color: #495057;
+            margin-bottom: 10px;
+        }
+
+        .notification-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        /* 通知設定樣式 */
+        .notification-settings {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .setting-group {
+            margin-bottom: 15px;
+        }
+
+        .setting-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .setting-group input, .setting-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
         /* 部門週期盤點頁面樣式 */
         .inventory-section {
             background: rgba(255, 255, 255, 0.9);
@@ -427,12 +557,10 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                         inset 0 0 0 1px rgba(255, 255, 255, 0.2);
         }
 
-        /* 容器樣式，當切換到盤點頁面時不需要 */
         .container.hidden {
             display: none;
         }
 
-        /* 標題和按鈕容器 */
         .centered-title {
             text-align: center;
             width: 100%;
@@ -452,7 +580,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         }
         
         .half-width-btn {
-            width: 25%; /* 按鈕寬度設為原來的一半 */
+            width: 25%;
             padding: 10px 15px;
             border: none;
             border-radius: 8px;
@@ -495,7 +623,6 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             margin-bottom: 25px;
         }
 
-        /* 表格樣式 */
         .inventory-table {
             width: 100%;
             border-collapse: separate;
@@ -571,7 +698,6 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             transform: translateY(-2px);
         }
 
-        /* 表單元素樣式 */
         .select-container select, .input-container input {
             width: 100%;
             padding: 10px;
@@ -595,16 +721,14 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             border-color: rgba(0, 0, 0, 0.1);
         }
 
-                /* 行動裝置特定修正 */
         @media (max-width: 767px) {
             img[src*="LOGO.png"] {
                 position: relative;
                 left: 50%;
-                transform: translateX(-50%); /* 這個技巧可以確保完美置中 */
-                margin: 0; /* 重設可能的邊距 */
+                transform: translateX(-50%);
+                margin: 0;
             }
             
-            /* 確保容器沒有額外的內邊距或邊距 */
             .logo-container, div:has(> img[src*="LOGO.png"]) {
                 padding: 0;
                 margin: 0;
@@ -613,8 +737,6 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             }
         }
 
-
-        /* 風險項目樣式 */
         .risk-info {
             margin-bottom: 10px;
         }
@@ -637,7 +759,6 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             margin-top: 3px;
         }
 
-        /* 模態框樣式 */
         .modal-content {
             border-radius: 16px;
             border: none;
@@ -720,8 +841,8 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         @media (max-width: 480px) {
             .container {
                 padding: 0px;
-                 max-width: 99%; /* 增加到螢幕寬度的95% */
-        width: 99%;
+                max-width: 99%;
+                width: 99%;
             }
             
             h1 {
@@ -760,7 +881,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             <h1>昶青實業<br>【AI企業風控中心】</h1>
             <div class="form-group">
                 <label for="username">帳號</label>
-                <input type="text" id="username" placeholder="請輸入帳號">
+                                <input type="text" id="username" placeholder="請輸入帳號">
             </div>
             <div class="form-group">
                 <label for="password">密碼</label>
@@ -775,17 +896,23 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         <div id="dashboard-section" class="dashboard hidden">
             <!-- 使用者資訊區塊 -->
             <div id="user-info" class="user-info" style="width: 100%; text-align: center;">
-    歡迎： <strong id="user-department"></strong> - <strong id="user-name"></strong>
-</div>
+                <!-- 通知圖標 -->
+                <div class="notification-icon" id="notification-icon" title="查看通知">
+                    🔔
+                    <span class="notification-badge hidden" id="notification-badge">0</span>
+                </div>
+                歡迎： <strong id="user-department"></strong> - <strong id="user-name"></strong>
+            </div>
 
             <div class="logo-container">
                 <img src="LOGO.png" alt="昶青實業 Logo" class="logo">
             </div>
             <h1>昶青實業<br>【AI企業風控中心】</h1>
             <div class="button-group">
-                 <button class="feature-btn" id="dept-risk-index-btn" style="background: linear-gradient(to right, #1a6fc4, #34c3aa);">部門風險係數</button>
-    <button id="inventory-btn" class="feature-btn">部門週期盤點</button>
-    <button id="event-btn" class="feature-btn">事件登錄</button>
+                <button class="feature-btn" id="dept-risk-index-btn" style="background: linear-gradient(to right, #1a6fc4, #34c3aa);">部門風險係數</button>
+                <button id="inventory-btn" class="feature-btn">部門週期盤點</button>
+                <button id="event-btn" class="feature-btn">事件登錄</button>
+                <button id="notification-btn" class="feature-btn">通知管理</button>
             </div>
             
             <!-- 登出下拉選單 -->
@@ -808,7 +935,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                         <h5 class="modal-title" id="changePasswordModalLabel">更改密碼</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                                        <div class="modal-body">
+                    <div class="modal-body">
                         <form id="changePasswordForm">
                             <div class="mb-3">
                                 <label for="currentPassword" class="form-label">目前密碼</label>
@@ -835,32 +962,84 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     </div>
 
     <!-- 部門風險係數頁面 -->
-<div id="dept-risk-index-page" class="dashboard-page" style="display: none;">
-    <div class="logo-container">
-        <img src="LOGO.png" alt="TCC.AI Logo" class="logo">
+    <div id="dept-risk-index-page" class="dashboard-page" style="display: none;">
+        <div class="logo-container">
+            <img src="LOGO.png" alt="TCC.AI Logo" class="logo">
+        </div>
+        <h2 class="text-center mb-4">部門風險係數</h2>
+        
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>部門</th>
+                        <th>風險係數(R值)</th>
+                    </tr>
+                </thead>
+                <tbody id="risk-index-table-body">
+                    <tr>
+                        <td colspan="2" class="text-center">載入中...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <button class="btn btn-secondary mt-3" id="back-to-dashboard-from-risk">返回</button>
     </div>
-    <h2 class="text-center mb-4">部門風險係數</h2>
-    
-    <div class="table-responsive">
-        <table class="table table-striped table-bordered">
-            <thead>
-                <tr>
-                    <th>部門</th>
-                    <th>風險係數(R值)</th>
-                </tr>
-            </thead>
-            <tbody id="risk-index-table-body">
-                <!-- 數據將通過JavaScript動態填充 -->
-                <tr>
-                    <td colspan="2" class="text-center">載入中...</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    
-    <button class="btn btn-secondary mt-3" id="back-to-dashboard-from-risk">返回</button>
-</div>
 
+    <!-- 通知管理頁面 -->
+    <div id="notification-page" class="notification-page" style="display: none;">
+        <div class="logo-container">
+            <img src="LOGO.png" alt="昶青實業 Logo" class="logo">
+        </div>
+        <h2 class="text-center mb-4">通知管理</h2>
+        
+        <!-- 通知設定區域 -->
+        <div class="notification-settings">
+            <h4>通知設定</h4>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="setting-group">
+                        <label for="risk-threshold">風險閾值設定</label>
+                        <select id="risk-threshold">
+                            <option value="20">低風險 (R值 > 20)</option>
+                            <option value="30" selected>中風險 (R值 > 30)</option>
+                            <option value="40">高風險 (R值 > 40)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="setting-group">
+                        <label for="notification-frequency">檢查頻率</label>
+                        <select id="notification-frequency">
+                            <option value="realtime" selected>即時</option>
+                            <option value="hourly">每小時</option>
+                            <option value="daily">每日</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-primary" id="save-settings-btn">儲存設定</button>
+            <button class="btn btn-info" id="check-risk-now-btn">立即檢查風險</button>
+        </div>
+
+        <!-- 通知列表 -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4>通知記錄</h4>
+            <div>
+                <button class="btn btn-sm btn-outline-primary" id="mark-all-read-btn">全部標為已讀</button>
+                <button class="btn btn-sm btn-outline-danger" id="clear-notifications-btn">清除所有通知</button>
+            </div>
+        </div>
+
+        <div id="notifications-container">
+            <div class="text-center">
+                <p>載入通知中...</p>
+            </div>
+        </div>
+
+        <button class="btn btn-secondary mt-3" id="back-to-dashboard-from-notification">返回</button>
+    </div>
     
     <!-- 部門週期盤點頁面 -->
     <div id="inventory-section" class="inventory-section hidden">
@@ -909,6 +1088,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         const dashboardSection = document.getElementById('dashboard-section');
         const inventorySection = document.getElementById('inventory-section');
         const deptRiskIndexPage = document.getElementById('dept-risk-index-page');
+        const notificationPage = document.getElementById('notification-page');
         const loginBtn = document.getElementById('login-btn');
         const usernameInput = document.getElementById('username');
         const passwordInput = document.getElementById('password');
@@ -916,6 +1096,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         const loadingMsg = document.getElementById('loading');
         const inventoryBtn = document.getElementById('inventory-btn');
         const eventBtn = document.getElementById('event-btn');
+        const notificationBtn = document.getElementById('notification-btn');
         const logoutBtn = document.getElementById('logoutBtn');
         const changePasswordBtn = document.getElementById('changePasswordBtn');
         const submitChangePasswordBtn = document.getElementById('submitChangePassword');
@@ -929,17 +1110,32 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         const inventoryContent = document.getElementById('inventory-content');
         const deptRiskIndexBtn = document.getElementById('dept-risk-index-btn');
         const backFromRiskBtn = document.getElementById('back-to-dashboard-from-risk');
+        const backFromNotificationBtn = document.getElementById('back-to-dashboard-from-notification');
+        const notificationIcon = document.getElementById('notification-icon');
+        const notificationBadge = document.getElementById('notification-badge');
+        
+        // 通知相關元素
+        const saveSettingsBtn = document.getElementById('save-settings-btn');
+        const checkRiskNowBtn = document.getElementById('check-risk-now-btn');
+        const markAllReadBtn = document.getElementById('mark-all-read-btn');
+        const clearNotificationsBtn = document.getElementById('clear-notifications-btn');
+        const notificationsContainer = document.getElementById('notifications-container');
+        const riskThresholdSelect = document.getElementById('risk-threshold');
+        const notificationFrequencySelect = document.getElementById('notification-frequency');
         
         // 自動登出相關變數
         let inactivityTimer;
-        const inactivityTimeout = 10 * 60 * 1000; // 10分鐘，以毫秒為單位
+        const inactivityTimeout = 10 * 60 * 1000; // 10分鐘
+        
+        // 通知檢查計時器
+        let notificationCheckTimer;
+        
+        // Google Apps Script Web App URL
+        const scriptUrl = 'https://script.google.com/macros/s/AKfycbwd45aliGBU2gd7U5xd39Li-c-AeSBQazJjVgBxihn4vNYLxo93MCGbHU-znN17vLo3/exec';
         
         // 監控用戶活動的函數
         function resetInactivityTimer() {
-            // 清除現有計時器
             clearTimeout(inactivityTimer);
-            
-            // 如果用戶已登入，則設置新的計時器
             if (localStorage.getItem('isLoggedIn') === 'true') {
                 inactivityTimer = setTimeout(autoLogout, inactivityTimeout);
             }
@@ -947,18 +1143,12 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         
         // 自動登出函數
         function autoLogout() {
-            // 只有在用戶已登入的情況下執行登出
             if (localStorage.getItem('isLoggedIn') === 'true') {
-                // 顯示提示訊息
                 alert('因長時間未操作，系統已自動登出');
-                
-                // 清除登入資訊
                 localStorage.removeItem('isLoggedIn');
                 localStorage.removeItem('username');
                 localStorage.removeItem('department');
                 localStorage.removeItem('name');
-                
-                // 返回登入頁面
                 showLogin();
             }
         }
@@ -968,28 +1158,316 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             document.addEventListener(event, resetInactivityTimer, true);
         });
         
-        // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-        const scriptUrl = 'https://script.google.com/macros/s/AKfycbw59qaT8cEKwPd6tWs6wBTf6sq71hdTgU3NrjETNFNteQF86ll3HnhwWJ_SUE5rZVFF/exec';
-        
         // 檢查是否已登入
         if (localStorage.getItem('isLoggedIn') === 'true') {
-            // 顯示使用者資訊
             userDepartment.textContent = localStorage.getItem('department') || '';
             userName.textContent = localStorage.getItem('name') || '';
             showDashboard();
-            // 初始化自動登出計時器
             resetInactivityTimer();
+            loadNotificationSettings();
+            startNotificationCheck();
         }
 
-        // 添加部門風險係數按鈕點擊事件
+        // 通知管理功能
+        notificationBtn.addEventListener('click', function() {
+            dashboardSection.style.display = 'none';
+            notificationPage.style.display = 'block';
+            loadNotifications();
+            resetInactivityTimer();
+        });
+
+        notificationIcon.addEventListener('click', function() {
+            dashboardSection.style.display = 'none';
+            notificationPage.style.display = 'block';
+            loadNotifications();
+            resetInactivityTimer();
+        });
+
+        backFromNotificationBtn.addEventListener('click', function() {
+            notificationPage.style.display = 'none';
+            dashboardSection.style.display = 'block';
+            resetInactivityTimer();
+        });
+
+        // 儲存通知設定
+        saveSettingsBtn.addEventListener('click', function() {
+            const threshold = riskThresholdSelect.value;
+            const frequency = notificationFrequencySelect.value;
+            
+            // 儲存到本地存儲
+            localStorage.setItem('riskThreshold', threshold);
+            localStorage.setItem('notificationFrequency', frequency);
+            
+            // 發送到後端
+            fetch(`${scriptUrl}?action=saveNotificationSettings`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    username: localStorage.getItem('username'),
+                    riskThreshold: threshold,
+                    notificationFrequency: frequency
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('通知設定已儲存');
+                    // 重新啟動通知檢查
+                    startNotificationCheck();
+                } else {
+                    alert('儲存設定失敗: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('儲存設定錯誤:', error);
+                alert('儲存設定時發生錯誤');
+            });
+            
+            resetInactivityTimer();
+        });
+
+        // 立即檢查風險
+        checkRiskNowBtn.addEventListener('click', function() {
+            checkRiskNowBtn.disabled = true;
+            checkRiskNowBtn.textContent = '檢查中...';
+            
+            fetch(`${scriptUrl}?action=checkRiskThreshold&username=${encodeURIComponent(localStorage.getItem('username'))}`)
+                .then(response => response.json())
+                .then(data => {
+                    checkRiskNowBtn.disabled = false;
+                    checkRiskNowBtn.textContent = '立即檢查風險';
+                    
+                    if (data.success) {
+                        if (data.notifications && data.notifications.length > 0) {
+                            alert(`發現 ${data.notifications.length} 個風險警告`);
+                            loadNotifications(); // 重新載入通知列表
+                            updateNotificationBadge();
+                        } else {
+                            alert('目前沒有風險警告');
+                        }
+                    } else {
+                        alert('檢查失敗: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    checkRiskNowBtn.disabled = false;
+                    checkRiskNowBtn.textContent = '立即檢查風險';
+                    console.error('檢查風險錯誤:', error);
+                    alert('檢查風險時發生錯誤');
+                });
+            
+            resetInactivityTimer();
+        });
+
+        // 全部標為已讀
+        markAllReadBtn.addEventListener('click', function() {
+            fetch(`${scriptUrl}?action=markAllNotificationsRead&username=${encodeURIComponent(localStorage.getItem('username'))}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadNotifications();
+                        updateNotificationBadge();
+                        alert('所有通知已標為已讀');
+                    } else {
+                        alert('操作失敗: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('標記已讀錯誤:', error);
+                    alert('操作時發生錯誤');
+                });
+            
+            resetInactivityTimer();
+        });
+
+        // 清除所有通知
+        clearNotificationsBtn.addEventListener('click', function() {
+            if (confirm('確定要清除所有通知嗎？此操作無法復原。')) {
+                fetch(`${scriptUrl}?action=clearAllNotifications&username=${encodeURIComponent(localStorage.getItem('username'))}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadNotifications();
+                            updateNotificationBadge();
+                            alert('所有通知已清除');
+                        } else {
+                            alert('清除失敗: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('清除通知錯誤:', error);
+                        alert('清除時發生錯誤');
+                    });
+            }
+            
+            resetInactivityTimer();
+        });
+
+        // 載入通知設定
+        function loadNotificationSettings() {
+            const threshold = localStorage.getItem('riskThreshold') || '30';
+            const frequency = localStorage.getItem('notificationFrequency') || 'realtime';
+            
+            riskThresholdSelect.value = threshold;
+            notificationFrequencySelect.value = frequency;
+        }
+
+        // 載入通知列表
+        function loadNotifications() {
+            notificationsContainer.innerHTML = '<div class="text-center"><p>載入通知中...</p></div>';
+            
+            fetch(`${scriptUrl}?action=getNotifications&username=${encodeURIComponent(localStorage.getItem('username'))}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        renderNotifications(data.notifications);
+                    } else {
+                        notificationsContainer.innerHTML = '<div class="text-center text-danger"><p>載入通知失敗</p></div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('載入通知錯誤:', error);
+                    notificationsContainer.innerHTML = '<div class="text-center text-danger"><p>載入通知時發生錯誤</p></div>';
+                });
+        }
+
+        // 渲染通知列表
+        function renderNotifications(notifications) {
+            if (notifications.length === 0) {
+                notificationsContainer.innerHTML = '<div class="text-center"><p>目前沒有通知</p></div>';
+                return;
+            }
+
+            const notificationHtml = notifications.map(notification => {
+                const isUrgent = notification.priority === 'urgent';
+                const isUnread = !notification.isRead;
+                
+                return `
+                    <div class="notification-item ${isUnread ? 'unread' : ''} ${isUrgent ? 'urgent' : ''}" data-id="${notification.id}">
+                        <div class="notification-header">
+                            <h5 class="notification-title">${notification.title}</h5>
+                            <span class="notification-time">${notification.time}</span>
+                        </div>
+                        <div class="notification-content">${notification.content}</div>
+                        <div class="notification-actions">
+                            ${isUnread ? `<button class="btn btn-sm btn-primary mark-read-btn" data-id="${notification.id}">標為已讀</button>` : ''}
+                            <button class="btn btn-sm btn-danger delete-notification-btn" data-id="${notification.id}">刪除</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            notificationsContainer.innerHTML = notificationHtml;
+
+            // 綁定按鈕事件
+            document.querySelectorAll('.mark-read-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const notificationId = this.getAttribute('data-id');
+                    markNotificationAsRead(notificationId);
+                });
+            });
+
+            document.querySelectorAll('.delete-notification-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const notificationId = this.getAttribute('data-id');
+                    deleteNotification(notificationId);
+                });
+            });
+        }
+
+        // 標記單個通知為已讀
+        function markNotificationAsRead(notificationId) {
+            fetch(`${scriptUrl}?action=markNotificationRead&notificationId=${notificationId}&username=${encodeURIComponent(localStorage.getItem('username'))}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        loadNotifications();
+                        updateNotificationBadge();
+                    } else {
+                        alert('操作失敗: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('標記已讀錯誤:', error);
+                    alert('操作時發生錯誤');
+                });
+        }
+
+        // 刪除單個通知
+        function deleteNotification(notificationId) {
+            if (confirm('確定要刪除這個通知嗎？')) {
+                fetch(`${scriptUrl}?action=deleteNotification&notificationId=${notificationId}&username=${encodeURIComponent(localStorage.getItem('username'))}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            loadNotifications();
+                            updateNotificationBadge();
+                        } else {
+                            alert('刪除失敗: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('刪除通知錯誤:', error);
+                        alert('刪除時發生錯誤');
+                    });
+            }
+        }
+
+        // 更新通知徽章
+        function updateNotificationBadge() {
+            fetch(`${scriptUrl}?action=getUnreadNotificationCount&username=${encodeURIComponent(localStorage.getItem('username'))}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const count = data.count;
+                        if (count > 0) {
+                            notificationBadge.textContent = count > 99 ? '99+' : count;
+                            notificationBadge.classList.remove('hidden');
+                        } else {
+                            notificationBadge.classList.add('hidden');
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('更新通知徽章錯誤:', error);
+                });
+        }
+
+        // 開始通知檢查
+        function startNotificationCheck() {
+            clearInterval(notificationCheckTimer);
+            
+            const frequency = localStorage.getItem('notificationFrequency') || 'realtime';
+            let interval;
+            
+            switch (frequency) {
+                case 'realtime':
+                    interval = 30000; // 30秒
+                    break;
+                case 'hourly':
+                    interval = 3600000; // 1小時
+                    break;
+                case 'daily':
+                    interval = 86400000; // 24小時
+                    break;
+                default:
+                    interval = 30000;
+            }
+            
+            notificationCheckTimer = setInterval(() => {
+                if (localStorage.getItem('isLoggedIn') === 'true') {
+                    updateNotificationBadge();
+                    // 背景檢查風險
+                    fetch(`${scriptUrl}?action=checkRiskThreshold&username=${encodeURIComponent(localStorage.getItem('username'))}`)
+                        .catch(error => console.error('背景風險檢查錯誤:', error));
+                }
+            }, interval);
+        }
+
+        // 部門風險係數按鈕點擊事件
         deptRiskIndexBtn.addEventListener('click', function() {
             dashboardSection.style.display = 'none';
             deptRiskIndexPage.style.display = 'block';
-            
-            // 載入風險係數數據
             loadRiskIndexData();
-            
-            // 重置計時器
             resetInactivityTimer();
         });
         
@@ -997,24 +1475,18 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         backFromRiskBtn.addEventListener('click', function() {
             deptRiskIndexPage.style.display = 'none';
             dashboardSection.style.display = 'block';
-            // 強制重新整理頁面
-    window.location.reload();
-            
-            // 重置計時器
+            window.location.reload();
             resetInactivityTimer();
         });
         
         // 載入風險係數數據的函數
         function loadRiskIndexData() {
-            // 顯示載入中訊息
             document.getElementById('risk-index-table-body').innerHTML = '<tr><td colspan="2" class="text-center">載入中...</td></tr>';
             
-            // 調用後端API獲取數據，現在從"R值"工作表獲取
             fetch(`${scriptUrl}?action=getDepartmentRiskIndexFromRSheet`)
                 .then(response => response.json())
                 .then(result => {
                     if (result.success) {
-                        // 更新表格
                         updateRiskTable(result.data);
                     } else {
                         console.error('獲取數據失敗:', result.message);
@@ -1030,59 +1502,48 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         }
         
         // 更新風險表格的函數
-       // 更新風險表格的函數
-function updateRiskTable(riskData) {
-    const tableBody = document.getElementById('risk-index-table-body');
-    
-    if (riskData.length === 0) {
-        tableBody.innerHTML = '<tr><td colspan="2" class="text-center">無數據</td></tr>';
-        return;
-    }
-    
-    // 創建表格行
-    const rows = riskData.map(item => {
-        // 解析風險係數值（去除 "R" 後綴）
-        const riskValue = parseInt(item.riskIndex.replace('R', '')) || 0;
-        
-        // 根據風險係數決定燈號(調整燈號)
-        let lightIcon = '';
-        if (riskValue <= 15) {
-            lightIcon = '<span class="risk-light green-light">●</span>'; // 綠燈
-        } else if (riskValue <= 30) {
-            lightIcon = '<span class="risk-light yellow-light">●</span>'; // 黃燈
-        } else {
-            lightIcon = '<span class="risk-light red-light">●</span>'; // 紅燈
+        function updateRiskTable(riskData) {
+            const tableBody = document.getElementById('risk-index-table-body');
+            
+            if (riskData.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="2" class="text-center">無數據</td></tr>';
+                return;
+            }
+            
+            const rows = riskData.map(item => {
+                const riskValue = parseInt(item.riskIndex.replace('R', '')) || 0;
+                
+                let lightIcon = '';
+                if (riskValue <= 15) {
+                    lightIcon = '<span class="risk-light green-light">●</span>';
+                } else if (riskValue <= 30) {
+                    lightIcon = '<span class="risk-light yellow-light">●</span>';
+                } else {
+                    lightIcon = '<span class="risk-light red-light">●</span>';
+                }
+                
+                return `
+                    <tr>
+                        <td>${lightIcon} ${item.department}</td>
+                        <td>${item.riskIndex}</td>
+                    </tr>
+                `;
+            }).join('');
+            
+            tableBody.innerHTML = rows;
         }
-        
-        return `
-            <tr>
-                <td>${lightIcon} ${item.department}</td>
-                <td>${item.riskIndex}</td>
-            </tr>
-        `;
-    }).join('');
-    
-    tableBody.innerHTML = rows;
-}
-
 
         // 一鍵全否按鈕點擊事件
         const allNoBtn = document.getElementById('all-no-btn');
         allNoBtn.addEventListener('click', function() {
-            // 將所有增加選擇框設為「否」
             document.querySelectorAll('.increase-select').forEach(select => {
                 select.value = 'no';
-                
-                // 觸發 change 事件，以便禁用相關輸入框
                 const event = new Event('change');
                 select.dispatchEvent(event);
             });
-            
-            // 重置計時器
             resetInactivityTimer();
         });
 
-        
         // 登入按鈕點擊事件
         loginBtn.addEventListener('click', function() {
             const username = usernameInput.value.trim();
@@ -1093,10 +1554,9 @@ function updateRiskTable(riskData) {
                 return;
             }
             
-            // 顯示載入中訊息
             errorMessage.textContent = '';
             loadingMsg.classList.remove('hidden');
-            loginBtn.disabled = true;
+                        loginBtn.disabled = true;
             
             // 使用 fetch API 呼叫 Google Apps Script
             fetch(`${scriptUrl}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
@@ -1117,8 +1577,11 @@ function updateRiskTable(riskData) {
                         userName.textContent = data.name || '';
                         
                         showDashboard();
-                        // 啟動自動登出計時器
+                        // 啟動自動登出計時器和通知檢查
                         resetInactivityTimer();
+                        loadNotificationSettings();
+                        startNotificationCheck();
+                        updateNotificationBadge();
                     } else {
                         // 登入失敗
                         errorMessage.textContent = data.message || '帳號或密碼錯誤';
@@ -1136,14 +1599,12 @@ function updateRiskTable(riskData) {
         inventoryBtn.addEventListener('click', function() {
             showInventorySection();
             loadInventoryData();
-            // 重置計時器
             resetInactivityTimer();
         });
         
         // 返回按鈕點擊事件
         backBtn.addEventListener('click', function() {
             showDashboard();
-            // 重置計時器
             resetInactivityTimer();
         });
         
@@ -1173,7 +1634,6 @@ function updateRiskTable(riskData) {
                     } else {
                         alert(data.message || '無法獲取風險清單');
                     }
-                    // 重置計時器
                     resetInactivityTimer();
                 })
                 .catch(error => {
@@ -1253,7 +1713,6 @@ function updateRiskTable(riskData) {
                         reasonInput.value = '';
                     }
                     
-                    // 重置計時器
                     resetInactivityTimer();
                 });
             });
@@ -1333,14 +1792,13 @@ function updateRiskTable(riskData) {
             
             fetch(`${scriptUrl}?action=submitInventory`, {
                 method: 'POST',
-                
                 body: JSON.stringify({
                     timestamp: currentTime,
                     department: department,
                     username: username,
                     name: name,
                     responses: responses,
-                    sheetName: '定期紀錄' // 指定要寫入的工作表名稱
+                    sheetName: '定期紀錄'
                 })
             })
             .then(response => response.json())
@@ -1350,11 +1808,16 @@ function updateRiskTable(riskData) {
                 
                 if (data.success) {
                     alert('部門週期盤點已成功送出');
+                    // 送出後立即檢查風險
+                    fetch(`${scriptUrl}?action=checkRiskThreshold&username=${encodeURIComponent(username)}`)
+                        .then(() => {
+                            updateNotificationBadge();
+                        })
+                        .catch(error => console.error('風險檢查錯誤:', error));
                     showDashboard();
                 } else {
                     alert(data.message || '送出失敗，請稍後再試');
                 }
-                // 重置計時器
                 resetInactivityTimer();
             })
             .catch(error => {
@@ -1385,53 +1848,53 @@ function updateRiskTable(riskData) {
                 reasonInput.style.borderColor = '';
             });
             
-            // 重置計時器
             resetInactivityTimer();
         });
         
         // 事件登錄按鈕點擊事件
         eventBtn.addEventListener('click', function() {
             alert('將導向事件登錄功能');
-            // 這裡可以替換成實際的功能實現
-            // 重置計時器
             resetInactivityTimer();
         });
         
-// 登出按鈕點擊事件
-logoutBtn.addEventListener('click', function() {
-    // 立即執行本地登出
-    performLocalLogout();
-    
-    // 在背景發送登出請求到後端
-    const username = localStorage.getItem('username') || '';
-    fetch(`${apiUrl}?action=logout&username=${encodeURIComponent(username)}`)
-        .then(response => response.json())
-        .catch(error => console.error('登出請求失敗:', error));
-});
+        // 登出按鈕點擊事件
+        logoutBtn.addEventListener('click', function() {
+            performLocalLogout();
+            
+            const username = localStorage.getItem('username') || '';
+            fetch(`${scriptUrl}?action=logout&username=${encodeURIComponent(username)}`)
+                .then(response => response.json())
+                .catch(error => console.error('登出請求失敗:', error));
+        });
 
-// 本地登出函數
-function performLocalLogout() {
-    // 清除本地儲存的登入資訊
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('username');
-    localStorage.removeItem('department');
-    localStorage.removeItem('name');
-    
-    // 顯示登入頁面，隱藏其他頁面
-    loginSection.classList.remove('hidden');
-    dashboardSection.classList.add('hidden');
-    inventorySection.classList.add('hidden');
-    deptRiskIndexPage.style.display = 'none';
-    document.querySelector('.container').classList.remove('hidden');
-    
-    // 清空登入表單
-    document.getElementById('username').value = '';
-    document.getElementById('password').value = '';
-    
-    // 停止計時器
-    clearTimeout(inactivityTimeout);
-}
-
+        // 本地登出函數
+        function performLocalLogout() {
+            // 清除本地儲存的登入資訊
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('username');
+            localStorage.removeItem('department');
+            localStorage.removeItem('name');
+            localStorage.removeItem('riskThreshold');
+            localStorage.removeItem('notificationFrequency');
+            
+            // 停止通知檢查
+            clearInterval(notificationCheckTimer);
+            
+            // 顯示登入頁面，隱藏其他頁面
+            loginSection.classList.remove('hidden');
+            dashboardSection.classList.add('hidden');
+            inventorySection.classList.add('hidden');
+            deptRiskIndexPage.style.display = 'none';
+            notificationPage.style.display = 'none';
+            document.querySelector('.container').classList.remove('hidden');
+            
+            // 清空登入表單
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            
+            // 停止計時器
+            clearTimeout(inactivityTimer);
+        }
         
         // 更改密碼按鈕點擊事件
         changePasswordBtn.addEventListener('click', function() {
@@ -1443,7 +1906,6 @@ function performLocalLogout() {
             const changePasswordModal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
             changePasswordModal.show();
             
-            // 重置計時器
             resetInactivityTimer();
         });
         
@@ -1486,7 +1948,6 @@ function performLocalLogout() {
                         messageDiv.textContent = data.message || '密碼更改失敗！';
                         messageDiv.style.display = 'block';
                     }
-                    // 重置計時器
                     resetInactivityTimer();
                 })
                 .catch(error => {
@@ -1502,10 +1963,10 @@ function performLocalLogout() {
             loginSection.classList.add('hidden');
             inventorySection.classList.add('hidden');
             deptRiskIndexPage.style.display = 'none';
+            notificationPage.style.display = 'none';
             document.querySelector('.container').classList.remove('hidden');
             dashboardSection.classList.remove('hidden');
             document.querySelector('.container').style.maxWidth = '500px';
-            // 重置計時器
             resetInactivityTimer();
         }
         
@@ -1514,27 +1975,30 @@ function performLocalLogout() {
             dashboardSection.classList.add('hidden');
             inventorySection.classList.add('hidden');
             deptRiskIndexPage.style.display = 'none';
+            notificationPage.style.display = 'none';
             document.querySelector('.container').classList.remove('hidden');
             loginSection.classList.remove('hidden');
             usernameInput.value = '';
             passwordInput.value = '';
             errorMessage.textContent = '';
             document.querySelector('.container').style.maxWidth = '500px';
-            // 清除自動登出計時器
+            // 清除自動登出計時器和通知檢查
             clearTimeout(inactivityTimer);
+            clearInterval(notificationCheckTimer);
         }
         
-                // 顯示部門週期盤點頁面
+        // 顯示部門週期盤點頁面
         function showInventorySection() {
             loginSection.classList.add('hidden');
             dashboardSection.classList.add('hidden');
             deptRiskIndexPage.style.display = 'none';
-            document.querySelector('.container').classList.add('hidden'); // 隱藏原容器
+            notificationPage.style.display = 'none';
+            document.querySelector('.container').classList.add('hidden');
             inventorySection.classList.remove('hidden');
-            // 重置計時器
             resetInactivityTimer();
         }
     });
     </script>
 </body>
 </html>
+
