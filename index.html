@@ -1040,11 +1040,11 @@ function updateRiskTable(riskData) {
     
     // 創建表格行
     const rows = riskData.map(item => {
-        // 解析風險係數值（去除 "R" 後綴並格式化到小數第一位）
+        // 解析風險係數值（去除 "R" 後綴並格式化到小數第2位）
         let riskValue = parseFloat(item.riskIndex.replace('R', '')) || 0;
         
-        // 格式化到小數第一位
-        let formattedRiskValue = riskValue.toFixed(1);
+        // 格式化到小數第2位
+        let formattedRiskValue = riskValue.toFixed(2);
         
         // 根據風險係數決定燈號
         let lightIcon = '';
