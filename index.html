@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -7,6 +6,9 @@
     <title>AI-風險偵測管理系統-昶青實業</title>
     <!-- 新增 Bootstrap CSS 用於下拉選單 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 新增 Chart.js 庫 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@2.29.3/index.min.js"></script>
     <style>
         /* 基礎樣式設定 */
         * {
@@ -248,6 +250,15 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             background: linear-gradient(to right, #d33426, #e85a4a);
         }
 
+        /* 數據分析儀表板按鈕樣式 */
+        #data-analytics-btn {
+            background: linear-gradient(to right, #9c27b0, #e91e63);
+        }
+
+        #data-analytics-btn:hover {
+            background: linear-gradient(to right, #7b1fa2, #c2185b);
+        }
+
         .hidden {
             display: none;
         }
@@ -453,7 +464,76 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     border-left: 4px solid #007bff;
 }
 
+        /* 數據分析儀表板樣式 */
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 20px;
+        }
 
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .chart-container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .chart-title {
+            color: #1a6fc4;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .chart-container canvas {
+            max-height: 400px;
+        }
+
+        /* 不同統計卡片的漸層色彩 */
+        .stat-card:nth-child(1) {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .stat-card:nth-child(2) {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .stat-card:nth-child(3) {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stat-card:nth-child(4) {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
         
         
         /* 部門週期盤點頁面樣式 */
@@ -749,7 +829,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             }
             
             .inventory-table th, .inventory-table td {
-                padding: 12px;
+                                padding: 12px;
                 font-size: 14px;
             }
             
@@ -769,6 +849,18 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             
             .logo {
                 max-width: 280px;
+            }
+            
+            .stat-card {
+                margin-bottom: 15px;
+            }
+            
+            .stat-value {
+                font-size: 2rem;
+            }
+            
+            .chart-container {
+                padding: 15px;
             }
         }
 
@@ -842,6 +934,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             <h1>昶青實業<br>AI-風險偵測管理系統</h1>
             <div class="button-group">
                  <button class="feature-btn" id="dept-risk-index-btn" style="background: linear-gradient(to right, #1a6fc4, #34c3aa);">部門風險係數</button>
+                 <button class="feature-btn" id="data-analytics-btn" style="background: linear-gradient(to right, #9c27b0, #e91e63);">數據分析儀表板</button>
     <button id="inventory-btn" class="feature-btn">部門週期盤點</button>
     <button id="event-btn" class="feature-btn">事件登錄</button>
             </div>
@@ -945,6 +1038,138 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     <button class="btn btn-secondary mt-3" id="back-to-dashboard-from-risk">返回</button>
 </div>
 
+    <!-- 數據分析儀表板頁面 -->
+    <div id="data-analytics-page" class="dashboard-page" style="display: none;">
+        <div class="logo-container">
+            <img src="LOGO.png" alt="TCC.AI Logo" class="logo">
+        </div>
+        <h2 class="text-center mb-4">數據分析儀表板</h2>
+        
+        <!-- 時間範圍選擇器 -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label for="dateRange" class="form-label">選擇時間範圍：</label>
+                <select id="dateRange" class="form-select">
+                    <option value="7">最近7天</option>
+                    <option value="30" selected>最近30天</option>
+                    <option value="90">最近90天</option>
+                    <option value="365">最近一年</option>
+                    <option value="all">全部時間</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="departmentFilter" class="form-label">部門篩選：</label>
+                <select id="departmentFilter" class="form-select">
+                    <option value="all">全部部門</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- 統計卡片 -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">📊</div>
+                    <div class="stat-value" id="totalRisks">-</div>
+                    <div class="stat-label">總風險事件</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">⚠️</div>
+                    <div class="stat-value" id="highRiskEvents">-</div>
+                    <div class="stat-label">高風險事件</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-value" id="avgRiskLevel">-</div>
+                    <div class="stat-label">平均風險等級</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <div class="stat-icon">🏢</div>
+                    <div class="stat-value" id="activeDepartments">-</div>
+                    <div class="stat-label">活躍部門數</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 圖表區域 -->
+        <div class="row">
+            <!-- 風險趨勢圖 -->
+            <div class="col-md-12 mb-4">
+                <div class="chart-container">
+                    <h5 class="chart-title">風險趨勢分析</h5>
+                    <canvas id="riskTrendChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- 部門風險分布 -->
+            <div class="col-md-6 mb-4">
+                <div class="chart-container">
+                    <h5 class="chart-title">部門風險分布</h5>
+                    <canvas id="departmentRiskChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- 風險類別分析 -->
+            <div class="col-md-6 mb-4">
+                <div class="chart-container">
+                    <h5 class="chart-title">風險類別分析</h5>
+                    <canvas id="riskCategoryChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- 風險等級分布 -->
+            <div class="col-md-6 mb-4">
+                <div class="chart-container">
+                    <h5 class="chart-title">風險等級分布</h5>
+                    <canvas id="riskLevelChart"></canvas>
+                </div>
+            </div>
+            
+            <!-- 月度對比分析 -->
+            <div class="col-md-6 mb-4">
+                <div class="chart-container">
+                    <h5 class="chart-title">月度對比分析</h5>
+                    <canvas id="monthlyComparisonChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- 詳細數據表格 -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="chart-container">
+                    <h5 class="chart-title">詳細風險數據</h5>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered" id="detailDataTable">
+                            <thead>
+                                <tr>
+                                    <th>時間</th>
+                                    <th>部門</th>
+                                    <th>風險項目</th>
+                                    <th>風險等級</th>
+                                    <th>發生次數</th>
+                                    <th>風險值</th>
+                                </tr>
+                            </thead>
+                            <tbody id="detailDataTableBody">
+                                <tr>
+                                    <td colspan="6" class="text-center">載入中...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="btn btn-secondary mt-3" id="back-to-dashboard-from-analytics">返回</button>
+    </div>
     
     <!-- 部門週期盤點頁面 -->
     <div id="inventory-section" class="inventory-section hidden">
@@ -989,7 +1214,10 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbydIcpNnd1Z13nM_JB2sUX0zQQQv_Q3fl2OTvC-a2E8_pOakW-Y6UG_3enz7xpI686B/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbwHFRlF2-KV9PqruzKE1ezu6yBoN6ScdBwgDG967NWC4iICR0H0KBOJZL7tYG-It1Uc/exec';
+
+// 全域變數存儲圖表實例
+let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
 
 // 全域函數 - 顯示AI評析
 async function showAIAnalysis(department, riskValue) {
@@ -1066,6 +1294,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const dashboardSection = document.getElementById('dashboard-section');
     const inventorySection = document.getElementById('inventory-section');
     const deptRiskIndexPage = document.getElementById('dept-risk-index-page');
+    const dataAnalyticsPage = document.getElementById('data-analytics-page');
     const loginBtn = document.getElementById('login-btn');
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
@@ -1086,6 +1315,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const inventoryContent = document.getElementById('inventory-content');
     const deptRiskIndexBtn = document.getElementById('dept-risk-index-btn');
     const backFromRiskBtn = document.getElementById('back-to-dashboard-from-risk');
+    const dataAnalyticsBtn = document.getElementById('data-analytics-btn');
+    const backFromAnalyticsBtn = document.getElementById('back-to-dashboard-from-analytics');
     
     // 自動登出相關變數
     let inactivityTimer;
@@ -1147,6 +1378,18 @@ document.addEventListener('DOMContentLoaded', function() {
         resetInactivityTimer();
     });
     
+    // 數據分析儀表板按鈕點擊事件
+    dataAnalyticsBtn.addEventListener('click', function() {
+        dashboardSection.style.display = 'none';
+        dataAnalyticsPage.style.display = 'block';
+        
+        // 載入數據分析
+        loadAnalyticsData();
+        
+        // 重置計時器
+        resetInactivityTimer();
+    });
+    
     // 返回按鈕點擊事件
     backFromRiskBtn.addEventListener('click', function() {
         deptRiskIndexPage.style.display = 'none';
@@ -1155,6 +1398,28 @@ document.addEventListener('DOMContentLoaded', function() {
         window.location.reload();
         
         // 重置計時器
+        resetInactivityTimer();
+    });
+    
+    // 數據分析頁面返回按鈕點擊事件
+    backFromAnalyticsBtn.addEventListener('click', function() {
+        dataAnalyticsPage.style.display = 'none';
+        dashboardSection.style.display = 'block';
+        // 強制重新整理頁面
+        window.location.reload();
+        
+        // 重置計時器
+        resetInactivityTimer();
+    });
+    
+    // 時間範圍和部門篩選變更事件
+    document.getElementById('dateRange').addEventListener('change', function() {
+        loadAnalyticsData();
+        resetInactivityTimer();
+    });
+
+    document.getElementById('departmentFilter').addEventListener('change', function() {
+        loadAnalyticsData();
         resetInactivityTimer();
     });
     
@@ -1226,6 +1491,325 @@ document.addEventListener('DOMContentLoaded', function() {
         }).join('');
         
         tableBody.innerHTML = rows;
+    }
+
+    // 載入數據分析數據
+    async function loadAnalyticsData() {
+        try {
+            // 顯示載入狀態
+            showLoadingState();
+            
+            const dateRange = document.getElementById('dateRange').value;
+            const departmentFilter = document.getElementById('departmentFilter').value;
+            
+            // 獲取分析數據
+                        const response = await fetch(`${scriptUrl}?action=getAnalyticsData&dateRange=${dateRange}&department=${departmentFilter}`);
+            const result = await response.json();
+            
+            if (result.success) {
+                // 更新統計卡片
+                updateStatCards(result.data.stats);
+                
+                // 更新部門篩選器選項
+                updateDepartmentFilter(result.data.departments);
+                
+                // 更新圖表
+                updateCharts(result.data);
+                
+                // 更新詳細數據表格
+                updateDetailTable(result.data.events);
+            } else {
+                console.error('獲取分析數據失敗:', result.message);
+                showErrorState(result.message);
+            }
+        } catch (error) {
+            console.error('載入分析數據時發生錯誤:', error);
+            showErrorState('載入數據失敗，請稍後再試');
+        }
+    }
+    
+    // 顯示載入狀態
+    function showLoadingState() {
+        document.getElementById('totalRisks').textContent = '載入中...';
+        document.getElementById('highRiskEvents').textContent = '載入中...';
+        document.getElementById('avgRiskLevel').textContent = '載入中...';
+        document.getElementById('activeDepartments').textContent = '載入中...';
+        document.getElementById('detailDataTableBody').innerHTML = '<tr><td colspan="6" class="text-center">載入中...</td></tr>';
+    }
+    
+    // 顯示錯誤狀態
+    function showErrorState(message) {
+        document.getElementById('totalRisks').textContent = '錯誤';
+        document.getElementById('highRiskEvents').textContent = '錯誤';
+        document.getElementById('avgRiskLevel').textContent = '錯誤';
+        document.getElementById('activeDepartments').textContent = '錯誤';
+        document.getElementById('detailDataTableBody').innerHTML = `<tr><td colspan="6" class="text-center text-danger">${message}</td></tr>`;
+    }
+    
+    // 更新統計卡片
+    function updateStatCards(stats) {
+        document.getElementById('totalRisks').textContent = stats.totalRisks || 0;
+        document.getElementById('highRiskEvents').textContent = stats.highRiskEvents || 0;
+        document.getElementById('avgRiskLevel').textContent = stats.avgRiskLevel || '0.0';
+        document.getElementById('activeDepartments').textContent = stats.activeDepartments || 0;
+    }
+    
+    // 更新部門篩選器
+    function updateDepartmentFilter(departments) {
+        const departmentFilter = document.getElementById('departmentFilter');
+        const currentValue = departmentFilter.value;
+        
+        // 保留"全部部門"選項，添加其他部門
+        departmentFilter.innerHTML = '<option value="all">全部部門</option>';
+        
+        departments.forEach(dept => {
+            const option = document.createElement('option');
+            option.value = dept;
+            option.textContent = dept;
+            departmentFilter.appendChild(option);
+        });
+        
+        // 恢復之前選擇的值
+        if (currentValue && departments.includes(currentValue)) {
+            departmentFilter.value = currentValue;
+        }
+    }
+    
+    // 更新所有圖表
+    function updateCharts(data) {
+        updateRiskTrendChart(data.trendData);
+        updateDepartmentRiskChart(data.departmentData);
+        updateRiskCategoryChart(data.categoryData);
+        updateRiskLevelChart(data.levelData);
+        updateMonthlyComparisonChart(data.monthlyData);
+    }
+    
+    // 更新風險趨勢圖
+    function updateRiskTrendChart(trendData) {
+        const ctx = document.getElementById('riskTrendChart').getContext('2d');
+        
+        if (riskTrendChart) {
+            riskTrendChart.destroy();
+        }
+        
+        riskTrendChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: trendData.labels,
+                datasets: [{
+                    label: '風險事件數量',
+                    data: trendData.data,
+                    borderColor: '#1a6fc4',
+                    backgroundColor: 'rgba(26, 111, 196, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // 更新部門風險分布圖
+    function updateDepartmentRiskChart(departmentData) {
+        const ctx = document.getElementById('departmentRiskChart').getContext('2d');
+        
+        if (departmentRiskChart) {
+            departmentRiskChart.destroy();
+        }
+        
+        departmentRiskChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: departmentData.labels,
+                datasets: [{
+                    data: departmentData.data,
+                    backgroundColor: [
+                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                        '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+    
+    // 更新風險類別分析圖
+    function updateRiskCategoryChart(categoryData) {
+        const ctx = document.getElementById('riskCategoryChart').getContext('2d');
+        
+        if (riskCategoryChart) {
+            riskCategoryChart.destroy();
+        }
+        
+        riskCategoryChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: categoryData.labels,
+                datasets: [{
+                    label: '風險事件數量',
+                    data: categoryData.data,
+                    backgroundColor: '#34c3aa',
+                    borderColor: '#2aa890',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // 更新風險等級分布圖
+    function updateRiskLevelChart(levelData) {
+        const ctx = document.getElementById('riskLevelChart').getContext('2d');
+        
+        if (riskLevelChart) {
+            riskLevelChart.destroy();
+        }
+        
+        riskLevelChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['低風險 (1-3)', '中風險 (4-6)', '高風險 (7-10)'],
+                datasets: [{
+                    data: levelData,
+                    backgroundColor: ['#4CAF50', '#FF9800', '#F44336']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+    
+    // 更新月度對比分析圖
+    function updateMonthlyComparisonChart(monthlyData) {
+        const ctx = document.getElementById('monthlyComparisonChart').getContext('2d');
+        
+        if (monthlyComparisonChart) {
+            monthlyComparisonChart.destroy();
+        }
+        
+        monthlyComparisonChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: monthlyData.labels,
+                datasets: [{
+                    label: '風險事件數量',
+                    data: monthlyData.data,
+                    backgroundColor: '#9c27b0',
+                    borderColor: '#7b1fa2',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // 更新詳細數據表格
+    function updateDetailTable(events) {
+        const tableBody = document.getElementById('detailDataTableBody');
+        
+        if (events.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="6" class="text-center">無數據</td></tr>';
+            return;
+        }
+        
+        const rows = events.map(event => {
+            const riskValue = (event.riskLevel * event.occurrences).toFixed(1);
+            return `
+                <tr>
+                    <td>${formatDate(event.timestamp)}</td>
+                    <td>${event.department}</td>
+                    <td>${event.riskName}</td>
+                    <td>${event.riskLevel}</td>
+                    <td>${event.occurrences}</td>
+                    <td>${riskValue}</td>
+                </tr>
+            `;
+        }).join('');
+        
+        tableBody.innerHTML = rows;
+    }
+    
+    // 格式化日期
+    function formatDate(dateValue) {
+        try {
+            const date = new Date(dateValue);
+            if (isNaN(date.getTime())) {
+                return dateValue.toString();
+            }
+            return date.toLocaleDateString('zh-TW', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (error) {
+            return dateValue.toString();
+        }
     }
 
     // 一鍵全否按鈕點擊事件
@@ -1584,6 +2168,7 @@ document.addEventListener('DOMContentLoaded', function() {
         dashboardSection.classList.add('hidden');
         inventorySection.classList.add('hidden');
         deptRiskIndexPage.style.display = 'none';
+        dataAnalyticsPage.style.display = 'none';
         document.querySelector('.container').classList.remove('hidden');
         
         // 清空登入表單
@@ -1664,6 +2249,7 @@ document.addEventListener('DOMContentLoaded', function() {
         loginSection.classList.add('hidden');
         inventorySection.classList.add('hidden');
         deptRiskIndexPage.style.display = 'none';
+        dataAnalyticsPage.style.display = 'none';
         document.querySelector('.container').classList.remove('hidden');
         dashboardSection.classList.remove('hidden');
         document.querySelector('.container').style.maxWidth = '500px';
@@ -1676,6 +2262,7 @@ document.addEventListener('DOMContentLoaded', function() {
         dashboardSection.classList.add('hidden');
         inventorySection.classList.add('hidden');
         deptRiskIndexPage.style.display = 'none';
+        dataAnalyticsPage.style.display = 'none';
         document.querySelector('.container').classList.remove('hidden');
         loginSection.classList.remove('hidden');
         usernameInput.value = '';
@@ -1691,6 +2278,7 @@ document.addEventListener('DOMContentLoaded', function() {
         loginSection.classList.add('hidden');
         dashboardSection.classList.add('hidden');
         deptRiskIndexPage.style.display = 'none';
+        dataAnalyticsPage.style.display = 'none';
         document.querySelector('.container').classList.add('hidden'); // 隱藏原容器
         inventorySection.classList.remove('hidden');
         // 重置計時器
