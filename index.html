@@ -1174,8 +1174,8 @@ async function showAIAnalysis(department, riskValue) {
         const modal = new bootstrap.Modal(document.getElementById('aiAnalysisModal'));
         modal.show();
         
-        // 發送請求獲取AI評析
-        const response = await fetch(`${API_BASE_URL}?action=getAIAnalysis&department=${encodeURIComponent(department)}`, {
+        // 發送請求獲取AI評析 - 修正：使用 scriptUrl 而不是 API_BASE_URL
+        const response = await fetch(`${scriptUrl}?action=getAIAnalysis&department=${encodeURIComponent(department)}`, {
             method: 'GET'
         });
         
@@ -1197,11 +1197,12 @@ async function showAIAnalysis(department, riskValue) {
         console.error('載入AI評析時發生錯誤:', error);
         document.getElementById('aiAnalysisContent').innerHTML = `
             <div class="alert alert-danger" role="alert">
-                <i class="fas fa-exclamation-circle"></i> 載入失敗，請稍後再試
+                <i class="fas fa-exclamation-circle"></i> 載入失敗：${error.message}
             </div>
         `;
     }
 }
+
 
 // 簡單的Markdown轉HTML函數
 function convertMarkdownToHTML(markdown) {
