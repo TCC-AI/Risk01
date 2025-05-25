@@ -895,9 +895,134 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                 max-width: 280px;
             }
         }
+/* 通知系統樣式 */
+.notification-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 300px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.notification {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    margin-bottom: 10px;
+    transform: translateX(120%);
+    transition: transform 0.4s ease;
+    backdrop-filter: blur(5px);
+    border-left: 4px solid #1a6fc4;
+    display: flex;
+    flex-direction: column;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification.success {
+    border-left-color: #34a853;
+}
+
+.notification.warning {
+    border-left-color: #fbbc05;
+}
+
+.notification.danger {
+    border-left-color: #ea4335;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(234, 67, 53, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(234, 67, 53, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(234, 67, 53, 0);
+    }
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.notification-title {
+    font-weight: 600;
+    font-size: 16px;
+    margin: 0;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    color: #666;
+    padding: 0;
+    line-height: 1;
+}
+
+.notification-body {
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.notification-time {
+    font-size: 12px;
+    color: #999;
+    text-align: right;
+}
+
+.notification-action {
+    margin-top: 8px;
+    text-align: right;
+}
+
+.notification-btn {
+    background: linear-gradient(to right, #1a6fc4, #34c3aa);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.notification-btn:hover {
+    background: linear-gradient(to right, #1558a0, #2aa890);
+}
+
+/* 風險指示燈動畫 */
+.risk-light.red-light.alert {
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+        
     </style>
 </head>
 <body>
+     <!-- 通知容器 -->
+    <div class="notification-container" id="notification-container">
+        <!-- 通知將在這裡動態生成 -->
+    </div>
     <div class="container">
         <!-- 登入表單 -->
         <div id="login-section" class="login-form">
@@ -1214,7 +1339,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbz6Qjl6RcNYGXeZbgVyrFB0tHJylMmII-6tSPbI_72Jo1YuZbe31WkBPt3JaHwgoFlB/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycby6WhYpVCUPz-mnPC-tHjs2pgSQYaoZcGzSNLAv2KQPNd5RHPkQRcDonmnV0ac7awG_/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
@@ -2284,6 +2409,320 @@ document.addEventListener('DOMContentLoaded', function() {
         // 重置計時器
         resetInactivityTimer();
     }
+
+    // 通知系統管理
+const notificationSystem = {
+  container: null,
+  notifications: [],
+  maxNotifications: 5,
+  
+  init: function() {
+    this.container = document.getElementById('notification-container');
+    if (!this.container) {
+      this.container = document.createElement('div');
+      this.container.id = 'notification-container';
+      this.container.className = 'notification-container';
+      document.body.appendChild(this.container);
+    }
+  },
+  
+  show: function(options) {
+    this.init();
+    
+    const notification = document.createElement('div');
+    notification.className = `notification ${options.type || 'info'}`;
+    
+    const id = 'notification-' + Date.now();
+    notification.id = id;
+    
+    // 創建通知內容
+    notification.innerHTML = `
+      <div class="notification-header">
+        <h4 class="notification-title">${options.title || '系統通知'}</h4>
+        <button class="notification-close">&times;</button>
+      </div>
+      <div class="notification-body">${options.message}</div>
+      <div class="notification-time">${this.formatTime(new Date())}</div>
+      ${options.action ? `
+        <div class="notification-action">
+          <button class="notification-btn" data-action="${options.action.type}" data-target="${options.action.target || ''}">${options.action.text}</button>
+        </div>
+      ` : ''}
+    `;
+    
+    // 添加到容器
+    this.container.appendChild(notification);
+    
+    // 添加到通知列表
+    this.notifications.push({
+      id: id,
+      element: notification,
+      timeout: null
+    });
+    
+    // 如果超過最大數量，移除最舊的通知
+    if (this.notifications.length > this.maxNotifications) {
+      this.remove(this.notifications[0].id);
+    }
+    
+    // 顯示動畫
+    setTimeout(() => {
+      notification.classList.add('show');
+    }, 10);
+    
+    // 綁定關閉按鈕事件
+    const closeBtn = notification.querySelector('.notification-close');
+    if (closeBtn) {
+      closeBtn.addEventListener('click', () => {
+        this.remove(id);
+      });
+    }
+    
+    // 綁定操作按鈕事件
+    const actionBtn = notification.querySelector('.notification-btn');
+    if (actionBtn) {
+      actionBtn.addEventListener('click', (e) => {
+        const action = e.target.getAttribute('data-action');
+        const target = e.target.getAttribute('data-target');
+        
+        if (action === 'view-department') {
+          // 跳轉到部門風險係數頁面
+          showDeptRiskIndex();
+          // 如果有指定部門，可以高亮顯示該部門
+          if (target) {
+            setTimeout(() => {
+              const deptRow = document.querySelector(`tr[data-department="${target}"]`);
+              if (deptRow) {
+                deptRow.classList.add('highlight-row');
+                deptRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }
+            }, 500);
+          }
+        } else if (action === 'view-analytics') {
+          // 跳轉到數據分析頁面
+          showDataAnalytics();
+        }
+        
+        // 關閉通知
+        this.remove(id);
+      });
+    }
+    
+    // 設置自動關閉
+    if (options.duration !== 0) {
+      const timeout = setTimeout(() => {
+        this.remove(id);
+      }, options.duration || 5000);
+      
+      // 更新 timeout 引用
+      const notificationIndex = this.notifications.findIndex(n => n.id === id);
+      if (notificationIndex !== -1) {
+        this.notifications[notificationIndex].timeout = timeout;
+      }
+    }
+    
+    return id;
+  },
+  
+  remove: function(id) {
+    const index = this.notifications.findIndex(n => n.id === id);
+    if (index !== -1) {
+      const notification = this.notifications[index];
+      
+      // 清除定時器
+      if (notification.timeout) {
+        clearTimeout(notification.timeout);
+      }
+      
+      // 移除動畫
+      notification.element.classList.remove('show');
+      
+      // 移除元素
+      setTimeout(() => {
+        if (notification.element.parentNode) {
+          notification.element.parentNode.removeChild(notification.element);
+        }
+        this.notifications.splice(index, 1);
+      }, 400); // 等待過渡動畫完成
+    }
+  },
+  
+  formatTime: function(date) {
+    return date.toLocaleTimeString('zh-TW', { 
+      hour: '2-digit', 
+      minute: '2-digit'
+    });
+  },
+  
+  showRiskAlert: function(alert) {
+    return this.show({
+      title: '風險警報',
+      message: alert.message,
+      type: alert.level,
+      duration: alert.level === 'danger' ? 0 : 10000, // 高風險不自動關閉
+      action: {
+        text: '查看詳情',
+        type: 'view-department',
+        target: alert.department
+      }
+    });
+  }
+};
+
+// 在登入成功後顯示風險警報
+function handleLoginSuccess(data) {
+  // 設置用戶資訊
+  document.getElementById('user-department').textContent = data.department;
+  document.getElementById('user-name').textContent = data.name;
+  
+  // 顯示儀表板
+  document.getElementById('login-section').classList.add('hidden');
+  document.getElementById('dashboard-section').classList.remove('hidden');
+  
+  // 初始化通知系統
+  notificationSystem.init();
+  
+  // 處理風險警報
+  if (data.alerts && data.alerts.length > 0) {
+    // 顯示用戶部門的警報
+    data.alerts.forEach(alert => {
+      notificationSystem.showRiskAlert(alert);
+    });
+  }
+  
+  // 處理其他部門的高風險警報
+  if (data.allAlerts && data.allAlerts.length > 0) {
+    const highRiskAlerts = data.allAlerts.filter(alert => 
+      alert.level === 'danger' && alert.department !== data.department
+    );
+    
+    if (highRiskAlerts.length > 0) {
+      setTimeout(() => {
+        highRiskAlerts.forEach(alert => {
+          notificationSystem.showRiskAlert(alert);
+        });
+      }, 3000); // 延遲顯示其他部門的警報
+    }
+  }
+  
+  // 載入部門風險係數
+  loadDepartmentRiskIndex();
+}
+
+// 修改登入函數，處理警報數據
+function login() {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  
+  if (!username || !password) {
+    document.getElementById('login-error').textContent = '請輸入帳號和密碼';
+    return;
+  }
+  
+  document.getElementById('login-error').textContent = '';
+  document.getElementById('login-loading').classList.remove('hidden');
+  
+  // 調用 API 進行登入
+  const scriptURL = 'https://script.google.com/macros/s/AKfycby6WhYpVCUPz-mnPC-tHjs2pgSQYaoZcGzSNLAv2KQPNd5RHPkQRcDonmnV0ac7awG_/exec';
+  
+  fetch(`${scriptURL}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
+    .then(response => response.json())
+    .then(data => {
+      document.getElementById('login-loading').classList.add('hidden');
+      
+      if (data.success) {
+        // 保存用戶資訊到 sessionStorage
+        sessionStorage.setItem('user', JSON.stringify({
+          department: data.department,
+          name: data.name,
+          username: username
+        }));
+        
+        // 處理登入成功
+        handleLoginSuccess(data);
+      } else {
+        document.getElementById('login-error').textContent = data.message || '登入失敗';
+      }
+    })
+    .catch(error => {
+      document.getElementById('login-loading').classList.add('hidden');
+      document.getElementById('login-error').textContent = '連接伺服器時發生錯誤';
+      console.error('Error:', error);
+    });
+}
+
+// 在部門風險係數頁面添加風險警報顯示
+function loadDepartmentRiskIndex() {
+  const scriptURL = 'https://script.google.com/macros/s/AKfycby6WhYpVCUPz-mnPC-tHjs2pgSQYaoZcGzSNLAv2KQPNd5RHPkQRcDonmnV0ac7awG_/exec';
+  
+  fetch(`${scriptURL}?action=getDepartmentRiskIndexFromRSheet`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.success) {
+        const tableBody = document.getElementById('risk-index-table-body');
+        tableBody.innerHTML = '';
+        
+        data.data.forEach(item => {
+          const row = document.createElement('tr');
+          row.setAttribute('data-department', item.department);
+          
+          // 提取風險值數字部分
+          const riskValue = parseFloat(item.riskIndex.replace('R', ''));
+          let riskLight = '';
+          
+          // 根據風險值設置燈號
+          if (riskValue >= 30) {
+            riskLight = '<span class="risk-light red-light alert">⬤</span>';
+            row.classList.add('high-risk-row');
+          } else if (riskValue >= 15) {
+            riskLight = '<span class="risk-light yellow-light">⬤</span>';
+          } else {
+            riskLight = '<span class="risk-light green-light">⬤</span>';
+          }
+          
+          row.innerHTML = `
+            <td>${item.department}</td>
+            <td>${riskLight} ${item.riskIndex}</td>
+            <td>
+              <button class="btn btn-sm btn-primary ai-analysis-btn" data-department="${item.department}" data-risk="${item.riskIndex}">
+                AI評析
+              </button>
+            </td>
+          `;
+          
+          tableBody.appendChild(row);
+        });
+        
+        // 綁定 AI 評析按鈕事件
+        document.querySelectorAll('.ai-analysis-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const department = this.getAttribute('data-department');
+            const riskValue = this.getAttribute('data-risk');
+            showAIAnalysis(department, riskValue);
+          });
+        });
+      } else {
+        document.getElementById('risk-index-table-body').innerHTML = `
+          <tr>
+            <td colspan="3" class="text-center text-danger">
+              載入失敗：${data.message || '未知錯誤'}
+            </td>
+          </tr>
+        `;
+      }
+    })
+    .catch(error => {
+      document.getElementById('risk-index-table-body').innerHTML = `
+        <tr>
+          <td colspan="3" class="text-center text-danger">
+            連接伺服器時發生錯誤
+          </td>
+        </tr>
+      `;
+      console.error('Error:', error);
+    });
+}
+
 });
 </script>
 
