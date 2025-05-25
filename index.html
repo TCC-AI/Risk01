@@ -1029,8 +1029,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                 });
         }
         
-        // 更新風險表格的函數
-       // 更新風險表格的函數
+// 更新風險表格的函數
 function updateRiskTable(riskData) {
     const tableBody = document.getElementById('risk-index-table-body');
     
@@ -1041,10 +1040,13 @@ function updateRiskTable(riskData) {
     
     // 創建表格行
     const rows = riskData.map(item => {
-        // 解析風險係數值（去除 "R" 後綴）
-        const riskValue = parseInt(item.riskIndex.replace('R', '')) || 0;
+        // 解析風險係數值（去除 "R" 後綴並格式化到小數第一位）
+        let riskValue = parseFloat(item.riskIndex.replace('R', '')) || 0;
         
-        // 根據風險係數決定燈號(調整燈號)
+        // 格式化到小數第一位
+        let formattedRiskValue = riskValue.toFixed(1);
+        
+        // 根據風險係數決定燈號
         let lightIcon = '';
         if (riskValue <= 15) {
             lightIcon = '<span class="risk-light green-light">●</span>'; // 綠燈
@@ -1057,13 +1059,14 @@ function updateRiskTable(riskData) {
         return `
             <tr>
                 <td>${lightIcon} ${item.department}</td>
-                <td>${item.riskIndex}</td>
+                <td>${formattedRiskValue}R</td>
             </tr>
         `;
     }).join('');
     
     tableBody.innerHTML = rows;
 }
+
 
 
         // 一鍵全否按鈕點擊事件
