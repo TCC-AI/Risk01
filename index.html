@@ -259,15 +259,6 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             background: linear-gradient(to right, #7b1fa2, #c2185b);
         }
 
-        /* 通知管理按鈕樣式 */
-        #notification-management-btn {
-            background: linear-gradient(to right, #ff5722, #ff9800);
-        }
-
-        #notification-management-btn:hover {
-            background: linear-gradient(to right, #e64a19, #f57c00);
-        }
-
         .hidden {
             display: none;
         }
@@ -328,222 +319,6 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         .dropdown-item:hover {
             background-color: #f1f8ff;
             color: #1a6fc4;
-        }
-
-        /* 通知系統樣式 */
-        .notification-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            max-width: 400px;
-        }
-
-        .notification {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 12px;
-            padding: 15px 20px;
-            margin-bottom: 10px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
-            backdrop-filter: blur(10px);
-            border-left: 5px solid;
-            animation: slideInRight 0.3s ease-out;
-            position: relative;
-        }
-
-        .notification.warning {
-            border-left-color: #ff9800;
-            background: linear-gradient(135deg, rgba(255, 152, 0, 0.1), rgba(255, 193, 7, 0.1));
-        }
-
-        .notification.danger {
-            border-left-color: #f44336;
-            background: linear-gradient(135deg, rgba(244, 67, 54, 0.1), rgba(233, 30, 99, 0.1));
-        }
-
-        .notification.success {
-            border-left-color: #4caf50;
-            background: linear-gradient(135deg, rgba(76, 175, 80, 0.1), rgba(139, 195, 74, 0.1));
-        }
-
-        .notification-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .notification-icon {
-            font-size: 1.2rem;
-            margin-right: 8px;
-        }
-
-        .notification-title {
-            font-weight: bold;
-            color: #333;
-            flex: 1;
-        }
-
-        .notification-close {
-            background: none;
-            border: none;
-            font-size: 1.2rem;
-            color: #999;
-            cursor: pointer;
-            padding: 0;
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .notification-close:hover {
-            color: #666;
-        }
-
-        .notification-body {
-            color: #555;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-
-        .notification-time {
-            color: #888;
-            font-size: 12px;
-            margin-top: 5px;
-        }
-
-        @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        @keyframes slideOutRight {
-            from {
-                transform: translateX(0);
-                opacity: 1;
-            }
-            to {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-        }
-
-        /* 通知設定頁面樣式 */
-        .notification-settings {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .threshold-setting {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            gap: 15px;
-        }
-
-        .threshold-label {
-            min-width: 120px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .threshold-input {
-            flex: 1;
-            max-width: 100px;
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-size: 14px;
-        }
-
-        .threshold-input:focus {
-            outline: none;
-            border-color: #1a6fc4;
-            box-shadow: 0 0 0 2px rgba(26, 111, 196, 0.2);
-        }
-
-        /* 通知歷史樣式 */
-        .notification-history {
-            max-height: 400px;
-            overflow-y: auto;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-        }
-
-        .history-item {
-            padding: 12px 15px;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-        }
-
-        .history-item:last-child {
-            border-bottom: none;
-        }
-
-        .history-icon {
-            font-size: 1.1rem;
-            margin-top: 2px;
-        }
-
-        .history-content {
-            flex: 1;
-        }
-
-        .history-title {
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 4px;
-        }
-
-        .history-message {
-            color: #666;
-            font-size: 14px;
-            margin-bottom: 4px;
-        }
-
-        .history-time {
-            color: #999;
-            font-size: 12px;
-        }
-
-        /* 通知按鈕樣式 */
-        .notification-btn {
-            position: relative;
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: #f44336;
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
         }
 
         /* 部門風險係數頁面樣式 */
@@ -879,7 +654,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
-                .inventory-table tr {
+        .inventory-table tr {
             transition: all 0.2s ease;
         }
 
@@ -1162,11 +937,6 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                  <button class="feature-btn" id="data-analytics-btn" style="background: linear-gradient(to right, #9c27b0, #e91e63);">數據分析儀表板</button>
     <button id="inventory-btn" class="feature-btn">部門週期盤點</button>
     <button id="event-btn" class="feature-btn">事件登錄</button>
-    <!-- 新增通知管理按鈕 -->
-    <button class="feature-btn notification-btn" id="notification-management-btn" style="background: linear-gradient(to right, #ff5722, #ff9800);">
-        通知管理
-        <span id="notification-badge" class="notification-badge" style="display: none;">0</span>
-    </button>
             </div>
             
             <!-- 登出下拉選單 -->
@@ -1400,58 +1170,6 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         
         <button class="btn btn-secondary mt-3" id="back-to-dashboard-from-analytics">返回</button>
     </div>
-
-    <!-- 通知管理頁面 -->
-    <div id="notification-management-page" class="dashboard-page" style="display: none;">
-        <div class="logo-container">
-            <img src="LOGO.png" alt="TCC.AI Logo" class="logo">
-        </div>
-        <h2 class="text-center mb-4">通知管理系統</h2>
-        
-        <!-- 警報設定區 -->
-        <div class="notification-settings">
-            <h5 class="mb-3">🔧 警報閾值設定</h5>
-            <div class="threshold-setting">
-                <label class="threshold-label">黃燈警報:</label>
-                <input type="number" id="yellowThreshold" class="threshold-input" value="15" min="1" max="100" step="0.1">
-                <span class="text-muted">R值超過此數值時發送黃燈警報</span>
-            </div>
-            <div class="threshold-setting">
-                <label class="threshold-label">紅燈警報:</label>
-                <input type="number" id="redThreshold" class="threshold-input" value="30" min="1" max="100" step="0.1">
-                <span class="text-muted">R值超過此數值時發送紅燈警報</span>
-            </div>
-            <div class="threshold-setting">
-                <label class="threshold-label">通知Email:</label>
-                <input type="email" id="notificationEmail" class="form-control" style="max-width: 300px;" placeholder="manager@company.com">
-                <span class="text-muted">接收警報的Email地址</span>
-            </div>
-            <button class="btn btn-primary" id="saveNotificationSettings">💾 儲存設定</button>
-        </div>
-        
-        <!-- 即時監控狀態 -->
-        <div class="notification-settings">
-            <h5 class="mb-3">📊 即時監控狀態</h5>
-            <div class="row" id="realTimeStatus">
-                <div class="col-12">
-                    <p class="text-center text-muted">載入中...</p>
-                </div>
-            </div>
-            <button class="btn btn-success" id="refreshStatus">🔄 重新整理狀態</button>
-            <button class="btn btn-warning" id="testNotification">🧪 測試通知</button>
-        </div>
-        
-        <!-- 通知歷史 -->
-        <div class="notification-settings">
-            <h5 class="mb-3">📋 通知歷史記錄</h5>
-            <div class="notification-history" id="notificationHistory">
-                <div class="text-center p-3 text-muted">載入中...</div>
-            </div>
-            <button class="btn btn-info mt-2" id="clearHistory">🗑️ 清除歷史</button>
-        </div>
-        
-        <button class="btn btn-secondary mt-3" id="back-to-dashboard-from-notification">返回</button>
-    </div>
     
     <!-- 部門週期盤點頁面 -->
     <div id="inventory-section" class="inventory-section hidden">
@@ -1490,30 +1208,16 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         </div>
     </div>
 
-    <!-- 通知容器 -->
-    <div id="notification-container" class="notification-container"></div>
-
     <!-- 新增 Bootstrap JS 和 Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbwwyX3KbSB4IFSb9NAdv33GYB6bA_9Y56emOzE-BRfn9jon9MRuz0ZkmeoSsFiekJYA/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbwHFRlF2-KV9PqruzKE1ezu6yBoN6ScdBwgDG967NWC4iICR0H0KBOJZL7tYG-It1Uc/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
-
-// 通知系統相關變數
-let notificationSettings = {
-    yellowThreshold: 15,
-    redThreshold: 30,
-    notificationEmail: '',
-    enableEmail: true,
-    enableBrowser: true
-};
-
-let unreadNotifications = 0;
 
 // 全域函數 - 顯示AI評析
 async function showAIAnalysis(department, riskValue) {
@@ -1585,261 +1289,12 @@ function convertMarkdownToHTML(markdown) {
     return `<div class="markdown-content">${html}</div>`;
 }
 
-// 通知系統函數
-function showNotification(type, title, message, autoClose = true) {
-    const container = document.getElementById('notification-container');
-    const notificationId = 'notification-' + Date.now();
-    
-    const notification = document.createElement('div');
-    notification.className = `notification ${type}`;
-    notification.id = notificationId;
-    
-    const icon = type === 'danger' ? '🚨' : type === 'warning' ? '⚠️' : '✅';
-    
-    notification.innerHTML = `
-        <div class="notification-header">
-            <span class="notification-icon">${icon}</span>
-            <span class="notification-title">${title}</span>
-            <button class="notification-close" onclick="closeNotification('${notificationId}')">&times;</button>
-        </div>
-        <div class="notification-body">${message}</div>
-        <div class="notification-time">${new Date().toLocaleTimeString('zh-TW')}</div>
-    `;
-    
-    container.appendChild(notification);
-    
-    // 增加未讀計數
-    updateNotificationBadge(++unreadNotifications);
-    
-    // 自動關閉
-    if (autoClose) {
-        const closeTime = type === 'danger' ? 10000 : 5000; // 危險警報10秒，其他5秒
-        setTimeout(() => {
-            closeNotification(notificationId);
-        }, closeTime);
-    }
-    
-    // 瀏覽器原生通知
-    if (notificationSettings.enableBrowser && 'Notification' in window) {
-        if (Notification.permission === 'granted') {
-            new Notification(title, {
-                body: message,
-                icon: 'LOGO.png'
-            });
-        } else if (Notification.permission !== 'denied') {
-            Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                    new Notification(title, {
-                        body: message,
-                        icon: 'LOGO.png'
-                    });
-                }
-            });
-        }
-    }
-}
-
-function closeNotification(notificationId) {
-    const notification = document.getElementById(notificationId);
-    if (notification) {
-        notification.style.animation = 'slideOutRight 0.3s ease-in';
-        setTimeout(() => {
-            notification.remove();
-        }, 300);
-    }
-}
-
-function updateNotificationBadge(count) {
-    const badge = document.getElementById('notification-badge');
-    if (count > 0) {
-        badge.textContent = count > 99 ? '99+' : count;
-        badge.style.display = 'flex';
-    } else {
-        badge.style.display = 'none';
-    }
-}
-
-// 檢查風險警報
-async function checkRiskAlerts() {
-    try {
-        const response = await fetch(`${scriptUrl}?action=checkRiskAlerts`);
-        const result = await response.json();
-        
-        if (result.success && result.alerts && result.alerts.length > 0) {
-            result.alerts.forEach(alert => {
-                const title = alert.type === 'danger' ? '🚨 高風險警報' : '⚠️ 中風險警報';
-                const message = `${alert.department} - 風險係數: ${alert.rValue}`;
-                showNotification(alert.type, title, message);
-            });
-        }
-    } catch (error) {
-        console.error('檢查風險警報時發生錯誤:', error);
-    }
-}
-
-// 載入通知設定
-async function loadNotificationSettings() {
-    try {
-        const response = await fetch(`${scriptUrl}?action=getNotificationSettings`);
-        const result = await response.json();
-        
-        if (result.success) {
-            notificationSettings = { ...notificationSettings, ...result.settings };
-            
-            // 更新頁面上的設定值
-            document.getElementById('yellowThreshold').value = notificationSettings.yellowThreshold;
-            document.getElementById('redThreshold').value = notificationSettings.redThreshold;
-            document.getElementById('notificationEmail').value = notificationSettings.notificationEmail;
-        }
-    } catch (error) {
-        console.error('載入通知設定時發生錯誤:', error);
-    }
-}
-
-// 儲存通知設定
-async function saveNotificationSettings() {
-    try {
-        const settings = {
-            yellowThreshold: parseFloat(document.getElementById('yellowThreshold').value) || 15,
-            redThreshold: parseFloat(document.getElementById('redThreshold').value) || 30,
-            notificationEmail: document.getElementById('notificationEmail').value.trim()
-        };
-        
-        const response = await fetch(`${scriptUrl}?action=saveNotificationSettings`, {
-            method: 'POST',
-            body: JSON.stringify(settings)
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            notificationSettings = { ...notificationSettings, ...settings };
-            showNotification('success', '設定已儲存', '通知設定已成功更新');
-        } else {
-            showNotification('danger', '儲存失敗', result.message || '無法儲存設定');
-        }
-    } catch (error) {
-        console.error('儲存通知設定時發生錯誤:', error);
-        showNotification('danger', '系統錯誤', '無法連接到伺服器');
-    }
-}
-
-// 載入即時風險狀態
-async function loadRealTimeRiskStatus() {
-    try {
-        const response = await fetch(`${scriptUrl}?action=getRealTimeRiskStatus`);
-        const result = await response.json();
-        
-        const statusContainer = document.getElementById('realTimeStatus');
-        
-        if (result.success && result.departments && result.departments.length > 0) {
-            const statusHTML = result.departments.map(dept => {
-                const rValue = parseFloat(dept.riskIndex.replace('R', '')) || 0;
-                let statusClass = 'success';
-                let statusIcon = '🟢';
-                let statusText = '正常';
-                
-                if (rValue >= notificationSettings.redThreshold) {
-                    statusClass = 'danger';
-                    statusIcon = '🔴';
-                    statusText = '高風險';
-                } else if (rValue >= notificationSettings.yellowThreshold) {
-                    statusClass = 'warning';
-                    statusIcon = '🟡';
-                    statusText = '中風險';
-                }
-                
-                return `
-                    <div class="col-md-4 mb-3">
-                        <div class="alert alert-${statusClass} mb-0">
-                            <strong>${statusIcon} ${dept.department}</strong><br>
-                            風險係數: ${dept.riskIndex}<br>
-                            狀態: ${statusText}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            statusContainer.innerHTML = statusHTML;
-        } else {
-            statusContainer.innerHTML = '<div class="col-12"><p class="text-center text-muted">無部門數據</p></div>';
-        }
-    } catch (error) {
-        console.error('載入即時風險狀態時發生錯誤:', error);
-        document.getElementById('realTimeStatus').innerHTML = '<div class="col-12"><p class="text-center text-danger">載入失敗</p></div>';
-    }
-}
-
-// 載入通知歷史
-async function loadNotificationHistory() {
-    try {
-        const response = await fetch(`${scriptUrl}?action=getNotificationHistory`);
-        const result = await response.json();
-        
-        const historyContainer = document.getElementById('notificationHistory');
-        
-        if (result.success && result.history && result.history.length > 0) {
-            const historyHTML = result.history.map(item => {
-                const icon = item.type === 'danger' ? '🚨' : '⚠️';
-                return `
-                    <div class="history-item">
-                        <div class="history-icon">${icon}</div>
-                        <div class="history-content">
-                            <div class="history-title">${item.title}</div>
-                            <div class="history-message">${item.message}</div>
-                            <div class="history-time">${item.timestamp}</div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-            
-            historyContainer.innerHTML = historyHTML;
-        } else {
-            historyContainer.innerHTML = '<div class="text-center p-3 text-muted">暫無通知記錄</div>';
-        }
-    } catch (error) {
-        console.error('載入通知歷史時發生錯誤:', error);
-        document.getElementById('notificationHistory').innerHTML = '<div class="text-center p-3 text-danger">載入失敗</div>';
-    }
-}
-
-// 清除通知歷史
-async function clearNotificationHistory() {
-    if (!confirm('確定要清除所有通知歷史記錄嗎？')) {
-        return;
-    }
-    
-    try {
-        const response = await fetch(`${scriptUrl}?action=clearNotificationHistory`, {
-            method: 'POST'
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            showNotification('success', '清除成功', '通知歷史記錄已清除');
-            loadNotificationHistory(); // 重新載入歷史
-        } else {
-            showNotification('danger', '清除失敗', result.message || '無法清除歷史記錄');
-        }
-    } catch (error) {
-        console.error('清除通知歷史時發生錯誤:', error);
-        showNotification('danger', '系統錯誤', '無法連接到伺服器');
-    }
-}
-
-// 測試通知功能
-function testNotification() {
-    showNotification('warning', '🧪 測試通知', '這是一個測試通知，用於驗證通知系統是否正常運作。', false);
-}
-
 document.addEventListener('DOMContentLoaded', function() {
     const loginSection = document.getElementById('login-section');
     const dashboardSection = document.getElementById('dashboard-section');
     const inventorySection = document.getElementById('inventory-section');
     const deptRiskIndexPage = document.getElementById('dept-risk-index-page');
     const dataAnalyticsPage = document.getElementById('data-analytics-page');
-    const notificationManagementPage = document.getElementById('notification-management-page');
     const loginBtn = document.getElementById('login-btn');
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
@@ -1862,8 +1317,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const backFromRiskBtn = document.getElementById('back-to-dashboard-from-risk');
     const dataAnalyticsBtn = document.getElementById('data-analytics-btn');
     const backFromAnalyticsBtn = document.getElementById('back-to-dashboard-from-analytics');
-    const notificationManagementBtn = document.getElementById('notification-management-btn');
-    const backFromNotificationBtn = document.getElementById('back-to-dashboard-from-notification');
     
     // 自動登出相關變數
     let inactivityTimer;
@@ -1911,11 +1364,6 @@ document.addEventListener('DOMContentLoaded', function() {
         showDashboard();
         // 初始化自動登出計時器
         resetInactivityTimer();
-        
-        // 啟動風險警報檢查（每5分鐘檢查一次）
-        setInterval(checkRiskAlerts, 5 * 60 * 1000);
-        // 立即檢查一次
-        setTimeout(checkRiskAlerts, 2000);
     }
 
     // 添加部門風險係數按鈕點擊事件
@@ -1942,24 +1390,6 @@ document.addEventListener('DOMContentLoaded', function() {
         resetInactivityTimer();
     });
     
-    // 通知管理按鈕點擊事件
-    notificationManagementBtn.addEventListener('click', function() {
-        dashboardSection.style.display = 'none';
-        notificationManagementPage.style.display = 'block';
-        
-        // 載入通知管理頁面數據
-        loadNotificationSettings();
-        loadRealTimeRiskStatus();
-        loadNotificationHistory();
-        
-        // 清除未讀計數
-        unreadNotifications = 0;
-        updateNotificationBadge(0);
-        
-        // 重置計時器
-        resetInactivityTimer();
-    });
-    
     // 返回按鈕點擊事件
     backFromRiskBtn.addEventListener('click', function() {
         deptRiskIndexPage.style.display = 'none';
@@ -1981,23 +1411,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // 重置計時器
         resetInactivityTimer();
     });
-    
-    // 通知管理頁面返回按鈕點擊事件
-    backFromNotificationBtn.addEventListener('click', function() {
-        notificationManagementPage.style.display = 'none';
-        dashboardSection.style.display = 'block';
-        // 強制重新整理頁面
-        window.location.reload();
-        
-        // 重置計時器
-        resetInactivityTimer();
-    });
-    
-    // 通知管理頁面的事件監聽器
-    document.getElementById('saveNotificationSettings').addEventListener('click', saveNotificationSettings);
-    document.getElementById('refreshStatus').addEventListener('click', loadRealTimeRiskStatus);
-    document.getElementById('testNotification').addEventListener('click', testNotification);
-    document.getElementById('clearHistory').addEventListener('click', clearNotificationHistory);
     
     // 時間範圍和部門篩選變更事件
     document.getElementById('dateRange').addEventListener('change', function() {
@@ -2090,7 +1503,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const departmentFilter = document.getElementById('departmentFilter').value;
             
             // 獲取分析數據
-            const response = await fetch(`${scriptUrl}?action=getAnalyticsData&dateRange=${dateRange}&department=${departmentFilter}`);
+                        const response = await fetch(`${scriptUrl}?action=getAnalyticsData&dateRange=${dateRange}&department=${departmentFilter}`);
             const result = await response.json();
             
             if (result.success) {
@@ -2314,7 +1727,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-        // 更新月度對比分析圖
+    // 更新月度對比分析圖
     function updateMonthlyComparisonChart(monthlyData) {
         const ctx = document.getElementById('monthlyComparisonChart').getContext('2d');
         
@@ -2452,10 +1865,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     showDashboard();
                     // 啟動自動登出計時器
                     resetInactivityTimer();
-                    
-                    // 啟動風險警報檢查
-                    setTimeout(checkRiskAlerts, 2000);
-                    setInterval(checkRiskAlerts, 5 * 60 * 1000);
                 } else {
                     // 登入失敗
                     errorMessage.textContent = data.message || '帳號或密碼錯誤';
@@ -2688,12 +2097,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success) {
                 alert('部門週期盤點已成功送出');
                 showDashboard();
-                
-                // 顯示成功通知
-                showNotification('success', '盤點完成', '部門週期盤點已成功送出');
-                
-                // 觸發風險檢查
-                setTimeout(checkRiskAlerts, 3000);
             } else {
                 alert(data.message || '送出失敗，請稍後再試');
             }
@@ -2766,7 +2169,6 @@ document.addEventListener('DOMContentLoaded', function() {
         inventorySection.classList.add('hidden');
         deptRiskIndexPage.style.display = 'none';
         dataAnalyticsPage.style.display = 'none';
-        notificationManagementPage.style.display = 'none';
         document.querySelector('.container').classList.remove('hidden');
         
         // 清空登入表單
@@ -2775,10 +2177,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // 停止計時器
         clearTimeout(inactivityTimer);
-        
-        // 清除通知
-        unreadNotifications = 0;
-        updateNotificationBadge(0);
     }
 
     
@@ -2852,7 +2250,6 @@ document.addEventListener('DOMContentLoaded', function() {
         inventorySection.classList.add('hidden');
         deptRiskIndexPage.style.display = 'none';
         dataAnalyticsPage.style.display = 'none';
-        notificationManagementPage.style.display = 'none';
         document.querySelector('.container').classList.remove('hidden');
         dashboardSection.classList.remove('hidden');
         document.querySelector('.container').style.maxWidth = '500px';
@@ -2866,7 +2263,6 @@ document.addEventListener('DOMContentLoaded', function() {
         inventorySection.classList.add('hidden');
         deptRiskIndexPage.style.display = 'none';
         dataAnalyticsPage.style.display = 'none';
-        notificationManagementPage.style.display = 'none';
         document.querySelector('.container').classList.remove('hidden');
         loginSection.classList.remove('hidden');
         usernameInput.value = '';
@@ -2883,7 +2279,6 @@ document.addEventListener('DOMContentLoaded', function() {
         dashboardSection.classList.add('hidden');
         deptRiskIndexPage.style.display = 'none';
         dataAnalyticsPage.style.display = 'none';
-        notificationManagementPage.style.display = 'none';
         document.querySelector('.container').classList.add('hidden'); // 隱藏原容器
         inventorySection.classList.remove('hidden');
         // 重置計時器
