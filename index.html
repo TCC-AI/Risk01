@@ -895,9 +895,169 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                 max-width: 280px;
             }
         }
+
+        /* 通知相關樣式 */
+        .notification-icon {
+            position: relative;
+            cursor: pointer;
+            margin-left: 15px;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #ff4444;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        
+        .notification-panel {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 350px;
+            max-height: 400px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .notification-header {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+            font-weight: bold;
+            background-color: #f8f9fa;
+        }
+        
+        .notification-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .notification-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .notification-item.unread {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+        }
+        
+        .notification-item.critical {
+            background-color: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+        
+        .notification-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .notification-content {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .notification-time {
+            font-size: 12px;
+            color: #999;
+        }
+        
+        .notification-empty {
+            padding: 20px;
+            text-align: center;
+            color: #999;
+        }
+        
+        /* 警報橫幅樣式 */
+        .alert-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 9999;
+            padding: 10px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+        
+        .alert-banner.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border-bottom: 2px solid #ffc107;
+        }
+        
+        .alert-banner.critical {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-bottom: 2px solid #dc3545;
+        }
+        
+        .alert-banner .close-btn {
+            float: right;
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: inherit;
+        }
+        
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .notification-panel {
+                width: 300px;
+                right: -50px;
+            }
+        }
     </style>
 </head>
 <body>
+     <!-- 警報橫幅 -->
+    <div id="alertBanner" class="alert-banner">
+        <button class="close-btn" onclick="closeAlertBanner()">&times;</button>
+        <span id="alertMessage"></span>
+    </div>
+
+    <div class="container">
+        <header>
+            <h1>風險管理系統</h1>
+            <div class="user-info">
+                <span id="userInfo"></span>
+                <!-- 新增通知圖標 -->
+                <div class="notification-icon" onclick="toggleNotificationPanel()">
+                    🔔
+                    <span id="notificationBadge" class="notification-badge" style="display: none;">0</span>
+                    
+                    <!-- 通知面板 -->
+                    <div id="notificationPanel" class="notification-panel">
+                        <div class="notification-header">
+                            系統通知
+                        </div>
+                        <div id="notificationList">
+                            <div class="notification-empty">暫無通知</div>
+                        </div>
+                    </div>
+                </div>
+                <button onclick="logout()">登出</button>
+            </div>
+        </header>
     <div class="container">
         <!-- 登入表單 -->
         <div id="login-section" class="login-form">
@@ -1215,7 +1375,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbxc8MjhZnE-mHrC2pF0IDtvkrhhaZ5XnwmlfLGG9EQwxh3GsSdBeihou9UgJNkdxPi-/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycby5aBa7bqwGMIqgoUS5bX3Iv4vbHjV22OqLqTlPFlUIjXNKtJ9fM6--kVjjeVKUkB4q/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
@@ -2066,7 +2226,238 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('請填寫所有必填欄位');
             return;
         }
-        
+
+        // 通知系統相關變數
+        let notifications = [];
+        let notificationPanelOpen = false;
+
+        // 頁面載入時檢查通知
+        document.addEventListener('DOMContentLoaded', function() {
+            // 原有的初始化代碼...
+            
+            // 載入通知
+            if (currentUser && currentUser.department) {
+                loadNotifications();
+                // 設定定期檢查通知（每5分鐘）
+                setInterval(loadNotifications, 5 * 60 * 1000);
+            }
+        });
+
+        /**
+         * 載入系統通知
+         */
+        async function loadNotifications() {
+            if (!currentUser || !currentUser.department) return;
+
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=getNotifications&department=${encodeURIComponent(currentUser.department)}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    notifications = result.notifications || [];
+                    updateNotificationUI();
+                    checkForCriticalAlerts();
+                }
+            } catch (error) {
+                console.error('載入通知時出錯:', error);
+            }
+        }
+
+        /**
+         * 更新通知 UI
+         */
+        function updateNotificationUI() {
+            const badge = document.getElementById('notificationBadge');
+            const notificationList = document.getElementById('notificationList');
+
+            // 計算未讀通知數量
+            const unreadCount = notifications.filter(n => n.readStatus === '未讀').length;
+
+            // 更新徽章
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+
+            // 更新通知列表
+            if (notifications.length === 0) {
+                notificationList.innerHTML = '<div class="notification-empty">暫無通知</div>';
+            } else {
+                notificationList.innerHTML = notifications.map(notification => {
+                    const isUnread = notification.readStatus === '未讀';
+                    const isCritical = notification.severity === 'CRITICAL';
+                    
+                    let itemClass = 'notification-item';
+                    if (isUnread) itemClass += ' unread';
+                    if (isCritical) itemClass += ' critical';
+
+                    const timeStr = formatNotificationTime(notification.time);
+
+                    return `
+                        <div class="${itemClass}" onclick="markNotificationRead('${notification.time}')">
+                            <div class="notification-title">${notification.title}</div>
+                            <div class="notification-content">${notification.content}</div>
+                            <div class="notification-time">${timeStr}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        /**
+         * 檢查嚴重警報並顯示橫幅
+         */
+        function checkForCriticalAlerts() {
+            const criticalUnread = notifications.filter(n => 
+                n.readStatus === '未讀' && n.severity === 'CRITICAL'
+            );
+
+            if (criticalUnread.length > 0) {
+                const latestAlert = criticalUnread[0];
+                showAlertBanner(latestAlert.title, 'critical');
+            } else {
+                const warningUnread = notifications.filter(n => 
+                    n.readStatus === '未讀' && n.severity === 'WARNING'
+                );
+                
+                if (warningUnread.length > 0) {
+                    const latestAlert = warningUnread[0];
+                    showAlertBanner(latestAlert.title, 'warning');
+                }
+            }
+        }
+
+        /**
+         * 顯示警報橫幅
+         */
+        function showAlertBanner(message, type) {
+            const banner = document.getElementById('alertBanner');
+            const messageElement = document.getElementById('alertMessage');
+            
+            messageElement.textContent = message;
+            banner.className = `alert-banner ${type}`;
+            banner.style.display = 'block';
+
+            // 自動隱藏（10秒後）
+            setTimeout(() => {
+                banner.style.display = 'none';
+            }, 10000);
+        }
+
+        /**
+         * 關閉警報橫幅
+         */
+        function closeAlertBanner() {
+            document.getElementById('alertBanner').style.display = 'none';
+        }
+
+        /**
+         * 切換通知面板顯示
+         */
+        function toggleNotificationPanel() {
+            const panel = document.getElementById('notificationPanel');
+            notificationPanelOpen = !notificationPanelOpen;
+            panel.style.display = notificationPanelOpen ? 'block' : 'none';
+        }
+
+        /**
+         * 標記通知為已讀
+         */
+        async function markNotificationRead(notificationTime) {
+            if (!currentUser || !currentUser.department) return;
+
+            try {
+                const response = await fetch(`${SCRIPT_URL}?action=markNotificationRead&department=${encodeURIComponent(currentUser.department)}&time=${encodeURIComponent(notificationTime)}`);
+                const result = await response.json();
+
+                if (result.success) {
+                    // 更新本地通知狀態
+                    const notification = notifications.find(n => n.time === notificationTime);
+                    if (notification) {
+                        notification.readStatus = '已讀';
+                        updateNotificationUI();
+                    }
+                }
+            } catch (error) {
+                console.error('標記通知已讀時出錯:', error);
+            }
+        }
+
+        /**
+         * 格式化通知時間
+         */
+        function formatNotificationTime(timeStr) {
+            const time = new Date(timeStr);
+            const now = new Date();
+            const diffMs = now - time;
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+            if (diffMins < 1) {
+                return '剛剛';
+            } else if (diffMins < 60) {
+                return `${diffMins}分鐘前`;
+            } else if (diffHours < 24) {
+                return `${diffHours}小時前`;
+            } else if (diffDays < 7) {
+                return `${diffDays}天前`;
+            } else {
+                return time.toLocaleDateString('zh-TW', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+            }
+        }
+
+        // 點擊外部關閉通知面板
+        document.addEventListener('click', function(event) {
+            const notificationIcon = document.querySelector('.notification-icon');
+            const notificationPanel = document.getElementById('notificationPanel');
+            
+            if (!notificationIcon.contains(event.target)) {
+                notificationPanel.style.display = 'none';
+                notificationPanelOpen = false;
+            }
+        });
+
+        // 修改原有的提交函數，添加成功後重新載入通知
+        async function submitInventory() {
+            // 原有提交邏輯...
+            
+            try {
+                const response = await fetch(SCRIPT_URL + '?action=submitInventory', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(inventoryData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showMessage('部門週期盤點已成功送出！', 'success');
+                    
+                    // 重新載入通知（可能有新的風險警報）
+                    setTimeout(() => {
+                        loadNotifications();
+                    }, 2000);
+                    
+                    // 其他成功處理邏輯...
+                } else {
+                    showMessage('送出失敗：' + result.message, 'error');
+                }
+            } catch (error) {
+                console.error('送出時出錯:', error);
+                showMessage('送出時發生錯誤，請稍後再試', 'error');
+            }
+        }
+
         // 送出資料
         const department = localStorage.getItem('department');
         const username = localStorage.getItem('username');
