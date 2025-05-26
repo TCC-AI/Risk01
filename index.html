@@ -828,8 +828,11 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                 padding: 20px;
             }
             
+            繼續提供完整的代碼：
+
+```html
             .inventory-table th, .inventory-table td {
-                                padding: 12px;
+                padding: 12px;
                 font-size: 14px;
             }
             
@@ -895,6 +898,58 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                 max-width: 280px;
             }
         }
+
+        /* 風險警報樣式 - 新增 */
+        .alert-card {
+            background-color: #fff3f3;
+            border-left: 4px solid #dc3545;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .alert-card:hover {
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .alert-header {
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 15px;
+            border-top-right-radius: 8px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .alert-body {
+            padding: 15px;
+        }
+
+        .alert-badge {
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        .alert-badge-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .alert-badge-warning {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .alert-badge-success {
+            background-color: #28a745;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -931,6 +986,47 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             <div class="logo-container">
                 <img src="LOGO.png" alt="昶青實業 Logo" class="logo">
             </div>
+            
+            <!-- 風險警報區塊 - 新增 -->
+            <div class="row mb-4">
+              <div class="col-12">
+                <div class="card border-danger">
+                  <div class="card-header bg-danger text-white d-flex justify-content-between align-items-center">
+                    <div>
+                      <i class="bi bi-exclamation-triangle-fill"></i> 風險警報
+                    </div>
+                    <a href="#" id="alert-management-btn" class="btn btn-sm btn-outline-light">
+                      <i class="bi bi-bell"></i> 警報管理
+                    </a>
+                  </div>
+                  <div class="card-body p-0">
+                    <div id="alertsContainer">
+                      <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                          <thead>
+                            <tr>
+                              <th>時間</th>
+                              <th>部門</th>
+                              <th>風險值</th>
+                              <th>閾值</th>
+                              <th>狀態</th>
+                              <th>操作</th>
+                            </tr>
+                          </thead>
+                          <tbody id="recentAlerts">
+                            <!-- 最近警報將由 JavaScript 動態填充 -->
+                          </tbody>
+                        </table>
+                      </div>
+                      <div id="noRecentAlerts" class="text-center py-3 d-none">
+                        <p class="text-success mb-0"><i class="bi bi-check-circle"></i> 目前沒有待處理的風險警報</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
             <h1>昶青實業<br>AI-風險偵測管理系統</h1>
             <div class="button-group">
                 <button class="feature-btn" id="data-analytics-btn" style="background: linear-gradient(to right, #9c27b0, #e91e63);">數據分析儀表板</button> 
@@ -943,9 +1039,12 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             <!-- 登出下拉選單 -->
             <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle w-100 py-2" type="button" id="logoutDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                    登出選項
+                    系統設定
                 </button>
                 <ul class="dropdown-menu w-100" aria-labelledby="logoutDropdown">
+                    <li><a class="dropdown-item" href="#" id="thresholdSettingsBtn">風險閾值設定</a></li>
+                    <li><a class="dropdown-item" href="#" id="alertManagementBtn">警報管理</a></li>
+                    <li><hr class="dropdown-divider"></li>
                     <li><a class="dropdown-item" href="#" id="changePasswordBtn">更改密碼</a></li>
                     <li><a class="dropdown-item" href="#" id="logoutBtn">登出</a></li>
                 </ul>
@@ -1209,13 +1308,157 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         </div>
     </div>
 
+    <!-- 風險閾值設定頁面 - 新增 -->
+    <div id="threshold-settings-page" class="dashboard-page" style="display: none;">
+        <div class="logo-container">
+            <img src="LOGO.png" alt="TCC.AI Logo" class="logo">
+        </div>
+        <h2 class="text-center mb-4">風險閾值設定</h2>
+        
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle-fill"></i> 當部門風險值超過設定的閾值時，系統將自動發出警報通知。
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th style="width: 40%">部門</th>
+                        <th style="width: 30%">目前風險值</th>
+                        <th style="width: 30%">風險閾值</th>
+                    </tr>
+                </thead>
+                <tbody id="threshold-table-body">
+                    <!-- 數據將通過JavaScript動態填充 -->
+                    <tr>
+                        <td colspan="3" class="text-center">載入中...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="d-flex justify-content-between mt-3">
+            <button class="btn btn-secondary" id="back-from-threshold">返回</button>
+            <button class="btn btn-primary" id="save-thresholds">儲存設定</button>
+        </div>
+    </div>
+
+    <!-- 警報管理頁面 - 新增 -->
+    <div id="alert-management-page" class="dashboard-page" style="display: none;">
+        <div class="logo-container">
+            <img src="LOGO.png" alt="TCC.AI Logo" class="logo">
+        </div>
+        <h2 class="text-center mb-4">風險警報管理</h2>
+        
+        <div class="d-flex justify-content-between mb-3">
+            <div>
+                <select id="alert-status-filter" class="form-select">
+                    <option value="all">全部狀態</option>
+                    <option value="待處理" selected>待處理</option>
+                    <option value="已處理">已處理</option>
+                    <option value="已忽略">已忽略</option>
+                </select>
+            </div>
+            <div>
+                <button class="btn btn-outline-secondary" id="refresh-alerts">
+                    <i class="bi bi-arrow-clockwise"></i> 重新整理
+                </button>
+            </div>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>時間</th>
+                        <th>部門</th>
+                        <th>風險值</th>
+                        <th>閾值</th>
+                        <th>狀態</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="alerts-table-body">
+                    <!-- 數據將通過JavaScript動態填充 -->
+                    <tr>
+                        <td colspan="6" class="text-center">載入中...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div id="no-alerts-message" class="alert alert-info text-center d-none">
+            <i class="bi bi-info-circle"></i> 目前沒有符合條件的警報
+        </div>
+        
+        <button class="btn btn-secondary mt-3" id="back-from-alerts">返回</button>
+    </div>
+
+    <!-- 處理警報的彈出視窗 - 新增 -->
+    <div class="modal fade" id="processAlertModal" tabindex="-1" aria-labelledby="processAlertModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="processAlertModalLabel">處理風險警報</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <div><strong>部門：</strong> <span id="alert-department"></span></div>
+                        <div><strong>風險值：</strong> <span id="alert-risk-value"></span></div>
+                        <div><strong>閾值：</strong> <span id="alert-threshold"></span></div>
+                        <div><strong>時間：</strong> <span id="alert-time"></span></div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="alert-action" class="form-label">處理方式</label>
+                        <select class="form-select" id="alert-action">
+                            <option value="已處理">標記為已處理</option>
+                            <option value="已忽略">標記為已忽略</option>
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="alert-comment" class="form-label">處理備註</label>
+                        <textarea class="form-control" id="alert-comment" rows="3" placeholder="請輸入處理備註..."></textarea>
+                    </div>
+                    
+                    <input type="hidden" id="alert-id">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="submit-alert-process">確認處理</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 風險警報通知元件 - 新增 -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <div id="riskAlertToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header bg-danger text-white">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          <strong class="me-auto">風險警報</strong>
+          <small>剛剛</small>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">
+          <div id="toastMessage">有部門風險值超過閾值，請立即查看！</div>
+          <div class="mt-2 pt-2 border-top">
+            <a href="#" id="view-alert-details" class="btn btn-danger btn-sm">查看詳情</a>
+            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="toast">關閉</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- 新增 Bootstrap JS 和 Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbxc8MjhZnE-mHrC2pF0IDtvkrhhaZ5XnwmlfLGG9EQwxh3GsSdBeihou9UgJNkdxPi-/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbwFRn1k80kBZS5Mi0yzkF2HYPn1fLssaLGMer5t-flW59GL87t3yyNzUAVgLTis615o/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
@@ -1246,6 +1489,7 @@ async function showAIAnalysis(department, riskValue) {
         
         const result = await response.json();
         
+       繼續提供完整的代碼：
         if (result.success) {
             // 將Markdown內容轉換為HTML並顯示
             const htmlContent = convertMarkdownToHTML(result.aiAnalysis || '暫無AI評析內容');
@@ -1296,6 +1540,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const inventorySection = document.getElementById('inventory-section');
     const deptRiskIndexPage = document.getElementById('dept-risk-index-page');
     const dataAnalyticsPage = document.getElementById('data-analytics-page');
+    const thresholdSettingsPage = document.getElementById('threshold-settings-page');
+    const alertManagementPage = document.getElementById('alert-management-page');
     const loginBtn = document.getElementById('login-btn');
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
@@ -1318,10 +1564,23 @@ document.addEventListener('DOMContentLoaded', function() {
     const backFromRiskBtn = document.getElementById('back-to-dashboard-from-risk');
     const dataAnalyticsBtn = document.getElementById('data-analytics-btn');
     const backFromAnalyticsBtn = document.getElementById('back-to-dashboard-from-analytics');
+    const thresholdSettingsBtn = document.getElementById('thresholdSettingsBtn');
+    const backFromThresholdBtn = document.getElementById('back-from-threshold');
+    const saveThresholdsBtn = document.getElementById('save-thresholds');
+    const alertManagementBtn = document.getElementById('alertManagementBtn');
+    const alertManagementBtnDash = document.getElementById('alert-management-btn');
+    const backFromAlertsBtn = document.getElementById('back-from-alerts');
+    const refreshAlertsBtn = document.getElementById('refresh-alerts');
+    const alertStatusFilter = document.getElementById('alert-status-filter');
+    const submitAlertProcessBtn = document.getElementById('submit-alert-process');
     
     // 自動登出相關變數
     let inactivityTimer;
     const inactivityTimeout = 10 * 60 * 1000; // 10分鐘，以毫秒為單位
+    
+    // 風險警報輪詢相關變數
+    let alertPollingInterval;
+    const alertPollingTime = 5 * 60 * 1000; // 5分鐘檢查一次，以毫秒為單位
     
     // 監控用戶活動的函數
     function resetInactivityTimer() {
@@ -1365,6 +1624,10 @@ document.addEventListener('DOMContentLoaded', function() {
         showDashboard();
         // 初始化自動登出計時器
         resetInactivityTimer();
+        // 啟動風險警報輪詢
+        startAlertPolling();
+        // 載入最近警報
+        loadRecentAlerts();
     }
 
     // 添加部門風險係數按鈕點擊事件
@@ -1391,6 +1654,62 @@ document.addEventListener('DOMContentLoaded', function() {
         resetInactivityTimer();
     });
     
+    // 風險閾值設定按鈕點擊事件
+    thresholdSettingsBtn.addEventListener('click', function() {
+        dashboardSection.style.display = 'none';
+        thresholdSettingsPage.style.display = 'block';
+        
+        // 載入閾值設定數據
+        loadThresholdSettings();
+        
+        // 重置計時器
+        resetInactivityTimer();
+    });
+    
+    // 警報管理按鈕點擊事件
+    alertManagementBtn.addEventListener('click', function() {
+        dashboardSection.style.display = 'none';
+        alertManagementPage.style.display = 'block';
+        
+        // 載入警報數據
+        loadAlertData();
+        
+        // 重置計時器
+        resetInactivityTimer();
+    });
+    
+    // 儀表板上的警報管理按鈕點擊事件
+    if (alertManagementBtnDash) {
+        alertManagementBtnDash.addEventListener('click', function() {
+            dashboardSection.style.display = 'none';
+            alertManagementPage.style.display = 'block';
+            
+            // 載入警報數據
+            loadAlertData();
+            
+            // 重置計時器
+            resetInactivityTimer();
+        });
+    }
+    
+    // 警報狀態篩選器變更事件
+    alertStatusFilter.addEventListener('change', function() {
+        loadAlertData();
+        resetInactivityTimer();
+    });
+    
+    // 重新整理警報按鈕點擊事件
+    refreshAlertsBtn.addEventListener('click', function() {
+        loadAlertData();
+        resetInactivityTimer();
+    });
+    
+    // 處理警報提交按鈕點擊事件
+    submitAlertProcessBtn.addEventListener('click', function() {
+        processAlert();
+        resetInactivityTimer();
+    });
+    
     // 返回按鈕點擊事件
     backFromRiskBtn.addEventListener('click', function() {
         deptRiskIndexPage.style.display = 'none';
@@ -1413,6 +1732,30 @@ document.addEventListener('DOMContentLoaded', function() {
         resetInactivityTimer();
     });
     
+    // 閾值設定頁面返回按鈕點擊事件
+    backFromThresholdBtn.addEventListener('click', function() {
+        thresholdSettingsPage.style.display = 'none';
+        dashboardSection.style.display = 'block';
+        
+        // 重置計時器
+        resetInactivityTimer();
+    });
+    
+    // 警報管理頁面返回按鈕點擊事件
+    backFromAlertsBtn.addEventListener('click', function() {
+        alertManagementPage.style.display = 'none';
+        dashboardSection.style.display = 'block';
+        
+        // 重置計時器
+        resetInactivityTimer();
+    });
+    
+    // 儲存閾值設定按鈕點擊事件
+    saveThresholdsBtn.addEventListener('click', function() {
+        saveThresholdSettings();
+        resetInactivityTimer();
+    });
+    
     // 時間範圍和部門篩選變更事件
     document.getElementById('dateRange').addEventListener('change', function() {
         loadAnalyticsData();
@@ -1427,7 +1770,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 載入風險係數數據的函數
     function loadRiskIndexData() {
         // 顯示載入中訊息
-        document.getElementById('risk-index-table-body').innerHTML = '<tr><td colspan="2" class="text-center">載入中...</td></tr>';
+        document.getElementById('risk-index-table-body').innerHTML = '<tr><td colspan="3" class="text-center">載入中...</td></tr>';
         
         // 調用後端API獲取數據，現在從"R值"工作表獲取
         fetch(`${scriptUrl}?action=getDepartmentRiskIndexFromRSheet`)
@@ -1439,13 +1782,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     console.error('獲取數據失敗:', result.message);
                     document.getElementById('risk-index-table-body').innerHTML = 
-                        '<tr><td colspan="2" class="text-center text-danger">獲取數據失敗: ' + result.message + '</td></tr>';
+                        '<tr><td colspan="3" class="text-center text-danger">獲取數據失敗: ' + result.message + '</td></tr>';
                 }
             })
             .catch(error => {
                 console.error('獲取數據失敗:', error);
                 document.getElementById('risk-index-table-body').innerHTML = 
-                    '<tr><td colspan="2" class="text-center text-danger">獲取數據失敗</td></tr>';
+                    '<tr><td colspan="3" class="text-center text-danger">獲取數據失敗</td></tr>';
             });
     }
     
@@ -1504,7 +1847,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const departmentFilter = document.getElementById('departmentFilter').value;
             
             // 獲取分析數據
-                        const response = await fetch(`${scriptUrl}?action=getAnalyticsData&dateRange=${dateRange}&department=${departmentFilter}`);
+            const response = await fetch(`${scriptUrl}?action=getAnalyticsData&dateRange=${dateRange}&department=${departmentFilter}`);
             const result = await response.json();
             
             if (result.success) {
@@ -1526,6 +1869,502 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('載入分析數據時發生錯誤:', error);
             showErrorState('載入數據失敗，請稍後再試');
+        }
+    }
+    
+    // 載入閾值設定數據
+    async function loadThresholdSettings() {
+        try {
+            // 顯示載入中訊息
+            document.getElementById('threshold-table-body').innerHTML = '<tr><td colspan="3" class="text-center">載入中...</td></tr>';
+            
+            // 獲取閾值設定數據
+            const response = await fetch(`${scriptUrl}?action=getRiskThresholds`);
+            const result = await response.json();
+            
+            if (result.success) {
+                // 更新表格
+                updateThresholdTable(result.data);
+            } else {
+                console.error('獲取閾值設定失敗:', result.message);
+                document.getElementById('threshold-table-body').innerHTML = 
+                    '<tr><td colspan="3" class="text-center text-danger">獲取數據失敗: ' + result.message + '</td></tr>';
+            }
+        } catch (error) {
+            console.error('載入閾值設定時發生錯誤:', error);
+            document.getElementById('threshold-table-body').innerHTML = 
+                '<tr><td colspan="3" class="text-center text-danger">載入數據失敗，請稍後再試</td></tr>';
+        }
+    }
+    
+    // 更新閾值設定表格
+    function updateThresholdTable(thresholdData) {
+        const tableBody = document.getElementById('threshold-table-body');
+        
+        if (thresholdData.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="3" class="text-center">無數據</td></tr>';
+            return;
+        }
+        
+        // 創建表格行
+        const rows = thresholdData.map((item, index) => {
+            // 解析風險係數值並格式化到小數第一位
+            let riskValue = parseFloat(item.currentRisk.replace('R', '')) || 0;
+            let formattedRiskValue = riskValue.toFixed(1);
+            
+            // 根據風險係數決定燈號
+            let lightIcon = '';
+            if (riskValue <= 15) {
+                lightIcon = '<span class="risk-light green-light">●</span>';
+            } else if (riskValue <= 30) {
+                lightIcon = '<span class="risk-light yellow-light">●</span>';
+            } else {
+                lightIcon = '<span class="risk-light red-light">●</span>';
+            }
+            
+            return `
+                <tr>
+                    <td>${lightIcon} ${item.department}</td>
+                    <td>${formattedRiskValue}R</td>
+                    <td>
+                        <div class="input-group">
+                            <input type="number" class="form-control threshold-input" 
+                                   data-department="${item.department}" 
+                                   value="${item.threshold}" 
+                                   min="1" max="100" step="0.1">
+                            <span class="input-group-text">R</span>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+        
+        tableBody.innerHTML = rows;
+    }
+    
+    // 儲存閾值設定
+    async function saveThresholdSettings() {
+        try {
+            // 收集所有閾值設定
+            const thresholdInputs = document.querySelectorAll('.threshold-input');
+            const thresholdData = Array.from(thresholdInputs).map(input => {
+                return {
+                    department: input.dataset.department,
+                    threshold: parseFloat(input.value)
+                };
+            });
+            
+            // 顯示儲存中訊息
+            saveThresholdsBtn.disabled = true;
+            saveThresholdsBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 儲存中...';
+            
+            // 發送儲存請求
+            const response = await fetch(`${scriptUrl}?action=saveRiskThresholds`, {
+                method: 'POST',
+                body: JSON.stringify({ thresholds: thresholdData })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                alert('閾值設定已成功儲存');
+                // 重新載入閾值設定
+                loadThresholdSettings();
+            } else {
+                alert('儲存失敗: ' + (result.message || '未知錯誤'));
+            }
+        } catch (error) {
+            console.error('儲存閾值設定時發生錯誤:', error);
+            alert('儲存失敗，請稍後再試');
+        } finally {
+            // 恢復按鈕狀態
+            saveThresholdsBtn.disabled = false;
+            saveThresholdsBtn.innerHTML = '儲存設定';
+        }
+    }
+    
+    // 載入警報數據
+    async function loadAlertData() {
+        try {
+            // 顯示載入中訊息
+            document.getElementById('alerts-table-body').innerHTML = '<tr><td colspan="6" class="text-center">載入中...</td></tr>';
+            document.getElementById('no-alerts-message').classList.add('d-none');
+            
+            const statusFilter = document.getElementById('alert-status-filter').value;
+            
+            // 獲取警報數據
+            const response = await fetch(`${scriptUrl}?action=getRiskAlerts&status=${statusFilter}`);
+            const result = await response.json();
+            
+            if (result.success) {
+                // 更新表格
+                updateAlertsTable(result.data);
+            } else {
+                console.error('獲取警報數據失敗:', result.message);
+                document.getElementById('alerts-table-body').innerHTML = 
+                    '<tr><td colspan="6" class="text-center text-danger">獲取數據失敗: ' + result.message + '</td></tr>';
+            }
+        } catch (error) {
+            console.error('載入警報數據時發生錯誤:', error);
+            document.getElementById('alerts-table-body').innerHTML = 
+                '<tr><td colspan="6" class="text-center text-danger">載入數據失敗，請稍後再試</td></tr>';
+        }
+    }
+    
+    // 更新警報表格
+    function updateAlertsTable(alertsData) {
+        const tableBody = document.getElementById('alerts-table-body');
+        
+        if (alertsData.length === 0) {
+            tableBody.innerHTML = '';
+            document.getElementById('no-alerts-message').classList.remove('d-none');
+            return;
+        }
+        
+        document.getElementById('no-alerts-message').classList.add('d-none');
+        
+        // 創建表格行
+        const rows = alertsData.map((alert, index) => {
+            // 格式化時間
+            const alertTime = formatDate(alert.timestamp);
+            
+            // 根據狀態決定徽章樣式
+            let statusBadge = '';
+            if (alert.status === '待處理') {
+                statusBadge = '<span class="badge bg-danger">待處理</span>';
+            } else if (alert.status === '已處理') {
+                statusBadge = '<span class="badge bg-success">已處理</span>';
+            } else if (alert.status === '已忽略') {
+                statusBadge = '<span class="badge bg-secondary">已忽略</span>';
+            }
+            
+            // 根據狀態決定操作按鈕
+            let actionButton = '';
+            if (alert.status === '待處理') {
+                actionButton = `
+                    <button type="button" class="btn btn-outline-primary btn-sm process-alert-btn" 
+                            data-alert-id="${alert.id}"
+                            data-department="${alert.department}"
+                            data-risk-value="${alert.riskValue}"
+                            data-threshold="${alert.threshold}"
+                            data-time="${alertTime}">
+                        處理
+                    </button>
+                `;
+            } else {
+                actionButton = `
+                    <button type="button" class="btn btn-outline-secondary btn-sm view-alert-btn"
+                            data-alert-id="${alert.id}"
+                            data-department="${alert.department}"
+                            data-risk-value="${alert.riskValue}"
+                            data-threshold="${alert.threshold}"
+                            data-time="${alertTime}"
+                            data-status="${alert.status}"
+                            data-comment="${alert.comment || ''}">
+                        查看
+                    </button>
+                `;
+            }
+            
+            return `
+                <tr>
+                    <td>${alertTime}</td>
+                    <td>${alert.department}</td>
+                    <td>${alert.riskValue}</td>
+                    <td>${alert.threshold}</td>
+                    <td>${statusBadge}</td>
+                    <td>${actionButton}</td>
+                </tr>
+            `;
+        }).join('');
+        
+        tableBody.innerHTML = rows;
+        
+        // 添加處理按鈕事件監聽器
+        document.querySelectorAll('.process-alert-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                showProcessAlertModal(
+                    this.dataset.alertId,
+                    this.dataset.department,
+                    this.dataset.riskValue,
+                    this.dataset.threshold,
+                    this.dataset.time
+                );
+            });
+        });
+        
+        // 添加查看按鈕事件監聽器
+        document.querySelectorAll('.view-alert-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                showViewAlertModal(
+                    this.dataset.alertId,
+                    this.dataset.department,
+                    this.dataset.riskValue,
+                    this.dataset.threshold,
+                    this.dataset.time,
+                    this.dataset.status,
+                    this.dataset.comment
+                );
+            });
+        });
+    }
+    
+    // 顯示處理警報模態框
+    function showProcessAlertModal(alertId, department, riskValue, threshold, time) {
+        document.getElementById('alert-id').value = alertId;
+        document.getElementById('alert-department').textContent = department;
+        document.getElementById('alert-risk-value').textContent = riskValue;
+        document.getElementById('alert-threshold').textContent = threshold;
+        document.getElementById('alert-time').textContent = time;
+        document.getElementById('alert-action').value = '已處理';
+        document.getElementById('alert-comment').value = '';
+        
+        // 顯示模態框
+        const modal = new bootstrap.Modal(document.getElementById('processAlertModal'));
+        modal.show();
+    }
+    
+    // 顯示查看警報模態框
+    function showViewAlertModal(alertId, department, riskValue, threshold, time, status, comment) {
+        document.getElementById('alert-id').value = alertId;
+        document.getElementById('alert-department').textContent = department;
+        document.getElementById('alert-risk-value').textContent = riskValue;
+        document.getElementById('alert-threshold').textContent = threshold;
+        document.getElementById('alert-time').textContent = time;
+        document.getElementById('alert-action').value = status;
+        document.getElementById('alert-comment').value = comment;
+        
+        // 禁用輸入
+        document.getElementById('alert-action').disabled = true;
+        document.getElementById('alert-comment').disabled = true;
+        document.getElementById('submit-alert-process').style.display = 'none';
+        
+        // 修改模態框標題
+        document.getElementById('processAlertModalLabel').textContent = '查看風險警報';
+        
+        // 顯示模態框
+        const modal = new bootstrap.Modal(document.getElementById('processAlertModal'));
+        modal.show();
+        
+        // 監聽模態框關閉事件，恢復原始狀態
+        document.getElementById('processAlertModal').addEventListener('hidden.bs.modal', function () {
+            document.getElementById('alert-action').disabled = false;
+            document.getElementById('alert-comment').disabled = false;
+            document.getElementById('submit-alert-process').style.display = 'block';
+            document.getElementById('processAlertModalLabel').textContent = '處理風險警報';
+        }, { once: true });
+    }
+    
+    // 處理警報
+    async function processAlert() {
+        try {
+            const alertId = document.getElementById('alert-id').value;
+            const action = document.getElementById('alert-action').value;
+            const comment = document.getElementById('alert-comment').value;
+            
+            if (!comment.trim()) {
+                alert('請輸入處理備註');
+                return;
+            }
+            
+            // 顯示處理中訊息
+            submitAlertProcessBtn.disabled = true;
+            submitAlertProcessBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 處理中...';
+            
+            // 發送處理請求
+            const response = await fetch(`${scriptUrl}?action=processRiskAlert`, {
+                method: 'POST',
+                body: JSON.stringify({
+                    alertId: alertId,
+                    status: action,
+                    comment: comment,
+                    processor: localStorage.getItem('name') || localStorage.getItem('username')
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                // 關閉模態框
+                bootstrap.Modal.getInstance(document.getElementById('processAlertModal')).hide();
+                
+                // 重新載入警報數據
+                loadAlertData();
+                
+                // 如果在儀表板，也重新載入最近警報
+                loadRecentAlerts();
+                
+                alert('警報已成功處理');
+            } else {
+                alert('處理失敗: ' + (result.message || '未知錯誤'));
+            }
+                } catch (error) {
+            console.error('處理警報時發生錯誤:', error);
+            alert('處理失敗，請稍後再試');
+        } finally {
+            // 恢復按鈕狀態
+            submitAlertProcessBtn.disabled = false;
+            submitAlertProcessBtn.innerHTML = '確認處理';
+        }
+    }
+    
+    // 載入最近警報
+    async function loadRecentAlerts() {
+        try {
+            const recentAlertsContainer = document.getElementById('recentAlerts');
+            const noRecentAlertsMessage = document.getElementById('noRecentAlerts');
+            
+            if (!recentAlertsContainer || !noRecentAlertsMessage) return;
+            
+            // 獲取最近的待處理警報
+            const response = await fetch(`${scriptUrl}?action=getRiskAlerts&status=待處理&limit=3`);
+            const result = await response.json();
+            
+            if (result.success) {
+                const alerts = result.data;
+                
+                if (alerts.length === 0) {
+                    recentAlertsContainer.innerHTML = '';
+                    noRecentAlertsMessage.classList.remove('d-none');
+                } else {
+                    noRecentAlertsMessage.classList.add('d-none');
+                    
+                    // 創建表格行
+                    const rows = alerts.map((alert, index) => {
+                        // 格式化時間
+                        const alertTime = formatDate(alert.timestamp);
+                        
+                        return `
+                            <tr>
+                                <td>${alertTime}</td>
+                                <td>${alert.department}</td>
+                                <td>${alert.riskValue}</td>
+                                <td>${alert.threshold}</td>
+                                <td><span class="badge bg-danger">待處理</span></td>
+                                <td>
+                                    <button type="button" class="btn btn-outline-primary btn-sm dashboard-process-alert-btn" 
+                                            data-alert-id="${alert.id}"
+                                            data-department="${alert.department}"
+                                            data-risk-value="${alert.riskValue}"
+                                            data-threshold="${alert.threshold}"
+                                            data-time="${alertTime}">
+                                        處理
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                    
+                    recentAlertsContainer.innerHTML = rows;
+                    
+                    // 添加處理按鈕事件監聽器
+                    document.querySelectorAll('.dashboard-process-alert-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            showProcessAlertModal(
+                                this.dataset.alertId,
+                                this.dataset.department,
+                                this.dataset.riskValue,
+                                this.dataset.threshold,
+                                this.dataset.time
+                            );
+                        });
+                    });
+                }
+            } else {
+                console.error('獲取最近警報失敗:', result.message);
+            }
+        } catch (error) {
+            console.error('載入最近警報時發生錯誤:', error);
+        }
+    }
+    
+    // 啟動風險警報輪詢
+    function startAlertPolling() {
+        // 清除現有計時器
+        if (alertPollingInterval) {
+            clearInterval(alertPollingInterval);
+        }
+        
+        // 立即檢查一次
+        checkNewAlerts();
+        
+        // 設置定期檢查
+        alertPollingInterval = setInterval(checkNewAlerts, alertPollingTime);
+    }
+    
+    // 檢查新警報
+    async function checkNewAlerts() {
+        try {
+            // 獲取上次檢查時間
+            const lastCheckTime = localStorage.getItem('lastAlertCheckTime') || '1970-01-01T00:00:00Z';
+            
+            // 發送請求檢查新警報
+            const response = await fetch(`${scriptUrl}?action=checkNewAlerts&since=${lastCheckTime}`);
+            const result = await response.json();
+            
+            // 更新最後檢查時間
+            localStorage.setItem('lastAlertCheckTime', new Date().toISOString());
+            
+            if (result.success && result.hasNewAlerts) {
+                // 顯示通知
+                showAlertNotification(result.alerts);
+                
+                // 重新載入最近警報
+                loadRecentAlerts();
+            }
+        } catch (error) {
+            console.error('檢查新警報時發生錯誤:', error);
+        }
+    }
+    
+    // 顯示警報通知
+    function showAlertNotification(alerts) {
+        if (!alerts || alerts.length === 0) return;
+        
+        // 取得第一個警報
+        const firstAlert = alerts[0];
+        
+        // 設置通知內容
+        const toastMessage = document.getElementById('toastMessage');
+        if (alerts.length === 1) {
+            toastMessage.textContent = `${firstAlert.department} 部門風險值 (${firstAlert.riskValue}) 已超過閾值 (${firstAlert.threshold})，請立即處理！`;
+        } else {
+            toastMessage.textContent = `有 ${alerts.length} 個部門風險值超過閾值，請立即查看！`;
+        }
+        
+        // 設置查看詳情按鈕事件
+        const viewAlertDetailsBtn = document.getElementById('view-alert-details');
+        viewAlertDetailsBtn.addEventListener('click', function() {
+            // 隱藏通知
+            bootstrap.Toast.getInstance(document.getElementById('riskAlertToast')).hide();
+            
+            // 顯示警報管理頁面
+            dashboardSection.style.display = 'none';
+            alertManagementPage.style.display = 'block';
+            
+            // 載入警報數據
+            loadAlertData();
+            
+            // 重置計時器
+            resetInactivityTimer();
+        }, { once: true });
+        
+        // 顯示通知
+        const toastElement = document.getElementById('riskAlertToast');
+        const toast = new bootstrap.Toast(toastElement, { autohide: false });
+        toast.show();
+        
+        // 播放提示音
+        playAlertSound();
+    }
+    
+    // 播放警報提示音
+    function playAlertSound() {
+        try {
+            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/951/951-preview.mp3');
+            audio.play();
+        } catch (error) {
+            console.error('播放提示音失敗:', error);
         }
     }
     
@@ -1866,6 +2705,12 @@ document.addEventListener('DOMContentLoaded', function() {
                     showDashboard();
                     // 啟動自動登出計時器
                     resetInactivityTimer();
+                    // 啟動風險警報輪詢
+                    startAlertPolling();
+                    // 載入最近警報
+                    loadRecentAlerts();
+                    // 設置最後檢查時間
+                    localStorage.setItem('lastAlertCheckTime', new Date().toISOString());
                 } else {
                     // 登入失敗
                     errorMessage.textContent = data.message || '帳號或密碼錯誤';
@@ -2164,129 +3009,153 @@ document.addEventListener('DOMContentLoaded', function() {
         localStorage.removeItem('department');
         localStorage.removeItem('name');
         
-        // 顯示登入頁面，隱藏其他頁面
-        loginSection.classList.remove('hidden');
-        dashboardSection.classList.add('hidden');
-        inventorySection.classList.add('hidden');
-        deptRiskIndexPage.style.display = 'none';
-        dataAnalyticsPage.style.display = 'none';
-        document.querySelector('.container').classList.remove('hidden');
+        // 停止風險警報輪詢
+        if (alertPollingInterval) {
+            clearInterval(alertPollingInterval);
+        }
         
-        // 清空登入表單
-        document.getElementById('username').value = '';
-        document.getElementById('password').value = '';
-        
-        // 停止計時器
-        clearTimeout(inactivityTimer);
+                // 顯示登入頁面
+        showLogin();
     }
-
     
     // 更改密碼按鈕點擊事件
     changePasswordBtn.addEventListener('click', function() {
-        // 重置表單和訊息
-        document.getElementById('changePasswordForm').reset();
+        // 清空表單
+        document.getElementById('currentPassword').value = '';
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
         document.getElementById('passwordChangeMessage').style.display = 'none';
         
-        // 顯示更改密碼彈出視窗
-        const changePasswordModal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
-        changePasswordModal.show();
+        // 顯示模態框
+        const modal = new bootstrap.Modal(document.getElementById('changePasswordModal'));
+        modal.show();
         
         // 重置計時器
         resetInactivityTimer();
     });
     
-    // 提交更改密碼表單
+    // 提交更改密碼
     submitChangePasswordBtn.addEventListener('click', function() {
         const currentPassword = document.getElementById('currentPassword').value;
         const newPassword = document.getElementById('newPassword').value;
         const confirmPassword = document.getElementById('confirmPassword').value;
-        const messageDiv = document.getElementById('passwordChangeMessage');
+        const messageElement = document.getElementById('passwordChangeMessage');
         
-        // 檢查新密碼和確認密碼是否一致
-        if (newPassword !== confirmPassword) {
-            messageDiv.className = 'alert alert-danger';
-            messageDiv.textContent = '新密碼與確認密碼不一致！';
-            messageDiv.style.display = 'block';
+        // 驗證輸入
+        if (!currentPassword || !newPassword || !confirmPassword) {
+            messageElement.textContent = '請填寫所有密碼欄位';
+            messageElement.className = 'alert alert-danger';
+            messageElement.style.display = 'block';
             return;
         }
         
-        // 獲取當前登入的用戶名
-        const username = localStorage.getItem('username');
+        if (newPassword !== confirmPassword) {
+            messageElement.textContent = '新密碼與確認密碼不符';
+            messageElement.className = 'alert alert-danger';
+            messageElement.style.display = 'block';
+            return;
+        }
         
-        // 發送更改密碼請求到後端
-        fetch(`${scriptUrl}?action=changePassword&username=${encodeURIComponent(username)}&currentPassword=${encodeURIComponent(currentPassword)}&newPassword=${encodeURIComponent(newPassword)}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    messageDiv.className = 'alert alert-success';
-                    messageDiv.textContent = '密碼更改成功！';
-                    messageDiv.style.display = 'block';
-                    
-                    // 3秒後關閉彈出視窗
-                    setTimeout(function() {
-                        bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
-                        // 清空表單
-                        document.getElementById('changePasswordForm').reset();
-                        messageDiv.style.display = 'none';
-                    }, 3000);
-                } else {
-                    messageDiv.className = 'alert alert-danger';
-                    messageDiv.textContent = data.message || '密碼更改失敗！';
-                    messageDiv.style.display = 'block';
-                }
-                // 重置計時器
-                resetInactivityTimer();
+        if (newPassword.length < 6) {
+            messageElement.textContent = '新密碼長度不得少於6個字符';
+            messageElement.className = 'alert alert-danger';
+            messageElement.style.display = 'block';
+            return;
+        }
+        
+        // 禁用按鈕
+        submitChangePasswordBtn.disabled = true;
+        submitChangePasswordBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 處理中...';
+        
+        // 發送更改密碼請求
+        const username = localStorage.getItem('username');
+        fetch(`${scriptUrl}?action=changePassword`, {
+            method: 'POST',
+            body: JSON.stringify({
+                username: username,
+                currentPassword: currentPassword,
+                newPassword: newPassword
             })
-            .catch(error => {
-                messageDiv.className = 'alert alert-danger';
-                messageDiv.textContent = '系統錯誤，請稍後再試';
-                messageDiv.style.display = 'block';
-                console.error('Error:', error);
-            });
-    });
-    
-    // 顯示主頁面
-    function showDashboard() {
-        loginSection.classList.add('hidden');
-        inventorySection.classList.add('hidden');
-        deptRiskIndexPage.style.display = 'none';
-        dataAnalyticsPage.style.display = 'none';
-        document.querySelector('.container').classList.remove('hidden');
-        dashboardSection.classList.remove('hidden');
-        document.querySelector('.container').style.maxWidth = '500px';
+        })
+        .then(response => response.json())
+        .then(data => {
+            submitChangePasswordBtn.disabled = false;
+            submitChangePasswordBtn.textContent = '確認更改';
+            
+            if (data.success) {
+                messageElement.textContent = '密碼已成功更改';
+                messageElement.className = 'alert alert-success';
+                messageElement.style.display = 'block';
+                
+                // 3秒後關閉模態框
+                setTimeout(() => {
+                    bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
+                }, 3000);
+            } else {
+                messageElement.textContent = data.message || '密碼更改失敗';
+                messageElement.className = 'alert alert-danger';
+                messageElement.style.display = 'block';
+            }
+        })
+        .catch(error => {
+            submitChangePasswordBtn.disabled = false;
+            submitChangePasswordBtn.textContent = '確認更改';
+            messageElement.textContent = '系統錯誤，請稍後再試';
+            messageElement.className = 'alert alert-danger';
+            messageElement.style.display = 'block';
+            console.error('Error:', error);
+        });
+        
         // 重置計時器
         resetInactivityTimer();
-    }
+    });
     
     // 顯示登入頁面
     function showLogin() {
+        loginSection.classList.remove('hidden');
         dashboardSection.classList.add('hidden');
         inventorySection.classList.add('hidden');
         deptRiskIndexPage.style.display = 'none';
         dataAnalyticsPage.style.display = 'none';
-        document.querySelector('.container').classList.remove('hidden');
-        loginSection.classList.remove('hidden');
+        thresholdSettingsPage.style.display = 'none';
+        alertManagementPage.style.display = 'none';
+        
+        // 清除輸入欄位
         usernameInput.value = '';
         passwordInput.value = '';
         errorMessage.textContent = '';
-        document.querySelector('.container').style.maxWidth = '500px';
-        // 清除自動登出計時器
-        clearTimeout(inactivityTimer);
+    }
+    
+    // 顯示儀表板
+    function showDashboard() {
+        loginSection.classList.add('hidden');
+        dashboardSection.classList.remove('hidden');
+        inventorySection.classList.add('hidden');
+        deptRiskIndexPage.style.display = 'none';
+        dataAnalyticsPage.style.display = 'none';
+        thresholdSettingsPage.style.display = 'none';
+        alertManagementPage.style.display = 'none';
     }
     
     // 顯示部門週期盤點頁面
     function showInventorySection() {
         loginSection.classList.add('hidden');
         dashboardSection.classList.add('hidden');
+        inventorySection.classList.remove('hidden');
         deptRiskIndexPage.style.display = 'none';
         dataAnalyticsPage.style.display = 'none';
-        document.querySelector('.container').classList.add('hidden'); // 隱藏原容器
-        inventorySection.classList.remove('hidden');
-        // 重置計時器
-        resetInactivityTimer();
+        thresholdSettingsPage.style.display = 'none';
+        alertManagementPage.style.display = 'none';
     }
+    
+    // 為密碼輸入框添加回車鍵登入功能
+    passwordInput.addEventListener('keyup', function(event) {
+        if (event.key === 'Enter') {
+            loginBtn.click();
+        }
+    });
 });
 </script>
-
 </body>
 </html>
+
