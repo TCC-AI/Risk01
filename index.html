@@ -154,7 +154,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
         input {
             width: 100%;
-            padding: 12px 1;
+            padding: 12px 15px;
             border: 1px solid rgba(0, 100, 150, 0.2);
             border-radius: 8px;
             font-size: 16px;
@@ -389,24 +389,24 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         /* 風險燈號樣式 */
 .risk-light {
     display: inline-block;
-    font-size: 40px;
+    font-size: 20px;
     margin-right: 8px;
     vertical-align: middle;
 }
 
 .green-light {
     color: #34a853;
-    text-shadow: 0 0 10px rgba(52, 168, 83, 0.7);
+    text-shadow: 0 0 5px rgba(52, 168, 83, 0.7);
 }
 
 .yellow-light {
     color: #fbbc05;
-    text-shadow: 0 0 10px rgba(251, 188, 5, 0.7);
+    text-shadow: 0 0 5px rgba(251, 188, 5, 0.7);
 }
 
 .red-light {
     color: #ea4335;
-    text-shadow: 0 0 10px rgba(234, 67, 53, 0.7);
+    text-shadow: 0 0 5px rgba(234, 67, 53, 0.7);
 }
 
         /* AI評析按鈕樣式 */
@@ -933,9 +933,8 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             </div>
             <h1>昶青實業<br>AI-風險偵測管理系統</h1>
             <div class="button-group">
-                <button class="feature-btn" id="data-analytics-btn" style="background: linear-gradient(to right, #9c27b0, #e91e63);">數據分析儀表板</button> 
-                <button class="feature-btn" id="dept-risk-index-btn" style="background: linear-gradient(to right, #1a6fc4, #34c3aa);">部門風險係數</button>
-                 
+                 <button class="feature-btn" id="dept-risk-index-btn" style="background: linear-gradient(to right, #1a6fc4, #34c3aa);">部門風險係數</button>
+                 <button class="feature-btn" id="data-analytics-btn" style="background: linear-gradient(to right, #9c27b0, #e91e63);">數據分析儀表板</button>
     <button id="inventory-btn" class="feature-btn">部門週期盤點</button>
     <button id="event-btn" class="feature-btn">事件登錄</button>
             </div>
@@ -997,9 +996,9 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         <table class="table table-striped table-bordered">
             <thead>
                 <tr>
-                    <th style="width: 40%">部門</th>
-                    <th style="width: 30%">風險係數(R值)</th>
-                    <th style="width: 340%">AI分析</th>
+                    <th>部門</th>
+                    <th>風險係數(R值)</th>
+                    <th>AI分析</th>
                 </tr>
             </thead>
             <tbody id="risk-index-table-body">
