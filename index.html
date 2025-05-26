@@ -895,6 +895,47 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                 max-width: 280px;
             }
         }
+
+        .refresh-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .refresh-btn {
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 6px 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s;
+  }
+  
+  .refresh-btn:hover {
+    background-color: #e0e0e0;
+  }
+  
+  .refresh-btn.loading {
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  
+  .refresh-btn.loading i {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  #lastUpdateTime {
+    font-size: 0.8rem;
+    color: #666;
+  }
     </style>
 </head>
 <body>
@@ -1044,7 +1085,12 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             <img src="LOGO.png" alt="TCC.AI Logo" class="logo">
         </div>
         <h2 class="text-center mb-4">數據分析儀表板</h2>
-        
+        <div class="refresh-container">
+    <span id="lastUpdateTime">最後更新：--:--:--</span>
+    <button id="refreshButton" class="refresh-btn">
+      <i class="fas fa-sync-alt"></i> 刷新數據
+    </button>
+  </div>
         <!-- 時間範圍選擇器 -->
         <div class="row mb-4">
             <div class="col-md-6">
@@ -1266,6 +1312,93 @@ async function showAIAnalysis(department, riskValue) {
         `;
     }
 }
+
+     document.getElementById('refreshButton').addEventListener('click', function() {
+    refreshDashboardData();
+  });
+  
+  async function refreshDashboardData() {
+    const refreshBtn = document.getElementById('refreshButton');
+    refreshBtn.classList.add('loading');
+    refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> 更新中...';
+    
+    try {
+      // 強制繞過快取的數據加載
+      await loadAnalyticsData(true);
+      
+      // 更新最後更新時間
+      const now = new Date();
+      const timeString = now.toLocaleTimeString();
+      document.getElementById('lastUpdateTime').textContent = `最後更新：${timeString}`;
+      
+      // 顯示成功提示
+      showNotification('數據已成功更新', 'success');
+      
+    } catch (error) {
+      console.error('刷新數據失敗:', error);
+      showNotification('數據更新失敗', 'error');
+    } finally {
+      // 恢復按鈕狀態
+      refreshBtn.classList.remove('loading');
+      refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> 刷新數據';
+    }
+  }
+  
+  // 修改原有的數據加載函數，添加強制刷新參數
+  async function loadAnalyticsData(forceRefresh = false) {
+    try {
+      const timestamp = forceRefresh ? new Date().getTime() : '';
+      const response = await fetch(`${scriptUrl}?action=getAnalyticsData&dateRange=${dateRange}&department=${departmentFilter}${forceRefresh ? `&_=${timestamp}` : ''}`);
+      
+      if (!response.ok) {
+        throw new Error('網絡請求失敗');
+      }
+      
+      const result = await response.json();
+      
+      if (result.success) {
+        // 更新儀表板數據的代碼...
+        updateDashboardWithData(result.data);
+      } else {
+        throw new Error(result.message || '獲取數據失敗');
+      }
+    } catch (error) {
+      console.error('載入數據分析失敗:', error);
+      throw error;
+    }
+  }
+  
+  // 顯示通知提示
+  function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.textContent = message;
+    
+    document.body.appendChild(notification);
+    
+    // 淡入效果
+    setTimeout(() => {
+      notification.style.opacity = '1';
+      notification.style.transform = 'translateY(0)';
+    }, 10);
+    
+    // 自動消失
+    setTimeout(() => {
+      notification.style.opacity = '0';
+      notification.style.transform = 'translateY(-20px)';
+      setTimeout(() => {
+        notification.remove();
+      }, 300);
+    }, 3000);
+  }
+  
+  // 頁面加載時初始化
+  document.addEventListener('DOMContentLoaded', function() {
+    loadAnalyticsData();
+    // 設置初始的最後更新時間
+    const now = new Date();
+    document.getElementById('lastUpdateTime').textContent = `最後更新：${now.toLocaleTimeString()}`;
+  });
 
 // 全域函數 - 簡單的Markdown轉HTML
 function convertMarkdownToHTML(markdown) {
