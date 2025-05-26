@@ -389,7 +389,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         /* 風險燈號樣式 */
 .risk-light {
     display: inline-block;
-    font-size: 30px;
+    font-size: 20px;
     margin-right: 8px;
     vertical-align: middle;
 }
@@ -933,9 +933,8 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             </div>
             <h1>昶青實業<br>AI-風險偵測管理系統</h1>
             <div class="button-group">
-                <button class="feature-btn" id="data-analytics-btn" style="background: linear-gradient(to right, #9c27b0, #e91e63);">數據分析儀表板</button> 
-                <button class="feature-btn" id="dept-risk-index-btn" style="background: linear-gradient(to right, #1a6fc4, #34c3aa);">部門風險係數</button>
-                 
+                 <button class="feature-btn" id="dept-risk-index-btn" style="background: linear-gradient(to right, #1a6fc4, #34c3aa);">部門風險係數</button>
+                 <button class="feature-btn" id="data-analytics-btn" style="background: linear-gradient(to right, #9c27b0, #e91e63);">數據分析儀表板</button>
     <button id="inventory-btn" class="feature-btn">部門週期盤點</button>
     <button id="event-btn" class="feature-btn">事件登錄</button>
             </div>
@@ -997,9 +996,9 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         <table class="table table-striped table-bordered">
             <thead>
                 <tr>
-                     <th style="width: 40%">部門</th>
-                     <th style="width: 30%">風險係數(R值)</th>
-                     <th style="width: 30%">AI分析</th>
+                    <th>部門</th>
+                    <th>風險係數(R值)</th>
+                    <th>AI分析</th>
                 </tr>
             </thead>
             <tbody id="risk-index-table-body">
@@ -1215,7 +1214,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbxq55yHHzqXrY3JClWXsinXHk5tusF_EAxFS6b5FiMbX_6tZtjKBAZ0smpAlb-V6l4L/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbxc8MjhZnE-mHrC2pF0IDtvkrhhaZ5XnwmlfLGG9EQwxh3GsSdBeihou9UgJNkdxPi-/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
