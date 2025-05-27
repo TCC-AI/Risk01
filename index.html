@@ -1424,18 +1424,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
-我檢查了您的代碼，發現了幾個問題導致登入按鈕無法正常工作：
 
-## 主要問題
-
-1. **JavaScript 語法錯誤** - 在第 1165 行有一個語法錯誤
-2. **函數定義位置錯誤** - 一些重要函數被定義在 `DOMContentLoaded` 事件監聽器外面
-
-## 修復方案
-
-請將您的 JavaScript 部分完全替換為以下修正版本：
-
-```javascript
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
 const scriptUrl = 'https://script.google.com/macros/s/AKfycbxvv2NNdCqQwazHm-CpuoVzVgiFnqQf6LRi1j7dzNGinilfvdw3Icmt2liXIBZDUMAZ/exec';
