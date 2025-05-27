@@ -1427,7 +1427,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbxvv2NNdCqQwazHm-CpuoVzVgiFnqQf6LRi1j7dzNGinilfvdw3Icmt2liXIBZDUMAZ/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbyM2JHyatvnyjWhh3dnkqHI1LdoCRIBJg225UDMe3oZS1hi4nIqDdpuzoNIsM_yFQJh/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
@@ -2790,74 +2790,75 @@ document.addEventListener('DOMContentLoaded', function() {
         clearRiskDetails();
     }
 
-    // 提交事件登錄
-    async function submitEventRegistration() {
-        const submitBtn = document.getElementById('submitEventBtn');
-        const loadingMsg = document.getElementById('eventLoadingMsg');
-        
-        // 驗證必填欄位
-        const requiredFields = [
-            { id: 'riskDepartment', name: '風險所屬部門' },
-            { id: 'riskItem', name: '風險項目' },
-            { id: 'riskDescription', name: '風險描述' },
-            { id: 'occurrenceCount', name: '發生次數' },
-            { id: 'eventReason', name: '原因/說明' }
-        ];
-        
-        for (const field of requiredFields) {
-            const element = document.getElementById(field.id);
-            if (!element.value.trim()) {
-                alert(`請填寫 ${field.name}`);
-                element.focus();
-                return;
-            }
-        }
-        
-        // 準備提交資料
-        const eventData = {
-            timestamp: new Date().toISOString(),
-            department: document.getElementById('eventDepartment').value,
-            name: document.getElementById('eventName').value,
-            username: document.getElementById('eventUsername').value,
-            riskDepartment: document.getElementById('riskDepartment').value,
-            riskItem: document.getElementById('riskItem').value,
-            riskDescription: document.getElementById('riskDescription').value,
-            riskCategory: document.getElementById('riskCategory').value,
-            riskLevel: document.getElementById('riskLevel').value,
-            relatedDepartments: document.getElementById('relatedDepartments').value,
-            isIncreased: '是',
-            occurrenceCount: document.getElementById('occurrenceCount').value,
-            reason: document.getElementById('eventReason').value
-        };
-        
-        // 顯示載入狀態
-        submitBtn.disabled = true;
-        loadingMsg.style.display = 'block';
-        
-        try {
-            const response = await fetch(`${scriptUrl}?action=submitEventRegistration`, {
-                method: 'POST',
-                body: JSON.stringify(eventData)
-            });
-            
-            const result = await response.json();
-            
-            if (result.success) {
-                alert('風險事件登錄成功！');
-                resetEventForm();
-                // 可選：返回主頁面
-                // showDashboard();
-            } else {
-                alert('提交失敗: ' + result.message);
-            }
-        } catch (error) {
-            console.error('提交事件登錄時發生錯誤:', error);
-            alert('提交失敗，請稍後再試');
-        } finally {
-            submitBtn.disabled = false;
-            loadingMsg.style.display = 'none';
+// 提交事件登錄
+async function submitEventRegistration() {
+    const submitBtn = document.getElementById('submitEventBtn');
+    const loadingMsg = document.getElementById('eventLoadingMsg');
+    
+    // 驗證必填欄位
+    const requiredFields = [
+        { id: 'riskDepartment', name: '風險所屬部門' },
+        { id: 'riskItem', name: '風險項目' },
+        { id: 'riskDescription', name: '風險描述' },
+        { id: 'occurrenceCount', name: '發生次數' },
+        { id: 'eventReason', name: '原因/說明' }
+    ];
+    
+    for (const field of requiredFields) {
+        const element = document.getElementById(field.id);
+        if (!element.value.trim()) {
+            alert(`請填寫 ${field.name}`);
+            element.focus();
+            return;
         }
     }
+    
+    // 準備提交資料 - 按照新的欄位順序
+    const eventData = {
+        timestamp: new Date().toISOString(),
+        riskDepartment: document.getElementById('riskDepartment').value,  // 風險所屬部門
+        name: document.getElementById('eventName').value,
+        username: document.getElementById('eventUsername').value,
+        riskItem: document.getElementById('riskItem').value,
+        riskDescription: document.getElementById('riskDescription').value,
+        riskCategory: document.getElementById('riskCategory').value,
+        riskLevel: document.getElementById('riskLevel').value,
+        relatedDepartments: document.getElementById('relatedDepartments').value,
+        isIncreased: '是',
+        occurrenceCount: document.getElementById('occurrenceCount').value,
+        reason: document.getElementById('eventReason').value,
+        department: document.getElementById('eventDepartment').value  // 使用者所屬部門
+    };
+    
+    // 顯示載入狀態
+    submitBtn.disabled = true;
+    loadingMsg.style.display = 'block';
+    
+    try {
+        const response = await fetch(`${scriptUrl}?action=submitEventRegistration`, {
+            method: 'POST',
+            body: JSON.stringify(eventData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('風險事件登錄成功！');
+            resetEventForm();
+            // 可選：返回主頁面
+            // showDashboard();
+        } else {
+            alert('提交失敗: ' + result.message);
+        }
+    } catch (error) {
+        console.error('提交事件登錄時發生錯誤:', error);
+        alert('提交失敗，請稍後再試');
+    } finally {
+        submitBtn.disabled = false;
+        loadingMsg.style.display = 'none';
+    }
+}
+
 
 });
 </script>
