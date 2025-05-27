@@ -185,36 +185,11 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
-/* 保留原有 hover 效果 + 新增載入動畫 */
-button:hover:not(.btn) {
-    background: linear-gradient(to right, #1558a0, #2aa890);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
-}
-
-/* 🆕 新增：彩虹漸層流動動畫 */
-@keyframes buttonLoading {
-    0% { background: linear-gradient(45deg, #1a6fc4, #34c3aa, #2a9dd9, #4aeb97); }
-    25% { background: linear-gradient(45deg, #34c3aa, #2a9dd9, #4aeb97, #1a6fc4); }
-    50% { background: linear-gradient(45deg, #2a9dd9, #4aeb97, #1a6fc4, #34c3aa); }
-    75% { background: linear-gradient(45deg, #4aeb97, #1a6fc4, #34c3aa, #2a9dd9); }
-    100% { background: linear-gradient(45deg, #1a6fc4, #34c3aa, #2a9dd9, #4aeb97); }
-}
-
-/* 🆕 新增：脈衝光暈效果 */
-@keyframes buttonPulse {
-    0% { box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 0 0 0 rgba(26, 111, 196, 0.7); }
-    50% { box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 0 0 10px rgba(26, 111, 196, 0.2); }
-    100% { box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 0 0 0 rgba(26, 111, 196, 0); }
-}
-
-/* 🆕 新增：載入狀態應用動畫 */
-.button-loading {
-    animation: buttonLoading 1.5s infinite, buttonPulse 2s infinite;
-    cursor: wait !important;
-    pointer-events: none;
-}
-
+        button:hover:not(.btn) {
+            background: linear-gradient(to right, #1558a0, #2aa890);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
 
         button:active:not(.btn) {
             transform: translateY(0);
@@ -1947,60 +1922,55 @@ function updateUserInfo() {
     });
 
     
-    // 🆕 修改後的登入按鈕點擊事件
-loginBtn.addEventListener('click', function() {
-    const username = usernameInput.value.trim();
-    const password = passwordInput.value.trim();
-    
-    if (!username || !password) {
-        errorMessage.textContent = '請輸入帳號和密碼';
-        return;
-    }
-    
-    // 🆕 使用新的按鈕動畫系統
-    setButtonLoading(loginBtn, true, getLoadingText('login'));
-    errorMessage.textContent = '';
-    
-    // 🆕 保持原有的載入訊息顯示（如果您想保留的話）
-    loadingMsg.classList.remove('hidden');
-    
-    // 使用 fetch API 呼叫 Google Apps Script
-    fetch(`${scriptUrl}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
-        .then(response => response.json())
-        .then(data => {
-            // 🆕 統一的載入狀態清理
-            setButtonLoading(loginBtn, false);
-            loadingMsg.classList.add('hidden');
-            
-            if (data.success) {
-                // 登入成功，儲存使用者資訊
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('username', username);
-                localStorage.setItem('department', data.department || '');
-                localStorage.setItem('name', data.name || '');
-                localStorage.setItem('permission', data.permission || 's1'); // 🆕 儲存權限等級
+    // 登入按鈕點擊事件
+    loginBtn.addEventListener('click', function() {
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+        
+        if (!username || !password) {
+            errorMessage.textContent = '請輸入帳號和密碼';
+            return;
+        }
+        
+        // 顯示載入中訊息
+        errorMessage.textContent = '';
+        loadingMsg.classList.remove('hidden');
+        loginBtn.disabled = true;
+        
+        // 使用 fetch API 呼叫 Google Apps Script
+        fetch(`${scriptUrl}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
+            .then(response => response.json())
+            .then(data => {
+                loadingMsg.classList.add('hidden');
+                loginBtn.disabled = false;
                 
-                // 顯示使用者資訊
-                userDepartment.textContent = data.department || '';
-                userName.textContent = data.name || '';
-                
-                showDashboard();
-                // 啟動自動登出計時器
-                resetInactivityTimer();
-            } else {
-                // 登入失敗
-                errorMessage.textContent = data.message || '帳號或密碼錯誤';
-            }
-        })
-        .catch(error => {
-            // 🆕 統一的錯誤處理
-            setButtonLoading(loginBtn, false);
-            loadingMsg.classList.add('hidden');
-            errorMessage.textContent = '系統錯誤，請稍後再試';
-            console.error('Error:', error);
-        });
-});
-
+                if (data.success) {
+                    // 登入成功，儲存使用者資訊
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('username', username);
+                    localStorage.setItem('department', data.department || '');
+                    localStorage.setItem('name', data.name || '');
+                    localStorage.setItem('permission', data.permission || 's1'); // 🆕 儲存權限等級
+                    
+                    // 顯示使用者資訊
+                    userDepartment.textContent = data.department || '';
+                    userName.textContent = data.name || '';
+                    
+                    showDashboard();
+                    // 啟動自動登出計時器
+                    resetInactivityTimer();
+                } else {
+                    // 登入失敗
+                    errorMessage.textContent = data.message || '帳號或密碼錯誤';
+                }
+            })
+            .catch(error => {
+                loadingMsg.classList.add('hidden');
+                loginBtn.disabled = false;
+                errorMessage.textContent = '系統錯誤，請稍後再試';
+                console.error('Error:', error);
+            });
+    });
     
     // 部門週期盤點按鈕點擊事件
     inventoryBtn.addEventListener('click', function() {
