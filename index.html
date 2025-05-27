@@ -2693,14 +2693,14 @@ submitChangePasswordBtn.addEventListener('click', function() {
                 messageDiv.textContent = '密碼更改成功！';
                 messageDiv.style.display = 'block';
                 
-                // 3秒後關閉彈出視窗
+                // 1.5秒後關閉彈出視窗
                 setTimeout(function() {
                     bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
                     // 🆕 清空表單並重置按鈕
                     document.getElementById('changePasswordForm').reset();
                     messageDiv.style.display = 'none';
                     resetButtonState(submitBtn);
-                }, 3000);
+                }, 1500);
             } else {
                 // 🆕 顯示錯誤狀態
                 showButtonState(submitBtn, 'error', '更改失敗', 3000);
