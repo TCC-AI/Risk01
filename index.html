@@ -1424,6 +1424,18 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
 
+我檢查了您的代碼，發現了幾個問題導致登入按鈕無法正常工作：
+
+## 主要問題
+
+1. **JavaScript 語法錯誤** - 在第 1165 行有一個語法錯誤
+2. **函數定義位置錯誤** - 一些重要函數被定義在 `DOMContentLoaded` 事件監聽器外面
+
+## 修復方案
+
+請將您的 JavaScript 部分完全替換為以下修正版本：
+
+```javascript
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
 const scriptUrl = 'https://script.google.com/macros/s/AKfycbxvv2NNdCqQwazHm-CpuoVzVgiFnqQf6LRi1j7dzNGinilfvdw3Icmt2liXIBZDUMAZ/exec';
@@ -1501,12 +1513,30 @@ function convertMarkdownToHTML(markdown) {
     return `<div class="markdown-content">${html}</div>`;
 }
 
+// 🆕 權限檢查函數
+function checkPermission(requiredLevel) {
+    const userPermission = localStorage.getItem('permission') || 's1';
+    
+    // 權限等級對照：s3 > s2 > s1
+    const permissionLevels = {
+        's1': 1,
+        's2': 2,
+        's3': 3
+    };
+    
+    const userLevel = permissionLevels[userPermission] || 1;
+    const requiredLevelNum = permissionLevels[requiredLevel] || 1;
+    
+    return userLevel >= requiredLevelNum;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const loginSection = document.getElementById('login-section');
     const dashboardSection = document.getElementById('dashboard-section');
     const inventorySection = document.getElementById('inventory-section');
     const deptRiskIndexPage = document.getElementById('dept-risk-index-page');
     const dataAnalyticsPage = document.getElementById('data-analytics-page');
+    const eventRegistrationPage = document.getElementById('event-registration-page');
     const loginBtn = document.getElementById('login-btn');
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
@@ -1529,7 +1559,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const backFromRiskBtn = document.getElementById('back-to-dashboard-from-risk');
     const dataAnalyticsBtn = document.getElementById('data-analytics-btn');
     const backFromAnalyticsBtn = document.getElementById('back-to-dashboard-from-analytics');
-    const eventRegistrationPage = document.getElementById('event-registration-page');
     const backFromEventBtn = document.getElementById('backFromEventBtn');
     const resetEventBtn = document.getElementById('resetEventBtn');
     const eventForm = document.getElementById('eventRegistrationForm');
@@ -1561,6 +1590,7 @@ document.addEventListener('DOMContentLoaded', function() {
             localStorage.removeItem('username');
             localStorage.removeItem('department');
             localStorage.removeItem('name');
+            localStorage.removeItem('permission');
             
             // 返回登入頁面
             showLogin();
@@ -1572,6 +1602,112 @@ document.addEventListener('DOMContentLoaded', function() {
         document.addEventListener(event, resetInactivityTimer, true);
     });
     
+    // 🆕 設置按鈕權限狀態
+    function setButtonPermissions() {
+        // 檢查是否有s3權限
+        if (!checkPermission('s3')) {
+            // 沒有權限：禁用按鈕並改變樣式
+            dataAnalyticsBtn.disabled = true;
+            dataAnalyticsBtn.style.opacity = '0.5';
+            dataAnalyticsBtn.style.cursor = 'not-allowed';
+            dataAnalyticsBtn.style.background = 'linear-gradient(to right, #6c757d, #495057)';
+            
+            // 🆕 添加權限提示
+            dataAnalyticsBtn.title = '此功能需要 s3 權限等級';
+            
+            // 🆕 移除點擊事件，添加權限提示
+            dataAnalyticsBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('抱歉，您的權限等級不足，無法使用此功能。\n需要權限：s3\n您的權限：' + (localStorage.getItem('permission') || 's1'));
+            });
+        } else {
+            // 有權限：確保按鈕可用
+            dataAnalyticsBtn.disabled = false;
+            dataAnalyticsBtn.style.opacity = '1';
+            dataAnalyticsBtn.style.cursor = 'pointer';
+            dataAnalyticsBtn.style.background = 'linear-gradient(to right, #9c27b0, #e91e63)';
+            dataAnalyticsBtn.title = '';
+        }
+    }
+    
+    // 顯示主頁面
+    function showDashboard() {
+        loginSection.classList.add('hidden');
+        inventorySection.classList.add('hidden');
+        deptRiskIndexPage.style.display = 'none';
+        dataAnalyticsPage.style.display = 'none';
+        eventRegistrationPage.style.display = 'none';
+        document.querySelector('.container').classList.remove('hidden');
+        dashboardSection.classList.remove('hidden');
+        document.querySelector('.container').style.maxWidth = '500px';
+        
+        // 🆕 設置按鈕權限
+        setButtonPermissions();
+        
+        // 🆕 更新使用者資訊顯示
+        updateUserInfo();
+        
+        // 重置計時器
+        resetInactivityTimer();
+    }
+    
+    // 🆕 在使用者資訊區塊顯示權限等級
+    function updateUserInfo() {
+        const permission = localStorage.getItem('permission') || 's1';
+        const permissionText = {
+            's1': '一般使用者',
+            's2': '進階使用者', 
+            's3': '管理員'
+        };
+        
+        document.getElementById('user-info').innerHTML = `
+            歡迎： <strong id="user-department">${localStorage.getItem('department') || ''}</strong> - 
+            <strong id="user-name">${localStorage.getItem('name') || ''}</strong>
+            <span style="color: #666; font-size: 12px;">(${permissionText[permission]})</span>
+        `;
+    }
+    
+    // 顯示登入頁面
+    function showLogin() {
+        dashboardSection.classList.add('hidden');
+        inventorySection.classList.add('hidden');
+        deptRiskIndexPage.style.display = 'none';
+        dataAnalyticsPage.style.display = 'none';
+        eventRegistrationPage.style.display = 'none';
+        document.querySelector('.container').classList.remove('hidden');
+        loginSection.classList.remove('hidden');
+        usernameInput.value = '';
+        passwordInput.value = '';
+        errorMessage.textContent = '';
+        document.querySelector('.container').style.maxWidth = '500px';
+        // 清除自動登出計時器
+        clearTimeout(inactivityTimer);
+    }
+    
+    // 顯示部門週期盤點頁面
+    function showInventorySection() {
+        loginSection.classList.add('hidden');
+        dashboardSection.classList.add('hidden');
+        deptRiskIndexPage.style.display = 'none';
+        dataAnalyticsPage.style.display = 'none';
+        eventRegistrationPage.style.display = 'none';
+        document.querySelector('.container').classList.add('hidden'); // 隱藏原容器
+        inventorySection.classList.remove('hidden');
+        // 重置計時器
+        resetInactivityTimer();
+    }
+    
+    // 顯示風險事件登錄頁面
+    function showEventRegistrationPage() {
+        loginSection.classList.add('hidden');
+        dashboardSection.style.display = 'none';
+        inventorySection.classList.add('hidden');
+        deptRiskIndexPage.style.display = 'none';
+        dataAnalyticsPage.style.display = 'none';
+        eventRegistrationPage.style.display = 'block';
+        document.querySelector('.container').classList.add('hidden');
+    }
+    
     // 檢查是否已登入
     if (localStorage.getItem('isLoggedIn') === 'true') {
         // 顯示使用者資訊
@@ -1582,7 +1718,57 @@ document.addEventListener('DOMContentLoaded', function() {
         resetInactivityTimer();
     }
 
-    // 添加部門風險係數按鈕點擊事件
+    // 登入按鈕點擊事件
+    loginBtn.addEventListener('click', function() {
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+        
+        if (!username || !password) {
+            errorMessage.textContent = '請輸入帳號和密碼';
+            return;
+        }
+        
+        // 顯示載入中訊息
+        errorMessage.textContent = '';
+        loadingMsg.classList.remove('hidden');
+        loginBtn.disabled = true;
+        
+        // 使用 fetch API 呼叫 Google Apps Script
+        fetch(`${scriptUrl}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
+            .then(response => response.json())
+            .then(data => {
+                loadingMsg.classList.add('hidden');
+                loginBtn.disabled = false;
+                
+                if (data.success) {
+                    // 登入成功，儲存使用者資訊
+                    localStorage.setItem('isLoggedIn', 'true');
+                    localStorage.setItem('username', username);
+                    localStorage.setItem('department', data.department || '');
+                    localStorage.setItem('name', data.name || '');
+                    localStorage.setItem('permission', data.permission || 's1'); // 🆕 儲存權限等級
+                    
+                    // 顯示使用者資訊
+                    userDepartment.textContent = data.department || '';
+                    userName.textContent = data.name || '';
+                    
+                    showDashboard();
+                    // 啟動自動登出計時器
+                    resetInactivityTimer();
+                } else {
+                    // 登入失敗
+                    errorMessage.textContent = data.message || '帳號或密碼錯誤';
+                }
+            })
+            .catch(error => {
+                loadingMsg.classList.add('hidden');
+                loginBtn.disabled = false;
+                errorMessage.textContent = '系統錯誤，請稍後再試';
+                console.error('Error:', error);
+            });
+    });
+
+    // 部門風險係數按鈕點擊事件
     deptRiskIndexBtn.addEventListener('click', function() {
         dashboardSection.style.display = 'none';
         deptRiskIndexPage.style.display = 'block';
@@ -1594,28 +1780,23 @@ document.addEventListener('DOMContentLoaded', function() {
         resetInactivityTimer();
     });
     
-// 🆕 保存原始的事件處理函數
-let originalDataAnalyticsHandler = function() {
-    // 🆕 再次檢查權限（雙重保險）
-    if (!checkPermission('s3')) {
-        alert('權限不足，無法訪問數據分析儀表板');
-        return;
-    }
-    
-    dashboardSection.style.display = 'none';
-    dataAnalyticsPage.style.display = 'block';
-    
-    // 載入數據分析
-    loadAnalyticsData();
-    
-    // 重置計時器
-    resetInactivityTimer();
-};
-
-// 數據分析儀表板按鈕點擊事件
-dataAnalyticsBtn.addEventListener('click', originalDataAnalyticsHandler);
-
-    
+    // 數據分析儀表板按鈕點擊事件
+    dataAnalyticsBtn.addEventListener('click', function() {
+        // 🆕 再次檢查權限（雙重保險）
+        if (!checkPermission('s3')) {
+            alert('權限不足，無法訪問數據分析儀表板');
+            return;
+        }
+        
+        dashboardSection.style.display = 'none';
+        dataAnalyticsPage.style.display = 'block';
+        
+        // 載入數據分析
+        loadAnalyticsData();
+        
+        // 重置計時器
+        resetInactivityTimer();
+    });
     
     // 返回按鈕點擊事件
     backFromRiskBtn.addEventListener('click', function() {
@@ -1653,7 +1834,7 @@ dataAnalyticsBtn.addEventListener('click', originalDataAnalyticsHandler);
     // 載入風險係數數據的函數
     function loadRiskIndexData() {
         // 顯示載入中訊息
-        document.getElementById('risk-index-table-body').innerHTML = '<tr><td colspan="2" class="text-center">載入中...</td></tr>';
+        document.getElementById('risk-index-table-body').innerHTML = '<tr><td colspan="3" class="text-center">載入中...</td></tr>';
         
         // 調用後端API獲取數據，現在從"R值"工作表獲取
         fetch(`${scriptUrl}?action=getDepartmentRiskIndexFromRSheet`)
@@ -1665,97 +1846,15 @@ dataAnalyticsBtn.addEventListener('click', originalDataAnalyticsHandler);
                 } else {
                     console.error('獲取數據失敗:', result.message);
                     document.getElementById('risk-index-table-body').innerHTML = 
-                        '<tr><td colspan="2" class="text-center text-danger">獲取數據失敗: ' + result.message + '</td></tr>';
+                        '<tr><td colspan="3" class="text-center text-danger">獲取數據失敗: ' + result.message + '</td></tr>';
                 }
             })
             .catch(error => {
                 console.error('獲取數據失敗:', error);
                 document.getElementById('risk-index-table-body').innerHTML = 
-                    '<tr><td colspan="2" class="text-center text-danger">獲取數據失敗</td></tr>';
+                    '<tr><td colspan="3" class="text-center text-danger">獲取數據失敗</td></tr>';
             });
     }
-
-    // 🆕 新增權限檢查函數
-function checkPermission(requiredLevel) {
-    const userPermission = localStorage.getItem('permission') || 's1';
-    
-    // 權限等級對照：s3 > s2 > s1
-    const permissionLevels = {
-        's1': 1,
-        's2': 2,
-        's3': 3
-    };
-    
-    const userLevel = permissionLevels[userPermission] || 1;
-    const requiredLevelNum = permissionLevels[requiredLevel] || 1;
-    
-    return userLevel >= requiredLevelNum;
-}
-
-// 🆕 設置按鈕權限狀態
-function setButtonPermissions() {
-    const dataAnalyticsBtn = document.getElementById('data-analytics-btn');
-    
-    // 檢查是否有s3權限
-    if (!checkPermission('s3')) {
-        // 沒有權限：禁用按鈕並改變樣式
-        dataAnalyticsBtn.disabled = true;
-        dataAnalyticsBtn.style.opacity = '0.5';
-        dataAnalyticsBtn.style.cursor = 'not-allowed';
-        dataAnalyticsBtn.style.background = 'linear-gradient(to right, #6c757d, #495057)';
-        
-        // 🆕 添加權限提示
-        dataAnalyticsBtn.title = '此功能需要 s3 權限等級';
-        
-        // 🆕 移除點擊事件，添加權限提示
-        dataAnalyticsBtn.removeEventListener('click', originalDataAnalyticsHandler);
-        dataAnalyticsBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('抱歉，您的權限等級不足，無法使用此功能。\n需要權限：s3\n您的權限：' + (localStorage.getItem('permission') || 's1'));
-        });
-    } else {
-        // 有權限：確保按鈕可用
-        dataAnalyticsBtn.disabled = false;
-        dataAnalyticsBtn.style.opacity = '1';
-        dataAnalyticsBtn.style.cursor = 'pointer';
-        dataAnalyticsBtn.style.background = 'linear-gradient(to right, #9c27b0, #e91e63)';
-        dataAnalyticsBtn.title = '';
-    }
-}
-
-// 修改 showDashboard 函數
-function showDashboard() {
-    loginSection.classList.add('hidden');
-    inventorySection.classList.add('hidden');
-    deptRiskIndexPage.style.display = 'none';
-    dataAnalyticsPage.style.display = 'none';
-    document.querySelector('.container').classList.remove('hidden');
-    dashboardSection.classList.remove('hidden');
-    document.querySelector('.container').style.maxWidth = '500px';
-    
-    // 🆕 設置按鈕權限
-    setButtonPermissions();
-    
-    // 重置計時器
-    resetInactivityTimer();
-}
-
-    // 🆕 在使用者資訊區塊顯示權限等級
-function updateUserInfo() {
-    const permission = localStorage.getItem('permission') || 's1';
-    const permissionText = {
-        's1': '一般使用者',
-        's2': '進階使用者', 
-        's3': '管理員'
-    };
-    
-    document.getElementById('user-info').innerHTML = `
-        歡迎： <strong id="user-department">${localStorage.getItem('department') || ''}</strong> - 
-        <strong id="user-name">${localStorage.getItem('name') || ''}</strong>
-        <span style="color: #666; font-size: 12px;">(${permissionText[permission]})</span>
-    `;
-}
-
     
     // 更新風險表格的函數
     function updateRiskTable(riskData) {
@@ -1812,7 +1911,7 @@ function updateUserInfo() {
             const departmentFilter = document.getElementById('departmentFilter').value;
             
             // 獲取分析數據
-                        const response = await fetch(`${scriptUrl}?action=getAnalyticsData&dateRange=${dateRange}&department=${departmentFilter}`);
+            const response = await fetch(`${scriptUrl}?action=getAnalyticsData&dateRange=${dateRange}&department=${departmentFilter}`);
             const result = await response.json();
             
             if (result.success) {
@@ -2051,7 +2150,7 @@ function updateUserInfo() {
                 datasets: [{
                     label: '風險事件數量',
                     data: monthlyData.data,
-                    backgroundColor: '#9c27b0',
+                                        backgroundColor: '#9c27b0',
                     borderColor: '#7b1fa2',
                     borderWidth: 1
                 }]
@@ -2135,57 +2234,6 @@ function updateUserInfo() {
         
         // 重置計時器
         resetInactivityTimer();
-    });
-
-    
-    // 登入按鈕點擊事件
-    loginBtn.addEventListener('click', function() {
-        const username = usernameInput.value.trim();
-        const password = passwordInput.value.trim();
-        
-        if (!username || !password) {
-            errorMessage.textContent = '請輸入帳號和密碼';
-            return;
-        }
-        
-        // 顯示載入中訊息
-        errorMessage.textContent = '';
-        loadingMsg.classList.remove('hidden');
-        loginBtn.disabled = true;
-        
-        // 使用 fetch API 呼叫 Google Apps Script
-        fetch(`${scriptUrl}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
-            .then(response => response.json())
-            .then(data => {
-                loadingMsg.classList.add('hidden');
-                loginBtn.disabled = false;
-                
-                if (data.success) {
-                    // 登入成功，儲存使用者資訊
-                    localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('username', username);
-                    localStorage.setItem('department', data.department || '');
-                    localStorage.setItem('name', data.name || '');
-                    localStorage.setItem('permission', data.permission || 's1'); // 🆕 儲存權限等級
-                    
-                    // 顯示使用者資訊
-                    userDepartment.textContent = data.department || '';
-                    userName.textContent = data.name || '';
-                    
-                    showDashboard();
-                    // 啟動自動登出計時器
-                    resetInactivityTimer();
-                } else {
-                    // 登入失敗
-                    errorMessage.textContent = data.message || '帳號或密碼錯誤';
-                }
-            })
-            .catch(error => {
-                loadingMsg.classList.add('hidden');
-                loginBtn.disabled = false;
-                errorMessage.textContent = '系統錯誤，請稍後再試';
-                console.error('Error:', error);
-            });
     });
     
     // 部門週期盤點按鈕點擊事件
@@ -2389,7 +2437,6 @@ function updateUserInfo() {
         
         fetch(`${scriptUrl}?action=submitInventory`, {
             method: 'POST',
-            
             body: JSON.stringify({
                 timestamp: currentTime,
                 department: department,
@@ -2452,7 +2499,7 @@ function updateUserInfo() {
         resetInactivityTimer();
     });
 
-     // 風險事件登錄頁面返回按鈕
+    // 風險事件登錄頁面返回按鈕
     backFromEventBtn.addEventListener('click', function() {
         eventRegistrationPage.style.display = 'none';
         dashboardSection.style.display = 'block';
@@ -2510,6 +2557,7 @@ function updateUserInfo() {
         localStorage.removeItem('username');
         localStorage.removeItem('department');
         localStorage.removeItem('name');
+        localStorage.removeItem('permission');
         
         // 顯示登入頁面，隱藏其他頁面
         loginSection.classList.remove('hidden');
@@ -2517,6 +2565,7 @@ function updateUserInfo() {
         inventorySection.classList.add('hidden');
         deptRiskIndexPage.style.display = 'none';
         dataAnalyticsPage.style.display = 'none';
+        eventRegistrationPage.style.display = 'none';
         document.querySelector('.container').classList.remove('hidden');
         
         // 清空登入表單
@@ -2526,7 +2575,6 @@ function updateUserInfo() {
         // 停止計時器
         clearTimeout(inactivityTimer);
     }
-
     
     // 更改密碼按鈕點擊事件
     changePasswordBtn.addEventListener('click', function() {
@@ -2592,289 +2640,239 @@ function updateUserInfo() {
             });
     });
     
-    // 顯示主頁面
-    function showDashboard() {
-        loginSection.classList.add('hidden');
-        inventorySection.classList.add('hidden');
-        deptRiskIndexPage.style.display = 'none';
-        dataAnalyticsPage.style.display = 'none';
-        document.querySelector('.container').classList.remove('hidden');
-        dashboardSection.classList.remove('hidden');
-        document.querySelector('.container').style.maxWidth = '500px';
-        // 重置計時器
-        resetInactivityTimer();
+    // 載入事件表單資料
+    function loadEventFormData() {
+        // 填入使用者基本資訊
+        document.getElementById('eventDepartment').value = localStorage.getItem('department') || '';
+        document.getElementById('eventName').value = localStorage.getItem('name') || '';
+        document.getElementById('eventUsername').value = localStorage.getItem('username') || '';
+        
+        // 載入風險所屬部門選項
+        loadRiskDepartments();
     }
-    
-    // 顯示登入頁面
-    function showLogin() {
-        dashboardSection.classList.add('hidden');
-        inventorySection.classList.add('hidden');
-        deptRiskIndexPage.style.display = 'none';
-        dataAnalyticsPage.style.display = 'none';
-        document.querySelector('.container').classList.remove('hidden');
-        loginSection.classList.remove('hidden');
-        usernameInput.value = '';
-        passwordInput.value = '';
-        errorMessage.textContent = '';
-        document.querySelector('.container').style.maxWidth = '500px';
-        // 清除自動登出計時器
-        clearTimeout(inactivityTimer);
-    }
-    
-    // 顯示部門週期盤點頁面
-    function showInventorySection() {
-        loginSection.classList.add('hidden');
-        dashboardSection.classList.add('hidden');
-        deptRiskIndexPage.style.display = 'none';
-        dataAnalyticsPage.style.display = 'none';
-        document.querySelector('.container').classList.add('hidden'); // 隱藏原容器
-        inventorySection.classList.remove('hidden');
-        // 重置計時器
-        resetInactivityTimer();
-    }
-    / 顯示風險事件登錄頁面
-function showEventRegistrationPage() {
-    loginSection.classList.add('hidden');
-    dashboardSection.style.display = 'none';
-    inventorySection.classList.add('hidden');
-    deptRiskIndexPage.style.display = 'none';
-    dataAnalyticsPage.style.display = 'none';
-    eventRegistrationPage.style.display = 'block';
-    document.querySelector('.container').classList.add('hidden');
-}
 
-// 載入事件表單資料
-function loadEventFormData() {
-    // 填入使用者基本資訊
-    document.getElementById('eventDepartment').value = localStorage.getItem('department') || '';
-    document.getElementById('eventName').value = localStorage.getItem('name') || '';
-    document.getElementById('eventUsername').value = localStorage.getItem('username') || '';
-    
     // 載入風險所屬部門選項
-    loadRiskDepartments();
-}
-
-// 載入風險所屬部門選項
-async function loadRiskDepartments() {
-    try {
-        const response = await fetch(`${scriptUrl}?action=getRiskDepartments`);
-        const result = await response.json();
-        
-        if (result.success) {
-            const select = document.getElementById('riskDepartment');
-            select.innerHTML = '<option value="">請選擇風險所屬部門</option>';
+    async function loadRiskDepartments() {
+        try {
+            const response = await fetch(`${scriptUrl}?action=getRiskDepartments`);
+            const result = await response.json();
             
-            result.departments.forEach(dept => {
-                const option = document.createElement('option');
-                option.value = dept;
-                option.textContent = dept;
-                select.appendChild(option);
-            });
-        } else {
-            alert('載入風險部門失敗: ' + result.message);
+            if (result.success) {
+                const select = document.getElementById('riskDepartment');
+                select.innerHTML = '<option value="">請選擇風險所屬部門</option>';
+                
+                result.departments.forEach(dept => {
+                    const option = document.createElement('option');
+                    option.value = dept;
+                    option.textContent = dept;
+                    select.appendChild(option);
+                });
+            } else {
+                alert('載入風險部門失敗: ' + result.message);
+            }
+        } catch (error) {
+            console.error('載入風險部門時發生錯誤:', error);
+            alert('載入風險部門失敗，請稍後再試');
         }
-    } catch (error) {
-        console.error('載入風險部門時發生錯誤:', error);
-        alert('載入風險部門失敗，請稍後再試');
     }
-}
 
-// 載入風險項目選項
-async function loadRiskItems(department) {
-    const riskItemSelect = document.getElementById('riskItem');
-    const riskDescSelect = document.getElementById('riskDescription');
-    
-    if (!department) {
-        riskItemSelect.innerHTML = '<option value="">請先選擇風險所屬部門</option>';
-        riskItemSelect.disabled = true;
-        riskDescSelect.innerHTML = '<option value="">請先選擇風險項目</option>';
-        riskDescSelect.disabled = true;
-        clearRiskDetails();
-        return;
-    }
-    
-    try {
-        const response = await fetch(`${scriptUrl}?action=getRiskItemsByDepartment&department=${encodeURIComponent(department)}`);
-        const result = await response.json();
+    // 載入風險項目選項
+    async function loadRiskItems(department) {
+        const riskItemSelect = document.getElementById('riskItem');
+        const riskDescSelect = document.getElementById('riskDescription');
         
-        if (result.success) {
-            riskItemSelect.innerHTML = '<option value="">請選擇風險項目</option>';
-            
-            result.riskItems.forEach(item => {
-                const option = document.createElement('option');
-                option.value = item;
-                option.textContent = item;
-                riskItemSelect.appendChild(option);
-            });
-            
-            riskItemSelect.disabled = false;
+        if (!department) {
+            riskItemSelect.innerHTML = '<option value="">請先選擇風險所屬部門</option>';
+            riskItemSelect.disabled = true;
             riskDescSelect.innerHTML = '<option value="">請先選擇風險項目</option>';
             riskDescSelect.disabled = true;
             clearRiskDetails();
-        } else {
-            alert('載入風險項目失敗: ' + result.message);
-        }
-    } catch (error) {
-        console.error('載入風險項目時發生錯誤:', error);
-        alert('載入風險項目失敗，請稍後再試');
-    }
-}
-
-// 載入風險描述選項
-async function loadRiskDescriptions(riskItem) {
-    const riskDescSelect = document.getElementById('riskDescription');
-    const department = document.getElementById('riskDepartment').value;
-    
-    if (!riskItem || !department) {
-        riskDescSelect.innerHTML = '<option value="">請先選擇風險項目</option>';
-        riskDescSelect.disabled = true;
-        clearRiskDetails();
-        return;
-    }
-    
-    try {
-        const response = await fetch(`${scriptUrl}?action=getRiskDescriptions&department=${encodeURIComponent(department)}&riskItem=${encodeURIComponent(riskItem)}`);
-        const result = await response.json();
-        
-        if (result.success) {
-            riskDescSelect.innerHTML = '<option value="">請選擇風險描述</option>';
-            
-            result.descriptions.forEach(desc => {
-                const option = document.createElement('option');
-                option.value = desc;
-                option.textContent = desc;
-                riskDescSelect.appendChild(option);
-            });
-            
-            riskDescSelect.disabled = false;
-        } else {
-            alert('載入風險描述失敗: ' + result.message);
-        }
-    } catch (error) {
-        console.error('載入風險描述時發生錯誤:', error);
-        alert('載入風險描述失敗，請稍後再試');
-    }
-}
-
-// 更新風險詳細資訊
-async function updateRiskDetails() {
-    const department = document.getElementById('riskDepartment').value;
-    const riskItem = document.getElementById('riskItem').value;
-    const riskDesc = document.getElementById('riskDescription').value;
-    
-    if (!department || !riskItem || !riskDesc) {
-        clearRiskDetails();
-        return;
-    }
-    
-    try {
-        const response = await fetch(`${scriptUrl}?action=getRiskDetails&department=${encodeURIComponent(department)}&riskItem=${encodeURIComponent(riskItem)}&riskDesc=${encodeURIComponent(riskDesc)}`);
-        const result = await response.json();
-        
-        if (result.success) {
-            document.getElementById('riskCategory').value = result.details.category || '';
-            document.getElementById('riskLevel').value = result.details.level || '';
-            document.getElementById('relatedDepartments').value = result.details.relatedDepartments || '';
-        } else {
-            clearRiskDetails();
-        }
-    } catch (error) {
-        console.error('載入風險詳細資訊時發生錯誤:', error);
-        clearRiskDetails();
-    }
-}
-
-// 清空風險詳細資訊
-function clearRiskDetails() {
-    document.getElementById('riskCategory').value = '';
-    document.getElementById('riskLevel').value = '';
-    document.getElementById('relatedDepartments').value = '';
-}
-
-// 重置事件表單
-function resetEventForm() {
-    // 保留使用者基本資訊，重置其他欄位
-    document.getElementById('riskDepartment').value = '';
-    document.getElementById('riskItem').innerHTML = '<option value="">請先選擇風險所屬部門</option>';
-    document.getElementById('riskItem').disabled = true;
-    document.getElementById('riskDescription').innerHTML = '<option value="">請先選擇風險項目</option>';
-    document.getElementById('riskDescription').disabled = true;
-    document.getElementById('occurrenceCount').value = '';
-    document.getElementById('eventReason').value = '';
-    clearRiskDetails();
-}
-
-// 提交事件登錄
-async function submitEventRegistration() {
-    const submitBtn = document.getElementById('submitEventBtn');
-    const loadingMsg = document.getElementById('eventLoadingMsg');
-    
-    // 驗證必填欄位
-    const requiredFields = [
-        { id: 'riskDepartment', name: '風險所屬部門' },
-        { id: 'riskItem', name: '風險項目' },
-        { id: 'riskDescription', name: '風險描述' },
-        { id: 'occurrenceCount', name: '發生次數' },
-        { id: 'eventReason', name: '原因/說明' }
-    ];
-    
-    for (const field of requiredFields) {
-        const element = document.getElementById(field.id);
-        if (!element.value.trim()) {
-            alert(`請填寫 ${field.name}`);
-            element.focus();
             return;
         }
-    }
-    
-    // 準備提交資料
-    const eventData = {
-        timestamp: new Date().toISOString(),
-        department: document.getElementById('eventDepartment').value,
-        name: document.getElementById('eventName').value,
-        username: document.getElementById('eventUsername').value,
-        riskDepartment: document.getElementById('riskDepartment').value,
-        riskItem: document.getElementById('riskItem').value,
-        riskDescription: document.getElementById('riskDescription').value,
-        riskCategory: document.getElementById('riskCategory').value,
-        riskLevel: document.getElementById('riskLevel').value,
-        relatedDepartments: document.getElementById('relatedDepartments').value,
-        isIncreased: '是',
-        occurrenceCount: document.getElementById('occurrenceCount').value,
-        reason: document.getElementById('eventReason').value
-    };
-    
-    // 顯示載入狀態
-    submitBtn.disabled = true;
-    loadingMsg.style.display = 'block';
-    
-    try {
-        const response = await fetch(`${scriptUrl}?action=submitEventRegistration`, {
-            method: 'POST',
-            body: JSON.stringify(eventData)
-        });
         
-        const result = await response.json();
-        
-        if (result.success) {
-            alert('風險事件登錄成功！');
-            resetEventForm();
-            // 可選：返回主頁面
-            // showDashboard();
-        } else {
-            alert('提交失敗: ' + result.message);
+        try {
+            const response = await fetch(`${scriptUrl}?action=getRiskItemsByDepartment&department=${encodeURIComponent(department)}`);
+            const result = await response.json();
+            
+            if (result.success) {
+                riskItemSelect.innerHTML = '<option value="">請選擇風險項目</option>';
+                
+                result.riskItems.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item;
+                    option.textContent = item;
+                    riskItemSelect.appendChild(option);
+                });
+                
+                riskItemSelect.disabled = false;
+                riskDescSelect.innerHTML = '<option value="">請先選擇風險項目</option>';
+                riskDescSelect.disabled = true;
+                clearRiskDetails();
+            } else {
+                alert('載入風險項目失敗: ' + result.message);
+            }
+        } catch (error) {
+            console.error('載入風險項目時發生錯誤:', error);
+            alert('載入風險項目失敗，請稍後再試');
         }
-    } catch (error) {
-        console.error('提交事件登錄時發生錯誤:', error);
-        alert('提交失敗，請稍後再試');
-    } finally {
-        submitBtn.disabled = false;
-        loadingMsg.style.display = 'none';
     }
-}
+
+    // 載入風險描述選項
+    async function loadRiskDescriptions(riskItem) {
+        const riskDescSelect = document.getElementById('riskDescription');
+        const department = document.getElementById('riskDepartment').value;
+        
+        if (!riskItem || !department) {
+            riskDescSelect.innerHTML = '<option value="">請先選擇風險項目</option>';
+            riskDescSelect.disabled = true;
+            clearRiskDetails();
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${scriptUrl}?action=getRiskDescriptions&department=${encodeURIComponent(department)}&riskItem=${encodeURIComponent(riskItem)}`);
+            const result = await response.json();
+            
+            if (result.success) {
+                riskDescSelect.innerHTML = '<option value="">請選擇風險描述</option>';
+                
+                result.descriptions.forEach(desc => {
+                    const option = document.createElement('option');
+                    option.value = desc;
+                    option.textContent = desc;
+                    riskDescSelect.appendChild(option);
+                });
+                
+                riskDescSelect.disabled = false;
+            } else {
+                alert('載入風險描述失敗: ' + result.message);
+            }
+        } catch (error) {
+            console.error('載入風險描述時發生錯誤:', error);
+            alert('載入風險描述失敗，請稍後再試');
+        }
+    }
+
+    // 更新風險詳細資訊
+    async function updateRiskDetails() {
+        const department = document.getElementById('riskDepartment').value;
+        const riskItem = document.getElementById('riskItem').value;
+        const riskDesc = document.getElementById('riskDescription').value;
+        
+        if (!department || !riskItem || !riskDesc) {
+            clearRiskDetails();
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${scriptUrl}?action=getRiskDetails&department=${encodeURIComponent(department)}&riskItem=${encodeURIComponent(riskItem)}&riskDesc=${encodeURIComponent(riskDesc)}`);
+            const result = await response.json();
+            
+            if (result.success) {
+                document.getElementById('riskCategory').value = result.details.category || '';
+                document.getElementById('riskLevel').value = result.details.level || '';
+                document.getElementById('relatedDepartments').value = result.details.relatedDepartments || '';
+            } else {
+                clearRiskDetails();
+            }
+        } catch (error) {
+            console.error('載入風險詳細資訊時發生錯誤:', error);
+            clearRiskDetails();
+        }
+    }
+
+    // 清空風險詳細資訊
+    function clearRiskDetails() {
+        document.getElementById('riskCategory').value = '';
+        document.getElementById('riskLevel').value = '';
+        document.getElementById('relatedDepartments').value = '';
+    }
+
+    // 重置事件表單
+    function resetEventForm() {
+        // 保留使用者基本資訊，重置其他欄位
+        document.getElementById('riskDepartment').value = '';
+        document.getElementById('riskItem').innerHTML = '<option value="">請先選擇風險所屬部門</option>';
+        document.getElementById('riskItem').disabled = true;
+        document.getElementById('riskDescription').innerHTML = '<option value="">請先選擇風險項目</option>';
+        document.getElementById('riskDescription').disabled = true;
+        document.getElementById('occurrenceCount').value = '';
+        document.getElementById('eventReason').value = '';
+        clearRiskDetails();
+    }
+
+    // 提交事件登錄
+    async function submitEventRegistration() {
+        const submitBtn = document.getElementById('submitEventBtn');
+        const loadingMsg = document.getElementById('eventLoadingMsg');
+        
+        // 驗證必填欄位
+        const requiredFields = [
+            { id: 'riskDepartment', name: '風險所屬部門' },
+            { id: 'riskItem', name: '風險項目' },
+            { id: 'riskDescription', name: '風險描述' },
+            { id: 'occurrenceCount', name: '發生次數' },
+            { id: 'eventReason', name: '原因/說明' }
+        ];
+        
+        for (const field of requiredFields) {
+            const element = document.getElementById(field.id);
+            if (!element.value.trim()) {
+                alert(`請填寫 ${field.name}`);
+                element.focus();
+                return;
+            }
+        }
+        
+        // 準備提交資料
+        const eventData = {
+            timestamp: new Date().toISOString(),
+            department: document.getElementById('eventDepartment').value,
+            name: document.getElementById('eventName').value,
+            username: document.getElementById('eventUsername').value,
+            riskDepartment: document.getElementById('riskDepartment').value,
+            riskItem: document.getElementById('riskItem').value,
+            riskDescription: document.getElementById('riskDescription').value,
+            riskCategory: document.getElementById('riskCategory').value,
+            riskLevel: document.getElementById('riskLevel').value,
+            relatedDepartments: document.getElementById('relatedDepartments').value,
+            isIncreased: '是',
+            occurrenceCount: document.getElementById('occurrenceCount').value,
+            reason: document.getElementById('eventReason').value
+        };
+        
+        // 顯示載入狀態
+        submitBtn.disabled = true;
+        loadingMsg.style.display = 'block';
+        
+        try {
+            const response = await fetch(`${scriptUrl}?action=submitEventRegistration`, {
+                method: 'POST',
+                body: JSON.stringify(eventData)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                alert('風險事件登錄成功！');
+                resetEventForm();
+                // 可選：返回主頁面
+                // showDashboard();
+            } else {
+                alert('提交失敗: ' + result.message);
+            }
+        } catch (error) {
+            console.error('提交事件登錄時發生錯誤:', error);
+            alert('提交失敗，請稍後再試');
+        } finally {
+            submitBtn.disabled = false;
+            loadingMsg.style.display = 'none';
+        }
+    }
 
 });
 </script>
+
 
 </body>
 </html>
