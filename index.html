@@ -996,6 +996,69 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         margin-bottom: 0;
     }
 }
+        /* 更改密碼按鈕的特殊樣式 */
+#submitChangePassword {
+    background: linear-gradient(to right, #1a6fc4, #34c3aa);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 按鈕懸停效果 */
+#submitChangePassword:hover {
+    background: linear-gradient(to right, #1558a0, #2aa890);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* 🆕 按鈕點擊時的變色效果 */
+#submitChangePassword:active {
+    background: linear-gradient(to right, #0d4f87, #1e8a75) !important;
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* 🆕 按鈕處理中狀態 */
+#submitChangePassword.processing {
+    background: linear-gradient(to right, #6c757d, #495057) !important;
+    color: #ffffff;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* 🆕 按鈕成功狀態 */
+#submitChangePassword.success {
+    background: linear-gradient(to right, #28a745, #20c997) !important;
+    color: white;
+}
+
+/* 🆕 按鈕錯誤狀態 */
+#submitChangePassword.error {
+    background: linear-gradient(to right, #dc3545, #e83e8c) !important;
+    color: white;
+}
+
+/* 🆕 按鈕文字變化動畫 */
+#submitChangePassword .btn-text {
+    transition: opacity 0.3s ease;
+}
+
+#submitChangePassword .btn-icon {
+    display: none;
+    margin-right: 5px;
+}
+
+#submitChangePassword.processing .btn-icon,
+#submitChangePassword.success .btn-icon,
+#submitChangePassword.error .btn-icon {
+    display: inline;
+}
+
 
     </style>
 </head>
@@ -2593,55 +2656,110 @@ backFromEventBtn.addEventListener('click', function() {
         resetInactivityTimer();
     });
     
-    // 提交更改密碼表單
-    submitChangePasswordBtn.addEventListener('click', function() {
-        const currentPassword = document.getElementById('currentPassword').value;
-        const newPassword = document.getElementById('newPassword').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
-        const messageDiv = document.getElementById('passwordChangeMessage');
+// 提交更改密碼表單 (增強版)
+submitChangePasswordBtn.addEventListener('click', function() {
+    const currentPassword = document.getElementById('currentPassword').value;
+    const newPassword = document.getElementById('newPassword').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    const messageDiv = document.getElementById('passwordChangeMessage');
+    const submitBtn = this; // 🆕 引用按鈕本身
+    
+    // 檢查新密碼和確認密碼是否一致
+    if (newPassword !== confirmPassword) {
+        // 🆕 顯示錯誤狀態
+        showButtonState(submitBtn, 'error', '密碼不一致', 2000);
         
-        // 檢查新密碼和確認密碼是否一致
-        if (newPassword !== confirmPassword) {
-            messageDiv.className = 'alert alert-danger';
-            messageDiv.textContent = '新密碼與確認密碼不一致！';
-            messageDiv.style.display = 'block';
-            return;
-        }
-        
-        // 獲取當前登入的用戶名
-        const username = localStorage.getItem('username');
-        
-        // 發送更改密碼請求到後端
-        fetch(`${scriptUrl}?action=changePassword&username=${encodeURIComponent(username)}&currentPassword=${encodeURIComponent(currentPassword)}&newPassword=${encodeURIComponent(newPassword)}`)
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    messageDiv.className = 'alert alert-success';
-                    messageDiv.textContent = '密碼更改成功！';
-                    messageDiv.style.display = 'block';
-                    
-                    // 3秒後關閉彈出視窗
-                    setTimeout(function() {
-                        bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
-                        // 清空表單
-                        document.getElementById('changePasswordForm').reset();
-                        messageDiv.style.display = 'none';
-                    }, 3000);
-                } else {
-                    messageDiv.className = 'alert alert-danger';
-                    messageDiv.textContent = data.message || '密碼更改失敗！';
-                    messageDiv.style.display = 'block';
-                }
-                // 重置計時器
-                resetInactivityTimer();
-            })
-            .catch(error => {
-                messageDiv.className = 'alert alert-danger';
-                messageDiv.textContent = '系統錯誤，請稍後再試';
+        messageDiv.className = 'alert alert-danger';
+        messageDiv.textContent = '新密碼與確認密碼不一致！';
+        messageDiv.style.display = 'block';
+        return;
+    }
+    
+    // 🆕 顯示處理中狀態
+    showButtonState(submitBtn, 'processing', '處理中...', 0);
+    
+    // 獲取當前登入的用戶名
+    const username = localStorage.getItem('username');
+    
+    // 發送更改密碼請求到後端
+    fetch(`${scriptUrl}?action=changePassword&username=${encodeURIComponent(username)}&currentPassword=${encodeURIComponent(currentPassword)}&newPassword=${encodeURIComponent(newPassword)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // 🆕 顯示成功狀態
+                showButtonState(submitBtn, 'success', '更改成功！', 3000);
+                
+                messageDiv.className = 'alert alert-success';
+                messageDiv.textContent = '密碼更改成功！';
                 messageDiv.style.display = 'block';
-                console.error('Error:', error);
-            });
-    });
+                
+                // 3秒後關閉彈出視窗
+                setTimeout(function() {
+                    bootstrap.Modal.getInstance(document.getElementById('changePasswordModal')).hide();
+                    // 🆕 清空表單並重置按鈕
+                    document.getElementById('changePasswordForm').reset();
+                    messageDiv.style.display = 'none';
+                    resetButtonState(submitBtn);
+                }, 3000);
+            } else {
+                // 🆕 顯示錯誤狀態
+                showButtonState(submitBtn, 'error', '更改失敗', 3000);
+                
+                messageDiv.className = 'alert alert-danger';
+                messageDiv.textContent = data.message || '密碼更改失敗！';
+                messageDiv.style.display = 'block';
+            }
+            // 重置計時器
+            resetInactivityTimer();
+        })
+        .catch(error => {
+            // 🆕 顯示錯誤狀態
+            showButtonState(submitBtn, 'error', '系統錯誤', 3000);
+            
+            messageDiv.className = 'alert alert-danger';
+            messageDiv.textContent = '系統錯誤，請稍後再試';
+            messageDiv.style.display = 'block';
+            console.error('Error:', error);
+        });
+});
+
+// 🆕 按鈕狀態控制函數
+function showButtonState(button, state, text, duration) {
+    // 移除所有狀態類別
+    button.classList.remove('processing', 'success', 'error');
+    
+    // 添加新狀態
+    button.classList.add(state);
+    
+    // 更新按鈕文字和圖示
+    const icons = {
+        processing: '<i class="fas fa-spinner fa-spin btn-icon"></i>',
+        success: '<i class="fas fa-check btn-icon"></i>',
+        error: '<i class="fas fa-times btn-icon"></i>'
+    };
+    
+    button.innerHTML = `${icons[state] || ''}<span class="btn-text">${text}</span>`;
+    
+    // 禁用按鈕（處理中時）
+    if (state === 'processing') {
+        button.disabled = true;
+    }
+    
+    // 如果設定了持續時間，自動恢復
+    if (duration > 0) {
+        setTimeout(() => {
+            resetButtonState(button);
+        }, duration);
+    }
+}
+
+// 🆕 重置按鈕狀態函數
+function resetButtonState(button) {
+    button.classList.remove('processing', 'success', 'error');
+    button.disabled = false;
+    button.innerHTML = '<span class="btn-text">確認更改</span>';
+}
+
     
     // 載入事件表單資料
     function loadEventFormData() {
