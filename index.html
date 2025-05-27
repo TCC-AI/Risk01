@@ -1619,26 +1619,32 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // 顯示主頁面
-    function showDashboard() {
-        loginSection.classList.add('hidden');
-        inventorySection.classList.add('hidden');
-        deptRiskIndexPage.style.display = 'none';
-        dataAnalyticsPage.style.display = 'none';
-        eventRegistrationPage.style.display = 'none';
-        document.querySelector('.container').classList.remove('hidden');
-        dashboardSection.classList.remove('hidden');
-        document.querySelector('.container').style.maxWidth = '500px';
-        
-        // 🆕 設置按鈕權限
-        setButtonPermissions();
-        
-        // 🆕 更新使用者資訊顯示
-        updateUserInfo();
-        
-        // 重置計時器
-        resetInactivityTimer();
-    }
+// 顯示主頁面
+function showDashboard() {
+    loginSection.classList.add('hidden');
+    inventorySection.classList.add('hidden');
+    deptRiskIndexPage.style.display = 'none';
+    dataAnalyticsPage.style.display = 'none';
+    eventRegistrationPage.style.display = 'none';
+    
+    // 🆕 確保容器和儀表板都正確顯示
+    document.querySelector('.container').classList.remove('hidden');
+    document.querySelector('.container').style.display = 'block';
+    dashboardSection.classList.remove('hidden');
+    dashboardSection.style.display = 'block';
+    
+    document.querySelector('.container').style.maxWidth = '540px';
+    
+    // 🆕 設置按鈕權限
+    setButtonPermissions();
+    
+    // 🆕 更新使用者資訊顯示
+    updateUserInfo();
+    
+    // 重置計時器
+    resetInactivityTimer();
+}
+
     
     // 🆕 在使用者資訊區塊顯示權限等級
     function updateUserInfo() {
@@ -1673,18 +1679,23 @@ document.addEventListener('DOMContentLoaded', function() {
         clearTimeout(inactivityTimer);
     }
     
-    // 顯示部門週期盤點頁面
-    function showInventorySection() {
-        loginSection.classList.add('hidden');
-        dashboardSection.classList.add('hidden');
-        deptRiskIndexPage.style.display = 'none';
-        dataAnalyticsPage.style.display = 'none';
-        eventRegistrationPage.style.display = 'none';
-        document.querySelector('.container').classList.add('hidden'); // 隱藏原容器
-        inventorySection.classList.remove('hidden');
-        // 重置計時器
-        resetInactivityTimer();
-    }
+// 顯示部門週期盤點頁面
+function showInventorySection() {
+    loginSection.classList.add('hidden');
+    dashboardSection.classList.add('hidden');
+    deptRiskIndexPage.style.display = 'none';
+    dataAnalyticsPage.style.display = 'none';
+    eventRegistrationPage.style.display = 'none';
+    document.querySelector('.container').classList.add('hidden'); // 隱藏原容器
+    
+    // 🆕 確保盤點頁面正確顯示
+    inventorySection.classList.remove('hidden');
+    inventorySection.style.display = 'block';
+    
+    // 重置計時器
+    resetInactivityTimer();
+}
+
     
     // 顯示風險事件登錄頁面
     function showEventRegistrationPage() {
@@ -2233,12 +2244,19 @@ document.addEventListener('DOMContentLoaded', function() {
         resetInactivityTimer();
     });
     
-    // 返回按鈕點擊事件
-    backBtn.addEventListener('click', function() {
-        showDashboard();
-        // 重置計時器
-        resetInactivityTimer();
-    });
+// 返回按鈕點擊事件
+backBtn.addEventListener('click', function() {
+    // 🆕 先明確隱藏盤點頁面
+    inventorySection.classList.add('hidden');
+    inventorySection.style.display = 'none';
+    
+    // 然後顯示主頁面
+    showDashboard();
+    
+    // 重置計時器
+    resetInactivityTimer();
+});
+
     
     // 載入部門週期盤點資料
     function loadInventoryData() {
