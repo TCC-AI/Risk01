@@ -1378,17 +1378,28 @@ document.addEventListener('DOMContentLoaded', function() {
         resetInactivityTimer();
     });
     
-    // 數據分析儀表板按鈕點擊事件
-    dataAnalyticsBtn.addEventListener('click', function() {
-        dashboardSection.style.display = 'none';
-        dataAnalyticsPage.style.display = 'block';
-        
-        // 載入數據分析
-        loadAnalyticsData();
-        
-        // 重置計時器
-        resetInactivityTimer();
-    });
+// 🆕 保存原始的事件處理函數
+let originalDataAnalyticsHandler = function() {
+    // 🆕 再次檢查權限（雙重保險）
+    if (!checkPermission('s3')) {
+        alert('權限不足，無法訪問數據分析儀表板');
+        return;
+    }
+    
+    dashboardSection.style.display = 'none';
+    dataAnalyticsPage.style.display = 'block';
+    
+    // 載入數據分析
+    loadAnalyticsData();
+    
+    // 重置計時器
+    resetInactivityTimer();
+};
+
+// 數據分析儀表板按鈕點擊事件
+dataAnalyticsBtn.addEventListener('click', originalDataAnalyticsHandler);
+
+    
     
     // 返回按鈕點擊事件
     backFromRiskBtn.addEventListener('click', function() {
@@ -1447,6 +1458,88 @@ document.addEventListener('DOMContentLoaded', function() {
                     '<tr><td colspan="2" class="text-center text-danger">獲取數據失敗</td></tr>';
             });
     }
+
+    // 🆕 新增權限檢查函數
+function checkPermission(requiredLevel) {
+    const userPermission = localStorage.getItem('permission') || 's1';
+    
+    // 權限等級對照：s3 > s2 > s1
+    const permissionLevels = {
+        's1': 1,
+        's2': 2,
+        's3': 3
+    };
+    
+    const userLevel = permissionLevels[userPermission] || 1;
+    const requiredLevelNum = permissionLevels[requiredLevel] || 1;
+    
+    return userLevel >= requiredLevelNum;
+}
+
+// 🆕 設置按鈕權限狀態
+function setButtonPermissions() {
+    const dataAnalyticsBtn = document.getElementById('data-analytics-btn');
+    
+    // 檢查是否有s3權限
+    if (!checkPermission('s3')) {
+        // 沒有權限：禁用按鈕並改變樣式
+        dataAnalyticsBtn.disabled = true;
+        dataAnalyticsBtn.style.opacity = '0.5';
+        dataAnalyticsBtn.style.cursor = 'not-allowed';
+        dataAnalyticsBtn.style.background = 'linear-gradient(to right, #6c757d, #495057)';
+        
+        // 🆕 添加權限提示
+        dataAnalyticsBtn.title = '此功能需要 s3 權限等級';
+        
+        // 🆕 移除點擊事件，添加權限提示
+        dataAnalyticsBtn.removeEventListener('click', originalDataAnalyticsHandler);
+        dataAnalyticsBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('抱歉，您的權限等級不足，無法使用此功能。\n需要權限：s3\n您的權限：' + (localStorage.getItem('permission') || 's1'));
+        });
+    } else {
+        // 有權限：確保按鈕可用
+        dataAnalyticsBtn.disabled = false;
+        dataAnalyticsBtn.style.opacity = '1';
+        dataAnalyticsBtn.style.cursor = 'pointer';
+        dataAnalyticsBtn.style.background = 'linear-gradient(to right, #9c27b0, #e91e63)';
+        dataAnalyticsBtn.title = '';
+    }
+}
+
+// 修改 showDashboard 函數
+function showDashboard() {
+    loginSection.classList.add('hidden');
+    inventorySection.classList.add('hidden');
+    deptRiskIndexPage.style.display = 'none';
+    dataAnalyticsPage.style.display = 'none';
+    document.querySelector('.container').classList.remove('hidden');
+    dashboardSection.classList.remove('hidden');
+    document.querySelector('.container').style.maxWidth = '500px';
+    
+    // 🆕 設置按鈕權限
+    setButtonPermissions();
+    
+    // 重置計時器
+    resetInactivityTimer();
+}
+
+    // 🆕 在使用者資訊區塊顯示權限等級
+function updateUserInfo() {
+    const permission = localStorage.getItem('permission') || 's1';
+    const permissionText = {
+        's1': '一般使用者',
+        's2': '進階使用者', 
+        's3': '管理員'
+    };
+    
+    document.getElementById('user-info').innerHTML = `
+        歡迎： <strong id="user-department">${localStorage.getItem('department') || ''}</strong> - 
+        <strong id="user-name">${localStorage.getItem('name') || ''}</strong>
+        <span style="color: #666; font-size: 12px;">(${permissionText[permission]})</span>
+    `;
+}
+
     
     // 更新風險表格的函數
     function updateRiskTable(riskData) {
@@ -1857,6 +1950,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     localStorage.setItem('username', username);
                     localStorage.setItem('department', data.department || '');
                     localStorage.setItem('name', data.name || '');
+                    localStorage.setItem('permission', data.permission || 's1'); // 🆕 儲存權限等級
                     
                     // 顯示使用者資訊
                     userDepartment.textContent = data.department || '';
