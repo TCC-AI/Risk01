@@ -1461,7 +1461,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const rows = riskData.map((item, index) => {
             // 解析風險係數值並格式化到小數第一位
             let riskValue = parseFloat(item.riskIndex.replace('R', '')) || 0;
-            let formattedRiskValue = riskValue.toFixed(1);
+            let formattedRiskValue = riskValue.toFixed(0);// 🔧 這裡控制小數點位數！
             
             // 根據風險係數決定燈號
             let lightIcon = '';
