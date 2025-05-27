@@ -895,6 +895,106 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                 max-width: 280px;
             }
         }
+
+        /* 風險事件登錄頁面樣式 */
+.event-form-container {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-bottom: 20px;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2a6496;
+    margin-bottom: 8px;
+}
+
+.form-control, .form-select {
+    border: 1px solid rgba(0, 100, 150, 0.2);
+    border-radius: 8px;
+    padding: 10px 12px;
+    transition: all 0.3s ease;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #34c3aa;
+    box-shadow: 0 0 0 3px rgba(52, 195, 170, 0.25);
+    outline: none;
+}
+
+.form-control[readonly] {
+    background-color: rgba(233, 236, 239, 0.6);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+.text-danger {
+    color: #dc3545 !important;
+}
+
+/* 按鈕樣式 */
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-primary {
+    background: linear-gradient(to right, #1a6fc4, #34c3aa);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(to right, #1558a0, #2aa890);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-secondary {
+    background: linear-gradient(to right, #6c757d, #495057);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(to right, #5a6268, #3d4246);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-outline-secondary {
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    background: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background: #6c757d;
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    .event-form-container {
+        padding: 20px;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .btn:last-child {
+        margin-bottom: 0;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -1208,6 +1308,116 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         </div>
     </div>
 
+    <!-- 在現有的頁面後面添加風險事件登錄頁面 -->
+<!-- 風險事件登錄頁面 -->
+<div id="event-registration-page" class="dashboard-page" style="display: none;">
+    <div class="logo-container">
+        <img src="LOGO.png" alt="昶青實業 Logo" class="logo">
+    </div>
+    <h2 class="text-center mb-4">風險事件登錄</h2>
+    
+    <div class="event-form-container">
+        <form id="eventRegistrationForm">
+            <!-- 基本資訊區塊 -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="eventDepartment" class="form-label">部門</label>
+                    <input type="text" class="form-control" id="eventDepartment" readonly>
+                </div>
+                <div class="col-md-4">
+                    <label for="eventName" class="form-label">姓名</label>
+                    <input type="text" class="form-control" id="eventName" readonly>
+                </div>
+                <div class="col-md-4">
+                    <label for="eventUsername" class="form-label">帳號</label>
+                    <input type="text" class="form-control" id="eventUsername" readonly>
+                </div>
+            </div>
+
+            <!-- 風險資訊區塊 -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="riskDepartment" class="form-label">風險所屬部門 <span class="text-danger">*</span></label>
+                    <select class="form-select" id="riskDepartment" required>
+                        <option value="">請選擇風險所屬部門</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="riskItem" class="form-label">風險項目 <span class="text-danger">*</span></label>
+                    <select class="form-select" id="riskItem" required disabled>
+                        <option value="">請先選擇風險所屬部門</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-12">
+                    <label for="riskDescription" class="form-label">風險描述 <span class="text-danger">*</span></label>
+                    <select class="form-select" id="riskDescription" required disabled>
+                        <option value="">請先選擇風險項目</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 自動帶出資訊區塊 -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="riskCategory" class="form-label">風險類別</label>
+                    <input type="text" class="form-control" id="riskCategory" readonly>
+                </div>
+                <div class="col-md-4">
+                    <label for="riskLevel" class="form-label">風險等級</label>
+                    <input type="text" class="form-control" id="riskLevel" readonly>
+                </div>
+                <div class="col-md-4">
+                    <label for="relatedDepartments" class="form-label">相關聯部門</label>
+                    <input type="text" class="form-control" id="relatedDepartments" readonly>
+                </div>
+            </div>
+
+            <!-- 事件詳情區塊 -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="isIncreased" class="form-label">是否增加</label>
+                    <input type="text" class="form-control" id="isIncreased" value="是" readonly>
+                </div>
+                <div class="col-md-4">
+                    <label for="occurrenceCount" class="form-label">發生次數 <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control" id="occurrenceCount" min="1" required>
+                </div>
+                <div class="col-md-4">
+                    <label for="eventReason" class="form-label">原因/說明 <span class="text-danger">*</span></label>
+                    <textarea class="form-control" id="eventReason" rows="1" required></textarea>
+                </div>
+            </div>
+
+            <!-- 按鈕區塊 -->
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <button type="submit" class="btn btn-primary me-3" id="submitEventBtn">
+                        <i class="fas fa-paper-plane"></i> 送出
+                    </button>
+                    <button type="button" class="btn btn-secondary me-3" id="resetEventBtn">
+                        <i class="fas fa-undo"></i> 重置
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" id="backFromEventBtn">
+                        <i class="fas fa-arrow-left"></i> 返回
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- 載入提示 -->
+    <div id="eventLoadingMsg" class="text-center mt-3" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">處理中...</span>
+        </div>
+        <p class="mt-2">正在處理，請稍候...</p>
+    </div>
+</div>
+
+
     <!-- 新增 Bootstrap JS 和 Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
@@ -1317,6 +1527,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const backFromRiskBtn = document.getElementById('back-to-dashboard-from-risk');
     const dataAnalyticsBtn = document.getElementById('data-analytics-btn');
     const backFromAnalyticsBtn = document.getElementById('back-to-dashboard-from-analytics');
+    const eventRegistrationPage = document.getElementById('event-registration-page');
+    const backFromEventBtn = document.getElementById('backFromEventBtn');
+    const resetEventBtn = document.getElementById('resetEventBtn');
+    const eventForm = document.getElementById('eventRegistrationForm');
     
     // 自動登出相關變數
     let inactivityTimer;
@@ -2229,11 +2443,49 @@ function updateUserInfo() {
         resetInactivityTimer();
     });
     
-    // 事件登錄按鈕點擊事件
+    // 修改原有的事件登錄按鈕點擊事件
     eventBtn.addEventListener('click', function() {
-        alert('將導向事件登錄功能');
-        // 這裡可以替換成實際的功能實現
-        // 重置計時器
+        showEventRegistrationPage();
+        loadEventFormData();
+        resetInactivityTimer();
+    });
+
+     // 風險事件登錄頁面返回按鈕
+    backFromEventBtn.addEventListener('click', function() {
+        eventRegistrationPage.style.display = 'none';
+        dashboardSection.style.display = 'block';
+        resetInactivityTimer();
+    });
+    
+    // 重置按鈕
+    resetEventBtn.addEventListener('click', function() {
+        resetEventForm();
+        resetInactivityTimer();
+    });
+    
+    // 表單提交事件
+    eventForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        submitEventRegistration();
+        resetInactivityTimer();
+    });
+    
+    // 風險所屬部門選擇變更事件
+    document.getElementById('riskDepartment').addEventListener('change', function() {
+        loadRiskItems(this.value);
+        resetInactivityTimer();
+    });
+    
+    // 風險項目選擇變更事件
+    document.getElementById('riskItem').addEventListener('change', function() {
+        loadRiskDescriptions(this.value);
+        updateRiskDetails();
+        resetInactivityTimer();
+    });
+    
+    // 風險描述選擇變更事件
+    document.getElementById('riskDescription').addEventListener('change', function() {
+        updateRiskDetails();
         resetInactivityTimer();
     });
     
@@ -2378,6 +2630,447 @@ function updateUserInfo() {
         // 重置計時器
         resetInactivityTimer();
     }
+    / 顯示風險事件登錄頁面
+function showEventRegistrationPage() {
+    loginSection.classList.add('hidden');
+    dashboardSection.style.display = 'none';
+    inventorySection.classList.add('hidden');
+    deptRiskIndexPage.style.display = 'none';
+    dataAnalyticsPage.style.display = 'none';
+    eventRegistrationPage.style.display = 'block';
+    document.querySelector('.container').classList.add('hidden');
+}
+
+// 載入事件表單資料
+function loadEventFormData() {
+    // 填入使用者基本資訊
+    document.getElementById('eventDepartment').value = localStorage.getItem('department') || '';
+    document.getElementById('eventName').value = localStorage.getItem('name') || '';
+    document.getElementById('eventUsername').value = localStorage.getItem('username') || '';
+    
+    // 載入風險所屬部門選項
+    loadRiskDepartments();
+}
+
+// 載入風險所屬部門選項
+async function loadRiskDepartments() {
+    try {
+        const response = await fetch(`${scriptUrl}?action=getRiskDepartments`);
+        const result = await response.json();
+        
+        if (result.success) {
+            const select = document.getElementById('riskDepartment');
+            select.innerHTML = '<option value="">請選擇風險所屬部門</option>';
+            
+            result.departments.forEach(dept => {
+                const option = document.createElement('option');
+                option.value = dept;
+                option.textContent = dept;
+                select.appendChild(option);
+            });
+        } else {
+            alert('載入風險部門失敗: ' + result.message);
+        }
+    } catch (error) {
+        console.error('載入風險部門時發生錯誤:', error);
+        alert('載入風險部門失敗，請稍後再試');
+    }
+}
+
+// 載入風險項目選項
+async function loadRiskItems(department) {
+    const riskItemSelect = document.getElementById('riskItem');
+    const riskDescSelect = document.getElementById('riskDescription');
+    
+    if (!department) {
+        riskItemSelect.innerHTML = '<option value="">請先選擇風險所屬部門</option>';
+        riskItemSelect.disabled = true;
+        riskDescSelect.innerHTML = '<option value="">請先選擇風險項目</option>';
+        riskDescSelect.disabled = true;
+        clearRiskDetails();
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${scriptUrl}?action=getRiskItemsByDepartment&department=${encodeURIComponent(department)}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            riskItemSelect.innerHTML = '<option value="">請選擇風險項目</option>';
+            
+            result.riskItems.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item;
+                option.textContent = item;
+                riskItemSelect.appendChild(option);
+            });
+            
+            riskItemSelect.disabled = false;
+            riskDescSelect.innerHTML = '<option value="">請先選擇風險項目</option>';
+            riskDescSelect.disabled = true;
+            clearRiskDetails();
+        } else {
+            alert('載入風險項目失敗: ' + result.message);
+        }
+    } catch (error) {
+        console.error('載入風險項目時發生錯誤:', error);
+        alert('載入風險項目失敗，請稍後再試');
+    }
+}
+
+// 載入風險描述選項
+async function loadRiskDescriptions(riskItem) {
+    const riskDescSelect = document.getElementById('riskDescription');
+    const department = document.getElementById('riskDepartment').value;
+    
+    if (!riskItem || !department) {
+        riskDescSelect.innerHTML = '<option value="">請先選擇風險項目</option>';
+        riskDescSelect.disabled = true;
+        clearRiskDetails();
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${scriptUrl}?action=getRiskDescriptions&department=${encodeURIComponent(department)}&riskItem=${encodeURIComponent(riskItem)}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            riskDescSelect.innerHTML = '<option value="">請選擇風險描述</option>';
+            
+            result.descriptions.forEach(desc => {
+                const option = document.createElement('option');
+                option.value = desc;
+                option.textContent = desc;
+                riskDescSelect.appendChild(option);
+            });
+            
+            riskDescSelect.disabled = false;
+        } else {
+            alert('載入風險描述失敗: ' + result.message);
+        }
+    } catch (error) {
+        console.error('載入風險描述時發生錯誤:', error);
+        alert('載入風險描述失敗，請稍後再試');
+    }
+}
+
+// 更新風險詳細資訊
+async function updateRiskDetails() {
+    const department = document.getElementById('riskDepartment').value;
+    const riskItem = document.getElementById('riskItem').value;
+    const riskDesc = document.getElementById('riskDescription').value;
+    
+    if (!department || !riskItem || !riskDesc) {
+        clearRiskDetails();
+        return;
+    }
+    
+    try {
+        const response = await fetch(`${scriptUrl}?action=getRiskDetails&department=${encodeURIComponent(department)}&riskItem=${encodeURIComponent(riskItem)}&riskDesc=${encodeURIComponent(riskDesc)}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            document.getElementById('riskCategory').value = result.details.category || '';
+            document.getElementById('riskLevel').value = result.details.level || '';
+            document.getElementById('relatedDepartments').value = result.details.relatedDepartments || '';
+        } else {
+            clearRiskDetails();
+        }
+    } catch (error) {
+        console.error('載入風險詳細資訊時發生錯誤:', error);
+        clearRiskDetails();
+    }
+}
+
+// 清空風險詳細資訊
+function clearRiskDetails() {
+    document.getElementById('riskCategory').value = '';
+    document.getElementById('riskLevel').value = '';
+    document.getElementById('relatedDepartments').value = '';
+}
+
+// 重置事件表單
+function resetEventForm() {
+    // 保留使用者基本資訊，重置其他欄位
+    document.getElementById('riskDepartment').value = '';
+    document.getElementById('riskItem').innerHTML = '<option value="">請先選擇風險所屬部門</option>';
+    document.getElementById('riskItem').disabled = true;
+    document.getElementById('riskDescription').innerHTML = '<option value="">請先選擇風險項目</option>';
+    document.getElementById('riskDescription').disabled = true;
+    document.getElementById('occurrenceCount').value = '';
+    document.getElementById('eventReason').value = '';
+    clearRiskDetails();
+}
+
+// 提交事件登錄
+async function submitEventRegistration() {
+    const submitBtn = document.getElementById('submitEventBtn');
+    const loadingMsg = document.getElementById('eventLoadingMsg');
+    
+    // 驗證必填欄位
+    const requiredFields = [
+        { id: 'riskDepartment', name: '風險所屬部門' },
+        { id: 'riskItem', name: '風險項目' },
+        { id: 'riskDescription', name: '風險描述' },
+        { id: 'occurrenceCount', name: '發生次數' },
+        { id: 'eventReason', name: '原因/說明' }
+    ];
+    
+    for (const field of requiredFields) {
+        const element = document.getElementById(field.id);
+        if (!element.value.trim()) {
+            alert(`請填寫 ${field.name}`);
+            element.focus();
+            return;
+        }
+    }
+    
+    // 準備提交資料
+    const eventData = {
+        timestamp: new Date().toISOString(),
+        department: document.getElementById('eventDepartment').value,
+        name: document.getElementById('eventName').value,
+        username: document.getElementById('eventUsername').value,
+        riskDepartment: document.getElementById('riskDepartment').value,
+        riskItem: document.getElementById('riskItem').value,
+        riskDescription: document.getElementById('riskDescription').value,
+        riskCategory: document.getElementById('riskCategory').value,
+        riskLevel: document.getElementById('riskLevel').value,
+        relatedDepartments: document.getElementById('relatedDepartments').value,
+        isIncreased: '是',
+        occurrenceCount: document.getElementById('occurrenceCount').value,
+        reason: document.getElementById('eventReason').value
+    };
+    
+    // 顯示載入狀態
+    submitBtn.disabled = true;
+    loadingMsg.style.display = 'block';
+    
+    try {
+        const response = await fetch(`${scriptUrl}?action=submitEventRegistration`, {
+            method: 'POST',
+            body: JSON.stringify(eventData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('風險事件登錄成功！');
+            resetEventForm();
+            // 可選：返回主頁面
+            // showDashboard();
+        } else {
+            alert('提交失敗: ' + result.message);
+        }
+    } catch (error) {
+        console.error('提交事件登錄時發生錯誤:', error);
+        alert('提交失敗，請稍後再試');
+    } finally {
+        submitBtn.disabled = false;
+        loadingMsg.style.display = 'none';
+    }
+}
+4. 添加 Google Apps Script 後端處理函數
+在 Google Apps Script 中添加以下函數：
+
+複製
+/**
+ * 處理獲取風險部門請求
+ */
+function handleGetRiskDepartments(e) {
+  try {
+    const ss = SpreadsheetApp.openById('1GSuMBI3DOsfvmQnGUUJRyi6NgUk76TkyuJHBDYanF0I');
+    const sheet = ss.getSheetByName('風險清單');
+    
+    if (!sheet) {
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false,
+        message: '找不到風險清單工作表！'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const data = sheet.getDataRange().getValues();
+    const departments = new Set();
+    
+    // 從第二行開始讀取（跳過標題行）
+    for (let i = 1; i < data.length; i++) {
+      const department = data[i][0]; // A欄 - 單位名稱
+      if (department && department.trim() !== '') {
+        departments.add(department.trim());
+      }
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      departments: Array.from(departments).sort()
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    Logger.log('獲取風險部門時出錯: ' + error.toString());
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      message: '系統錯誤: ' + error.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * 處理根據部門獲取風險項目請求
+ */
+function handleGetRiskItemsByDepartment(e) {
+  try {
+    const department = e.parameter.department;
+    
+    if (!department) {
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false,
+        message: '缺少部門參數'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const ss = SpreadsheetApp.openById('1GSuMBI3DOsfvmQnGUUJRyi6NgUk76TkyuJHBDYanF0I');
+    const sheet = ss.getSheetByName('風險清單');
+    
+    if (!sheet) {
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false,
+        message: '找不到風險清單工作表！'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const data = sheet.getDataRange().getValues();
+    const riskItems = new Set();
+    
+    // 從第二行開始讀取
+    for (let i = 1; i < data.length; i++) {
+      const sheetDepartment = data[i][0]; // A欄 - 單位名稱
+      const riskName = data[i][1]; // B欄 - 風險名稱
+      
+      if (sheetDepartment === department && riskName && riskName.trim() !== '') {
+        riskItems.add(riskName.trim());
+      }
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      riskItems: Array.from(riskItems).sort()
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    Logger.log('獲取風險項目時出錯: ' + error.toString());
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      message: '系統錯誤: ' + error.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * 處理獲取風險描述請求
+ */
+function handleGetRiskDescriptions(e) {
+  try {
+    const department = e.parameter.department;
+    const riskItem = e.parameter.riskItem;
+    
+    if (!department || !riskItem) {
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false,
+        message: '缺少必要參數'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const ss = SpreadsheetApp.openById('1GSuMBI3DOsfvmQnGUUJRyi6NgUk76TkyuJHBDYanF0I');
+    const sheet = ss.getSheetByName('風險清單');
+    
+    if (!sheet) {
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false,
+        message: '找不到風險清單工作表！'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const data = sheet.getDataRange().getValues();
+    const descriptions = new Set();
+    
+    // 從第二行開始讀取
+    for (let i = 1; i < data.length; i++) {
+      const sheetDepartment = data[i][0]; // A欄 - 單位名稱
+      const sheetRiskName = data[i][1]; // B欄 - 風險名稱
+      const riskDescription = data[i][2]; // C欄 - 風險描述
+      
+      if (sheetDepartment === department && sheetRiskName === riskItem && 
+          riskDescription && riskDescription.trim() !== '') {
+        descriptions.add(riskDescription.trim());
+      }
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      descriptions: Array.from(descriptions)
+    })).setMimeType(ContentService.MimeType.JSON);
+    
+  } catch (error) {
+    Logger.log('獲取風險描述時出錯: ' + error.toString());
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      message: '系統錯誤: ' + error.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+/**
+ * 處理獲取風險詳細資訊請求
+ */
+function handleGetRiskDetails(e) {
+  try {
+    const department = e.parameter.department;
+    const riskItem = e.parameter.riskItem;
+    const riskDesc = e.parameter.riskDesc;
+    
+    if (!department || !riskItem || !riskDesc) {
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false,
+        message: '缺少必要參數'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const ss = SpreadsheetApp.openById('1GSuMBI3DOsfvmQnGUUJRyi6NgUk76TkyuJHBDYanF0I');
+    const sheet = ss.getSheetByName('風險清單');
+    
+    if (!sheet) {
+      return ContentService.createTextOutput(JSON.stringify({
+        success: false,
+        message: '找不到風險清單工作表！'
+      })).setMimeType(ContentService.MimeType.JSON);
+    }
+    
+    const data = sheet.getDataRange().getValues();
+    
+    // 從第二行開始讀取
+    for (let i = 1; i < data.length; i++) {
+      const sheetDepartment = data[i][0]; // A欄 - 單位名稱
+      const sheetRiskName = data[i][1]; // B欄 - 風險名稱
+      const sheetRiskDesc = data[i][2]; // C欄 - 風險描述
+      const riskCategory = data[i][3]; // D欄 - 風險類別
+      const riskLevel = data[i][4]; // E欄 - 風險等級
+      const relatedDepartments = data[i][5]; // F欄 - 相關聯部門
+      
+      if (sheetDepartment === department && sheetRiskName === riskItem && sheetRiskDesc === riskDesc) {
+        return ContentService.createTextOutput(JSON.stringify({
+          success: true,
+          details: {
+            category: riskCategory || '',
+            level: riskLevel || '',
+            relatedDepartments: relatedDepartments || ''
+          }
+        })).setMimeType(ContentService.MimeType.JSON);
+      }
+    }
+    
+    return ContentService.createTextOutput(JSON.stringify({
+      success: false,
+      message: '找不到
 });
 </script>
 
