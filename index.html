@@ -185,11 +185,36 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
 
-        button:hover:not(.btn) {
-            background: linear-gradient(to right, #1558a0, #2aa890);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 2px 4px rgba(0, 0, 0, 0.15);
-            transform: translateY(-2px);
-        }
+/* 保留原有 hover 效果 + 新增載入動畫 */
+button:hover:not(.btn) {
+    background: linear-gradient(to right, #1558a0, #2aa890);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+/* 🆕 新增：彩虹漸層流動動畫 */
+@keyframes buttonLoading {
+    0% { background: linear-gradient(45deg, #1a6fc4, #34c3aa, #2a9dd9, #4aeb97); }
+    25% { background: linear-gradient(45deg, #34c3aa, #2a9dd9, #4aeb97, #1a6fc4); }
+    50% { background: linear-gradient(45deg, #2a9dd9, #4aeb97, #1a6fc4, #34c3aa); }
+    75% { background: linear-gradient(45deg, #4aeb97, #1a6fc4, #34c3aa, #2a9dd9); }
+    100% { background: linear-gradient(45deg, #1a6fc4, #34c3aa, #2a9dd9, #4aeb97); }
+}
+
+/* 🆕 新增：脈衝光暈效果 */
+@keyframes buttonPulse {
+    0% { box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 0 0 0 rgba(26, 111, 196, 0.7); }
+    50% { box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15), 0 0 0 10px rgba(26, 111, 196, 0.2); }
+    100% { box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 0 0 0 rgba(26, 111, 196, 0); }
+}
+
+/* 🆕 新增：載入狀態應用動畫 */
+.button-loading {
+    animation: buttonLoading 1.5s infinite, buttonPulse 2s infinite;
+    cursor: wait !important;
+    pointer-events: none;
+}
+
 
         button:active:not(.btn) {
             transform: translateY(0);
