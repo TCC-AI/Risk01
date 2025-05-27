@@ -1818,9 +1818,9 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateUserInfo() {
         const permission = localStorage.getItem('permission') || 's1';
         const permissionText = {
-            's1': '一般使用者',
-            's2': '進階使用者', 
-            's3': '管理員'
+            's1': 's1級',
+            's2': 's2級', 
+            's3': 's3級'
         };
         
         document.getElementById('user-info').innerHTML = `
