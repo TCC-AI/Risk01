@@ -1619,34 +1619,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-// 修正 showDashboard 函數
-function showDashboard() {
-    // 隱藏所有其他頁面
-    loginSection.classList.add('hidden');
-    inventorySection.classList.add('hidden');
-    deptRiskIndexPage.style.display = 'none';
-    dataAnalyticsPage.style.display = 'none';
-    eventRegistrationPage.style.display = 'none';
-    
-    // 顯示主容器和儀表板
-    document.querySelector('.container').classList.remove('hidden');
-    document.querySelector('.container').style.display = 'block'; // 🆕 確保容器顯示
-    dashboardSection.classList.remove('hidden');
-    dashboardSection.style.display = 'block'; // 🆕 確保儀表板顯示
-    
-    // 重設容器寬度
-    document.querySelector('.container').style.maxWidth = '540px';
-    
-    // 🆕 設置按鈕權限
-    setButtonPermissions();
-    
-    // 🆕 更新使用者資訊顯示
-    updateUserInfo();
-    
-    // 重置計時器
-    resetInactivityTimer();
-}
-
+    // 顯示主頁面
+    function showDashboard() {
+        loginSection.classList.add('hidden');
+        inventorySection.classList.add('hidden');
+        deptRiskIndexPage.style.display = 'none';
+        dataAnalyticsPage.style.display = 'none';
+        eventRegistrationPage.style.display = 'none';
+        document.querySelector('.container').classList.remove('hidden');
+        dashboardSection.classList.remove('hidden');
+        document.querySelector('.container').style.maxWidth = '500px';
+        
+        // 🆕 設置按鈕權限
+        setButtonPermissions();
+        
+        // 🆕 更新使用者資訊顯示
+        updateUserInfo();
+        
+        // 重置計時器
+        resetInactivityTimer();
+    }
     
     // 🆕 在使用者資訊區塊顯示權限等級
     function updateUserInfo() {
@@ -2241,18 +2233,12 @@ function showDashboard() {
         resetInactivityTimer();
     });
     
-// 返回按鈕點擊事件 - 修正版
-backBtn.addEventListener('click', function() {
-    // 隱藏盤點頁面
-    inventorySection.classList.add('hidden');
-    
-    // 顯示主頁面
-    showDashboard();
-    
-    // 重置計時器
-    resetInactivityTimer();
-});
-
+    // 返回按鈕點擊事件
+    backBtn.addEventListener('click', function() {
+        showDashboard();
+        // 重置計時器
+        resetInactivityTimer();
+    });
     
     // 載入部門週期盤點資料
     function loadInventoryData() {
