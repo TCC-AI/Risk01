@@ -1687,15 +1687,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // 顯示風險事件登錄頁面
-    function showEventRegistrationPage() {
-        loginSection.classList.add('hidden');
-        dashboardSection.style.display = 'none';
-        inventorySection.classList.add('hidden');
-        deptRiskIndexPage.style.display = 'none';
-        dataAnalyticsPage.style.display = 'none';
-        eventRegistrationPage.style.display = 'block';
-        document.querySelector('.container').classList.add('hidden');
-    }
+// 顯示風險事件登錄頁面 (修正版本)
+function showEventRegistrationPage() {
+    // 隱藏所有其他頁面
+    loginSection.classList.add('hidden');
+    dashboardSection.classList.add('hidden');
+    inventorySection.classList.add('hidden');
+    deptRiskIndexPage.style.display = 'none';
+    dataAnalyticsPage.style.display = 'none';
+    
+    // 隱藏主容器
+    document.querySelector('.container').classList.add('hidden');
+    
+    // 顯示事件登錄頁面
+    eventRegistrationPage.style.display = 'block';
+    
+    // 重置計時器
+    resetInactivityTimer();
+}
     
     // 檢查是否已登入
     if (localStorage.getItem('isLoggedIn') === 'true') {
@@ -2487,20 +2496,13 @@ document.addEventListener('DOMContentLoaded', function() {
         loadEventFormData();
         resetInactivityTimer();
     });
-// 風險事件登錄頁面返回按鈕
+// 風險事件登錄頁面返回按鈕 (修正版本)
 backFromEventBtn.addEventListener('click', function() {
     // 隱藏事件登錄頁面
     eventRegistrationPage.style.display = 'none';
     
-    // 顯示主頁面容器和儀表板
-    document.querySelector('.container').classList.remove('hidden');
-    dashboardSection.classList.remove('hidden');
-    
-    // 確保其他頁面都是隱藏的
-    loginSection.classList.add('hidden');
-    inventorySection.classList.add('hidden');
-    deptRiskIndexPage.style.display = 'none';
-    dataAnalyticsPage.style.display = 'none';
+    // 顯示主頁面
+    showDashboard();
     
     // 重置計時器
     resetInactivityTimer();
