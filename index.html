@@ -1947,55 +1947,60 @@ function updateUserInfo() {
     });
 
     
-    // 登入按鈕點擊事件
-    loginBtn.addEventListener('click', function() {
-        const username = usernameInput.value.trim();
-        const password = passwordInput.value.trim();
-        
-        if (!username || !password) {
-            errorMessage.textContent = '請輸入帳號和密碼';
-            return;
-        }
-        
-        // 顯示載入中訊息
-        errorMessage.textContent = '';
-        loadingMsg.classList.remove('hidden');
-        loginBtn.disabled = true;
-        
-        // 使用 fetch API 呼叫 Google Apps Script
-        fetch(`${scriptUrl}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
-            .then(response => response.json())
-            .then(data => {
-                loadingMsg.classList.add('hidden');
-                loginBtn.disabled = false;
+    // 🆕 修改後的登入按鈕點擊事件
+loginBtn.addEventListener('click', function() {
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+    
+    if (!username || !password) {
+        errorMessage.textContent = '請輸入帳號和密碼';
+        return;
+    }
+    
+    // 🆕 使用新的按鈕動畫系統
+    setButtonLoading(loginBtn, true, getLoadingText('login'));
+    errorMessage.textContent = '';
+    
+    // 🆕 保持原有的載入訊息顯示（如果您想保留的話）
+    loadingMsg.classList.remove('hidden');
+    
+    // 使用 fetch API 呼叫 Google Apps Script
+    fetch(`${scriptUrl}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
+        .then(response => response.json())
+        .then(data => {
+            // 🆕 統一的載入狀態清理
+            setButtonLoading(loginBtn, false);
+            loadingMsg.classList.add('hidden');
+            
+            if (data.success) {
+                // 登入成功，儲存使用者資訊
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('username', username);
+                localStorage.setItem('department', data.department || '');
+                localStorage.setItem('name', data.name || '');
+                localStorage.setItem('permission', data.permission || 's1'); // 🆕 儲存權限等級
                 
-                if (data.success) {
-                    // 登入成功，儲存使用者資訊
-                    localStorage.setItem('isLoggedIn', 'true');
-                    localStorage.setItem('username', username);
-                    localStorage.setItem('department', data.department || '');
-                    localStorage.setItem('name', data.name || '');
-                    localStorage.setItem('permission', data.permission || 's1'); // 🆕 儲存權限等級
-                    
-                    // 顯示使用者資訊
-                    userDepartment.textContent = data.department || '';
-                    userName.textContent = data.name || '';
-                    
-                    showDashboard();
-                    // 啟動自動登出計時器
-                    resetInactivityTimer();
-                } else {
-                    // 登入失敗
-                    errorMessage.textContent = data.message || '帳號或密碼錯誤';
-                }
-            })
-            .catch(error => {
-                loadingMsg.classList.add('hidden');
-                loginBtn.disabled = false;
-                errorMessage.textContent = '系統錯誤，請稍後再試';
-                console.error('Error:', error);
-            });
-    });
+                // 顯示使用者資訊
+                userDepartment.textContent = data.department || '';
+                userName.textContent = data.name || '';
+                
+                showDashboard();
+                // 啟動自動登出計時器
+                resetInactivityTimer();
+            } else {
+                // 登入失敗
+                errorMessage.textContent = data.message || '帳號或密碼錯誤';
+            }
+        })
+        .catch(error => {
+            // 🆕 統一的錯誤處理
+            setButtonLoading(loginBtn, false);
+            loadingMsg.classList.add('hidden');
+            errorMessage.textContent = '系統錯誤，請稍後再試';
+            console.error('Error:', error);
+        });
+});
+
     
     // 部門週期盤點按鈕點擊事件
     inventoryBtn.addEventListener('click', function() {
