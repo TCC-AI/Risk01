@@ -2487,13 +2487,25 @@ document.addEventListener('DOMContentLoaded', function() {
         loadEventFormData();
         resetInactivityTimer();
     });
+// 風險事件登錄頁面返回按鈕
+backFromEventBtn.addEventListener('click', function() {
+    // 隱藏事件登錄頁面
+    eventRegistrationPage.style.display = 'none';
+    
+    // 顯示主頁面容器和儀表板
+    document.querySelector('.container').classList.remove('hidden');
+    dashboardSection.classList.remove('hidden');
+    
+    // 確保其他頁面都是隱藏的
+    loginSection.classList.add('hidden');
+    inventorySection.classList.add('hidden');
+    deptRiskIndexPage.style.display = 'none';
+    dataAnalyticsPage.style.display = 'none';
+    
+    // 重置計時器
+    resetInactivityTimer();
+});
 
-    // 風險事件登錄頁面返回按鈕
-    backFromEventBtn.addEventListener('click', function() {
-        eventRegistrationPage.style.display = 'none';
-        dashboardSection.style.display = 'block';
-        resetInactivityTimer();
-    });
     
     // 重置按鈕
     resetEventBtn.addEventListener('click', function() {
