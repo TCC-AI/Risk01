@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+    <!-- 在 <head> 標籤中添加 Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI-風險偵測管理系統-昶青實業</title>
@@ -1424,7 +1426,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbz4hX5gavoQWE9igwDxGMPinWEJNYQAZ4my3lBDrmBAkP5mSPwenqVIZiBysv_rNBk9/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbwt-SN4pfjVYKuA8sZkiWofQnN9CYpn05d1tSTBIHunociMptQNWYPfQWJtGu6oCR6r/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
@@ -2870,207 +2872,7 @@ async function submitEventRegistration() {
         loadingMsg.style.display = 'none';
     }
 }
-4. 添加 Google Apps Script 後端處理函數
-在 Google Apps Script 中添加以下函數：
 
-複製
-/**
- * 處理獲取風險部門請求
- */
-function handleGetRiskDepartments(e) {
-  try {
-    const ss = SpreadsheetApp.openById('1GSuMBI3DOsfvmQnGUUJRyi6NgUk76TkyuJHBDYanF0I');
-    const sheet = ss.getSheetByName('風險清單');
-    
-    if (!sheet) {
-      return ContentService.createTextOutput(JSON.stringify({
-        success: false,
-        message: '找不到風險清單工作表！'
-      })).setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    const data = sheet.getDataRange().getValues();
-    const departments = new Set();
-    
-    // 從第二行開始讀取（跳過標題行）
-    for (let i = 1; i < data.length; i++) {
-      const department = data[i][0]; // A欄 - 單位名稱
-      if (department && department.trim() !== '') {
-        departments.add(department.trim());
-      }
-    }
-    
-    return ContentService.createTextOutput(JSON.stringify({
-      success: true,
-      departments: Array.from(departments).sort()
-    })).setMimeType(ContentService.MimeType.JSON);
-    
-  } catch (error) {
-    Logger.log('獲取風險部門時出錯: ' + error.toString());
-    return ContentService.createTextOutput(JSON.stringify({
-      success: false,
-      message: '系統錯誤: ' + error.toString()
-    })).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-/**
- * 處理根據部門獲取風險項目請求
- */
-function handleGetRiskItemsByDepartment(e) {
-  try {
-    const department = e.parameter.department;
-    
-    if (!department) {
-      return ContentService.createTextOutput(JSON.stringify({
-        success: false,
-        message: '缺少部門參數'
-      })).setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    const ss = SpreadsheetApp.openById('1GSuMBI3DOsfvmQnGUUJRyi6NgUk76TkyuJHBDYanF0I');
-    const sheet = ss.getSheetByName('風險清單');
-    
-    if (!sheet) {
-      return ContentService.createTextOutput(JSON.stringify({
-        success: false,
-        message: '找不到風險清單工作表！'
-      })).setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    const data = sheet.getDataRange().getValues();
-    const riskItems = new Set();
-    
-    // 從第二行開始讀取
-    for (let i = 1; i < data.length; i++) {
-      const sheetDepartment = data[i][0]; // A欄 - 單位名稱
-      const riskName = data[i][1]; // B欄 - 風險名稱
-      
-      if (sheetDepartment === department && riskName && riskName.trim() !== '') {
-        riskItems.add(riskName.trim());
-      }
-    }
-    
-    return ContentService.createTextOutput(JSON.stringify({
-      success: true,
-      riskItems: Array.from(riskItems).sort()
-    })).setMimeType(ContentService.MimeType.JSON);
-    
-  } catch (error) {
-    Logger.log('獲取風險項目時出錯: ' + error.toString());
-    return ContentService.createTextOutput(JSON.stringify({
-      success: false,
-      message: '系統錯誤: ' + error.toString()
-    })).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-/**
- * 處理獲取風險描述請求
- */
-function handleGetRiskDescriptions(e) {
-  try {
-    const department = e.parameter.department;
-    const riskItem = e.parameter.riskItem;
-    
-    if (!department || !riskItem) {
-      return ContentService.createTextOutput(JSON.stringify({
-        success: false,
-        message: '缺少必要參數'
-      })).setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    const ss = SpreadsheetApp.openById('1GSuMBI3DOsfvmQnGUUJRyi6NgUk76TkyuJHBDYanF0I');
-    const sheet = ss.getSheetByName('風險清單');
-    
-    if (!sheet) {
-      return ContentService.createTextOutput(JSON.stringify({
-        success: false,
-        message: '找不到風險清單工作表！'
-      })).setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    const data = sheet.getDataRange().getValues();
-    const descriptions = new Set();
-    
-    // 從第二行開始讀取
-    for (let i = 1; i < data.length; i++) {
-      const sheetDepartment = data[i][0]; // A欄 - 單位名稱
-      const sheetRiskName = data[i][1]; // B欄 - 風險名稱
-      const riskDescription = data[i][2]; // C欄 - 風險描述
-      
-      if (sheetDepartment === department && sheetRiskName === riskItem && 
-          riskDescription && riskDescription.trim() !== '') {
-        descriptions.add(riskDescription.trim());
-      }
-    }
-    
-    return ContentService.createTextOutput(JSON.stringify({
-      success: true,
-      descriptions: Array.from(descriptions)
-    })).setMimeType(ContentService.MimeType.JSON);
-    
-  } catch (error) {
-    Logger.log('獲取風險描述時出錯: ' + error.toString());
-    return ContentService.createTextOutput(JSON.stringify({
-      success: false,
-      message: '系統錯誤: ' + error.toString()
-    })).setMimeType(ContentService.MimeType.JSON);
-  }
-}
-
-/**
- * 處理獲取風險詳細資訊請求
- */
-function handleGetRiskDetails(e) {
-  try {
-    const department = e.parameter.department;
-    const riskItem = e.parameter.riskItem;
-    const riskDesc = e.parameter.riskDesc;
-    
-    if (!department || !riskItem || !riskDesc) {
-      return ContentService.createTextOutput(JSON.stringify({
-        success: false,
-        message: '缺少必要參數'
-      })).setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    const ss = SpreadsheetApp.openById('1GSuMBI3DOsfvmQnGUUJRyi6NgUk76TkyuJHBDYanF0I');
-    const sheet = ss.getSheetByName('風險清單');
-    
-    if (!sheet) {
-      return ContentService.createTextOutput(JSON.stringify({
-        success: false,
-        message: '找不到風險清單工作表！'
-      })).setMimeType(ContentService.MimeType.JSON);
-    }
-    
-    const data = sheet.getDataRange().getValues();
-    
-    // 從第二行開始讀取
-    for (let i = 1; i < data.length; i++) {
-      const sheetDepartment = data[i][0]; // A欄 - 單位名稱
-      const sheetRiskName = data[i][1]; // B欄 - 風險名稱
-      const sheetRiskDesc = data[i][2]; // C欄 - 風險描述
-      const riskCategory = data[i][3]; // D欄 - 風險類別
-      const riskLevel = data[i][4]; // E欄 - 風險等級
-      const relatedDepartments = data[i][5]; // F欄 - 相關聯部門
-      
-      if (sheetDepartment === department && sheetRiskName === riskItem && sheetRiskDesc === riskDesc) {
-        return ContentService.createTextOutput(JSON.stringify({
-          success: true,
-          details: {
-            category: riskCategory || '',
-            level: riskLevel || '',
-            relatedDepartments: relatedDepartments || ''
-          }
-        })).setMimeType(ContentService.MimeType.JSON);
-      }
-    }
-    
-    return ContentService.createTextOutput(JSON.stringify({
-      success: false,
-      message: '找不到
 });
 </script>
 
