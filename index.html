@@ -1059,6 +1059,117 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     display: inline;
 }
 
+        /* 🆕 彈出視窗標題置中與關閉按鈕調整 */
+
+/* 模態框標題區域調整 */
+.modal-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center; /* 讓內容置中 */
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #dee2e6;
+    border-top-left-radius: calc(0.5rem - 1px);
+    border-top-right-radius: calc(0.5rem - 1px);
+}
+
+/* 標題文字完全置中 */
+.modal-title {
+    margin: 0 auto; /* 自動置中 */
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600; /* 稍微加粗 */
+    flex-grow: 1; /* 佔滿剩餘空間 */
+    color: white; /* 確保文字顏色為白色 */
+}
+
+/* 關閉按鈕縮小並固定在右側 */
+.modal-header .btn-close {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px !important;      /* 🆕 縮小寬度 */
+    height: 18px !important;     /* 🆕 縮小高度 */
+    font-size: 0.7rem !important; /* 🆕 縮小字體 */
+    padding: 0 !important;
+    margin: 0 !important;
+    opacity: 0.8;
+    transition: all 0.2s ease;
+    background: transparent;
+    border: none;
+}
+
+/* 關閉按鈕懸停效果 */
+.modal-header .btn-close:hover {
+    opacity: 1;
+    transform: translateY(-50%) scale(1.1); /* 懸停時稍微放大 */
+}
+
+/* 關閉按鈕點擊效果 */
+.modal-header .btn-close:active {
+    transform: translateY(-50%) scale(0.95);
+}
+
+/* 特定彈出視窗的標題樣式優化 */
+#aiAnalysisModal .modal-title,
+#changePasswordModal .modal-title {
+    letter-spacing: 0.5px; /* 增加字間距 */
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); /* 添加文字陰影 */
+}
+
+/* 確保標題在小螢幕上也能正常顯示 */
+@media (max-width: 576px) {
+    .modal-title {
+        font-size: 1.1rem;
+        padding-right: 25px; /* 為關閉按鈕留出空間 */
+    }
+    
+    .modal-header .btn-close {
+        width: 16px !important;
+        height: 16px !important;
+        right: 0.75rem;
+        font-size: 0.6rem !important;
+    }
+}
+
+/* 🆕 針對您現有的模態框標題背景漸層優化 */
+.modal-header {
+    background: linear-gradient(to right, #1a6fc4, #2a9dd9); /* 保持您原有的漸層 */
+    color: white;
+    border-bottom: none;
+}
+
+/* 🆕 確保關閉按鈕在漸層背景上清晰可見 */
+.modal-header .btn-close {
+    filter: brightness(0) invert(1); /* 讓關閉按鈕變成白色 */
+}
+
+.modal-header .btn-close:hover {
+    filter: brightness(0) invert(1) drop-shadow(0 0 3px rgba(255,255,255,0.5));
+}
+
+        /* 🌟 進階美化選項 (可選) */
+
+/* 標題下方裝飾線 */
+.modal-title::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.8);
+    margin: 5px auto 0;
+    border-radius: 1px;
+}
+
+/* 關閉按鈕圓形背景 */
+.modal-header .btn-close {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    backdrop-filter: blur(5px);
+}
+
+
 
     </style>
 </head>
