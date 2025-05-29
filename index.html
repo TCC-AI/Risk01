@@ -1972,6 +1972,13 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 
 <script>
+    // 🔧 修復 exports 錯誤 - 添加在最前面
+if (typeof exports === 'undefined') {
+    window.exports = {};
+}
+if (typeof module === 'undefined') {
+    window.module = { exports: {} };
+}
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
 const scriptUrl = 'https://script.google.com/macros/s/AKfycbwyurXanbf4iGd4BH735DKsOLxLn_swXWwquI0mPtjabujCaAXdpYrB1GbPSVoBkjo/exec';
 
