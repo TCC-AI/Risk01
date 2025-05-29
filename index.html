@@ -1422,7 +1422,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                 <label for="password">密碼</label>
                 <input type="password" id="password" placeholder="請輸入密碼">
             </div>
-            <button id="login-btn">登入</button>
+           <button id="login-btn" onclick="handleLogin()">登入</button>
             <div style="text-align: center; margin-top: 15px;">
     <small style="color: #6c757d; font-size: 12px;">Designed by T.C.C.管理本部</small>
 </div>
@@ -2033,6 +2033,22 @@ async function showAIAnalysis(department, riskValue) {
     }
 }
 
+    // 🔧 測試連接函數 - 添加到 script 標籤中
+function testConnection() {
+    console.log('🧪 測試後端連接...');
+    fetch(scriptUrl + '?test=1')
+        .then(response => response.text())
+        .then(data => {
+            console.log('✅ 連接測試成功:', data);
+            alert('後端連接正常');
+        })
+        .catch(error => {
+            console.error('❌ 連接測試失敗:', error);
+            alert('後端連接失敗: ' + error.message);
+        });
+}
+
+
 // 全域函數 - 簡單的Markdown轉HTML
 function convertMarkdownToHTML(markdown) {
     if (!markdown) return '<p>暫無內容</p>';
@@ -2304,7 +2320,70 @@ function formatDateTime(dateValue) {
         return dateValue.toString();
     }
 }
-
+// 🔧 全域登入函數 - 添加在 DOMContentLoaded 之前
+function handleLogin() {
+    console.log('🔄 全域登入函數被調用');
+    
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const errorMessage = document.getElementById('error-message');
+    const loadingMsg = document.getElementById('loading');
+    const loginBtn = document.getElementById('login-btn');
+    
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value.trim();
+    
+    console.log('📝 輸入驗證:', { username: username, passwordLength: password.length });
+    
+    if (!username || !password) {
+        errorMessage.textContent = '請輸入帳號和密碼';
+        return;
+    }
+    
+    // 顯示載入中訊息
+    errorMessage.textContent = '';
+    loadingMsg.classList.remove('hidden');
+    loginBtn.disabled = true;
+    
+    console.log('🌐 準備發送請求到:', scriptUrl);
+    
+    // 使用 fetch API 呼叫 Google Apps Script
+    fetch(`${scriptUrl}?action=login&username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`)
+        .then(response => {
+            console.log('📡 收到回應:', response.status);
+            return response.json();
+        })
+        .then(data => {
+            console.log('✅ 解析結果:', data);
+            
+            loadingMsg.classList.add('hidden');
+            loginBtn.disabled = false;
+            
+            if (data.success) {
+                // 登入成功，儲存使用者資訊
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('username', username);
+                localStorage.setItem('department', data.department || '');
+                localStorage.setItem('name', data.name || '');
+                localStorage.setItem('permission', data.permission || 's1');
+                
+                console.log('🎉 登入成功，準備跳轉...');
+                
+                // 重新載入頁面以顯示主頁面
+                window.location.reload();
+            } else {
+                // 登入失敗
+                errorMessage.textContent = data.message || '帳號或密碼錯誤';
+            }
+        })
+        .catch(error => {
+            console.error('❌ 登入錯誤:', error);
+            loadingMsg.classList.add('hidden');
+            loginBtn.disabled = false;
+            errorMessage.textContent = '系統錯誤，請稍後再試';
+        });
+}
+    
 document.addEventListener('DOMContentLoaded', function() {
     const loginSection = document.getElementById('login-section');
     const dashboardSection = document.getElementById('dashboard-section');
