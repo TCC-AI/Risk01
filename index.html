@@ -1294,40 +1294,6 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     backdrop-filter: blur(5px);
 }
 
-        .notification-container {
-  max-height: 300px;
-  overflow-y: auto;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 15px;
-  background: #f9f9f9;
-  margin: 10px 0;
-}
-
-.notification-item {
-  background: white;
-  border-left: 4px solid #007bff;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.notification-item.unread {
-  border-left-color: #28a745;
-  background: #f8fff9;
-}
-
-.notification-time {
-  font-size: 12px;
-  color: #666;
-  margin-bottom: 5px;
-}
-
-.notification-message {
-  font-size: 14px;
-  line-height: 1.4;
-}
 
 
     </style>
@@ -1433,27 +1399,6 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     </h2>
     
     <!-- 預警規則設定 -->
-    <!-- 在預警設定頁面添加這個區塊 -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0"><i class="fas fa-cog"></i> 系統狀態</h5>
-            </div>
-            <div class="card-body">
-                <div id="triggerStatus">
-                    <div class="text-center">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">檢查中...</span>
-                        </div>
-                        <p class="mt-2">正在檢查預警系統狀態...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
     <div class="alert-settings-container">
         <div class="row mb-4">
             <div class="col-12">
@@ -1573,15 +1518,6 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                     <div class="card-header bg-warning text-dark">
                         <h5 class="mb-0"><i class="fas fa-history"></i> 預警歷史記錄</h5>
                     </div>
-                    <div class="notification-section" style="margin-top: 30px;">
-                  <h3>📬 系統通知</h3>
-                  <div id="systemNotifications" class="notification-container">
-                    <!-- 系統通知將在這裡顯示 -->
-                  </div>
-                  <button onclick="refreshNotifications()" class="btn btn-secondary">
-                    🔄 重新整理通知
-                  </button>
-</div>
                     <div class="card-body">
                         <div class="table-responsive">
                             <table class="table table-striped" id="alertHistoryTable">
@@ -1986,7 +1922,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbzpevU5gv2HHubJidpRNMx14fMBAF73aM7DzthIz3I3537U6oxpmrb5SVDDUPqtGw7Y/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbwGokRv9LorZJFDg1E-iIse4R-v4Y-APNwrrL7lAKpaQHQIx4LEb_HqW4z5UR4C-hd-/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
@@ -2411,53 +2347,6 @@ async function loadAlertHistory() {
             '<tr><td colspan="6" class="text-center text-danger">載入失敗</td></tr>';
     }
 }
-
-    // 🆕 在預警設定頁面添加觸發器狀態顯示
-async function checkTriggerStatus() {
-    try {
-        const response = await fetch(`${scriptUrl}?action=getTriggerStatus`);
-        const result = await response.json();
-        
-        const statusDiv = document.getElementById('triggerStatus');
-        if (result.success && result.isActive) {
-            statusDiv.innerHTML = `
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle"></i> 預警系統已啟動
-                    <small>下次檢查時間: ${result.nextRun || '未知'}</small>
-                </div>
-            `;
-        } else {
-            statusDiv.innerHTML = `
-                <div class="alert alert-warning">
-                    <i class="fas fa-exclamation-triangle"></i> 預警系統未啟動
-                    <button onclick="activateAlerts()" class="btn btn-sm btn-primary ms-2">立即啟動</button>
-                </div>
-            `;
-        }
-    } catch (error) {
-        console.error('檢查觸發器狀態失敗:', error);
-    }
-}
-
-// 🆕 啟動預警系統
-async function activateAlerts() {
-    try {
-        const response = await fetch(`${scriptUrl}?action=setupAlertTriggers`, {
-            method: 'POST'
-        });
-        const result = await response.json();
-        
-        if (result.success) {
-            showNotification('預警系統已成功啟動！', 'success');
-            checkTriggerStatus(); // 重新檢查狀態
-        } else {
-            showNotification('啟動失敗: ' + result.message, 'error');
-        }
-    } catch (error) {
-        showNotification('啟動預警系統時發生錯誤', 'error');
-    }
-}
-
 
 // 更新預警歷史表格
 function updateAlertHistoryTable(history) {
@@ -4016,58 +3905,6 @@ async function submitEventRegistration() {
 }
 
 
-});
-
-/**
- * 🆕 重新整理系統通知
- */
-async function refreshNotifications() {
-  try {
-    const username = sessionStorage.getItem('username') || '';
-    const response = await fetch(`${scriptUrl}?action=getSystemNotifications&username=${encodeURIComponent(username)}`);
-    const data = await response.json();
-    
-    if (data.success) {
-      displaySystemNotifications(data.notifications);
-    } else {
-      console.error('獲取系統通知失敗:', data.message);
-    }
-  } catch (error) {
-    console.error('重新整理通知時出錯:', error);
-  }
-}
-
-/**
- * 🆕 顯示系統通知
- */
-function displaySystemNotifications(notifications) {
-  const container = document.getElementById('systemNotifications');
-  
-  if (!notifications || notifications.length === 0) {
-    container.innerHTML = '<p style="text-align: center; color: #666;">目前沒有系統通知</p>';
-    return;
-  }
-  
-  const notificationHtml = notifications.map(notification => `
-    <div class="notification-item ${notification.status === '未讀' ? 'unread' : ''}">
-      <div class="notification-time">
-        📅 ${notification.timestamp} | 類型: ${notification.type}
-      </div>
-      <div class="notification-message">
-        ${notification.message.replace(/\n/g, '<br>')}
-      </div>
-    </div>
-  `).join('');
-  
-  container.innerHTML = notificationHtml;
-}
-
-// 頁面載入時自動載入通知
-document.addEventListener('DOMContentLoaded', function() {
-  // 延遲載入通知，確保其他功能先載入完成
-  setTimeout(() => {
-    refreshNotifications();
-  }, 1000);
 });
 </script>
 
