@@ -1433,6 +1433,27 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     </h2>
     
     <!-- 預警規則設定 -->
+    <!-- 在預警設定頁面添加這個區塊 -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-cog"></i> 系統狀態</h5>
+            </div>
+            <div class="card-body">
+                <div id="triggerStatus">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">檢查中...</span>
+                        </div>
+                        <p class="mt-2">正在檢查預警系統狀態...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
     <div class="alert-settings-container">
         <div class="row mb-4">
             <div class="col-12">
@@ -2390,6 +2411,53 @@ async function loadAlertHistory() {
             '<tr><td colspan="6" class="text-center text-danger">載入失敗</td></tr>';
     }
 }
+
+    // 🆕 在預警設定頁面添加觸發器狀態顯示
+async function checkTriggerStatus() {
+    try {
+        const response = await fetch(`${scriptUrl}?action=getTriggerStatus`);
+        const result = await response.json();
+        
+        const statusDiv = document.getElementById('triggerStatus');
+        if (result.success && result.isActive) {
+            statusDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i> 預警系統已啟動
+                    <small>下次檢查時間: ${result.nextRun || '未知'}</small>
+                </div>
+            `;
+        } else {
+            statusDiv.innerHTML = `
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i> 預警系統未啟動
+                    <button onclick="activateAlerts()" class="btn btn-sm btn-primary ms-2">立即啟動</button>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('檢查觸發器狀態失敗:', error);
+    }
+}
+
+// 🆕 啟動預警系統
+async function activateAlerts() {
+    try {
+        const response = await fetch(`${scriptUrl}?action=setupAlertTriggers`, {
+            method: 'POST'
+        });
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification('預警系統已成功啟動！', 'success');
+            checkTriggerStatus(); // 重新檢查狀態
+        } else {
+            showNotification('啟動失敗: ' + result.message, 'error');
+        }
+    } catch (error) {
+        showNotification('啟動預警系統時發生錯誤', 'error');
+    }
+}
+
 
 // 更新預警歷史表格
 function updateAlertHistoryTable(history) {
