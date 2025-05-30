@@ -112,6 +112,131 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     }
 }
 
+        /* 預警設定頁面樣式 */
+.alert-settings-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.card {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+    border-radius: 12px 12px 0 0 !important;
+    border-bottom: none;
+    padding: 15px 20px;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+/* 預警按鈕樣式 */
+#alert-settings-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+#alert-settings-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+}
+
+#alert-settings-btn:hover::before {
+    left: 100%;
+}
+
+/* 風險等級指示器 */
+.risk-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 5px;
+}
+
+.risk-low { background-color: #28a745; }
+.risk-medium { background-color: #ffc107; }
+.risk-high { background-color: #dc3545; }
+.risk-critical { 
+    background-color: #dc3545; 
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* 通知狀態樣式 */
+.notification-status {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status-sent { 
+    background-color: #d4edda; 
+    color: #155724; 
+}
+
+.status-failed { 
+    background-color: #f8d7da; 
+    color: #721c24; 
+}
+
+.status-pending { 
+    background-color: #fff3cd; 
+    color: #856404; 
+}
+
+/* 測試按鈕動畫 */
+.btn-testing {
+    position: relative;
+    pointer-events: none;
+}
+
+.btn-testing::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    margin: auto;
+    border: 2px solid transparent;
+    border-top-color: #ffffff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
 
         /* 卡片樣式 */
         .login-form, .dashboard {
@@ -1213,6 +1338,10 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                  <button class="feature-btn" id="dept-risk-index-btn" style="background: linear-gradient(to right, #1a6fc4, #34c3aa);">部門風險係數</button>
     <button id="inventory-btn" class="feature-btn">部門週期盤點</button>
     <button id="event-btn" class="feature-btn">事件登錄</button>
+                 <!-- 🆕 新增預警設定按鈕 -->
+    <button id="alert-settings-btn" class="feature-btn" style="background: linear-gradient(to right, #ff6b35, #f7931e);">
+        <i class="fas fa-bell"></i> 風險預警設定
+    </button>
             </div>
             
             <!-- 登出下拉選單 -->
@@ -1260,7 +1389,199 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             </div>
         </div>
     </div>
+<!-- 風險預警設定頁面 -->
+<div id="alert-settings-page" class="dashboard-page" style="display: none;">
+    <div class="logo-container">
+        <img src="LOGO.png" alt="昶青實業 Logo" class="logo">
+    </div>
+    <h2 class="text-center mb-4">
+        <i class="fas fa-bell text-warning"></i> 風險預警設定
+    </h2>
+    
+    <!-- 預警規則設定 -->
+    <div class="alert-settings-container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-cog"></i> 預警規則設定</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="alertRulesForm">
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <label for="lowRiskThreshold" class="form-label">低風險閾值 (R值)</label>
+                                    <input type="number" class="form-control" id="lowRiskThreshold" 
+                                           value="15" min="1" max="100" step="0.1">
+                                    <small class="text-muted">低於此值為綠燈</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="mediumRiskThreshold" class="form-label">中風險閾值 (R值)</label>
+                                    <input type="number" class="form-control" id="mediumRiskThreshold" 
+                                           value="30" min="1" max="100" step="0.1">
+                                    <small class="text-muted">超過此值為紅燈</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="criticalRiskThreshold" class="form-label">緊急風險閾值 (R值)</label>
+                                    <input type="number" class="form-control" id="criticalRiskThreshold" 
+                                           value="50" min="1" max="100" step="0.1">
+                                    <small class="text-muted">超過此值立即通知</small>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="checkFrequency" class="form-label">檢查頻率</label>
+                                    <select class="form-select" id="checkFrequency">
+                                        <option value="realtime">即時檢查</option>
+                                        <option value="hourly">每小時</option>
+                                        <option value="daily" selected>每日</option>
+                                        <option value="weekly">每週</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="notificationTime" class="form-label">通知時間</label>
+                                    <input type="time" class="form-control" id="notificationTime" value="09:00">
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
 
+        <!-- 通知方式設定 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-paper-plane"></i> 通知方式設定</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-envelope"></i> Email 通知</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="enableEmailAlert" checked>
+                                    <label class="form-check-label" for="enableEmailAlert">
+                                        啟用 Email 通知
+                                    </label>
+                                </div>
+                                <div class="mt-2">
+                                    <label for="emailRecipients" class="form-label">收件人 (多個請用;分隔)</label>
+                                    <textarea class="form-control" id="emailRecipients" rows="3" 
+                                              placeholder="manager@company.com;admin@company.com"></textarea>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-sms"></i> LINE 通知</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="enableLineAlert">
+                                    <label class="form-check-label" for="enableLineAlert">
+                                        啟用 LINE 通知
+                                    </label>
+                                </div>
+                                <div class="mt-2">
+                                    <label for="lineToken" class="form-label">LINE Notify Token</label>
+                                    <input type="password" class="form-control" id="lineToken" 
+                                           placeholder="請輸入 LINE Notify Token">
+                                    <small class="text-muted">
+                                        <a href="https://notify-bot.line.me/" target="_blank">
+                                            取得 LINE Notify Token
+                                        </a>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h6><i class="fas fa-bell"></i> 系統內通知</h6>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="enableSystemAlert" checked>
+                                    <label class="form-check-label" for="enableSystemAlert">
+                                        啟用系統內彈出通知
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 預警歷史記錄 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-history"></i> 預警歷史記錄</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="alertHistoryTable">
+                                <thead>
+                                    <tr>
+                                        <th>時間</th>
+                                        <th>部門</th>
+                                        <th>風險等級</th>
+                                        <th>R值</th>
+                                        <th>通知方式</th>
+                                        <th>狀態</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="alertHistoryTableBody">
+                                    <tr>
+                                        <td colspan="6" class="text-center">載入中...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 測試通知 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-vial"></i> 測試通知</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>測試您的通知設定是否正常運作：</p>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-primary" id="testEmailBtn">
+                                <i class="fas fa-envelope"></i> 測試 Email
+                            </button>
+                            <button type="button" class="btn btn-outline-success" id="testLineBtn">
+                                <i class="fas fa-sms"></i> 測試 LINE
+                            </button>
+                            <button type="button" class="btn btn-outline-warning" id="testSystemBtn">
+                                <i class="fas fa-bell"></i> 測試系統通知
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 操作按鈕 -->
+        <div class="text-center">
+            <button type="button" class="btn btn-primary btn-lg me-3" id="saveAlertSettingsBtn">
+                <i class="fas fa-save"></i> 儲存設定
+            </button>
+            <button type="button" class="btn btn-secondary btn-lg" id="backFromAlertBtn">
+                <i class="fas fa-arrow-left"></i> 返回
+            </button>
+        </div>
+    </div>
+</div>
+
+
+    
     <!-- 部門風險係數頁面 -->
 <div id="dept-risk-index-page" class="dashboard-page" style="display: none;">
     <div class="logo-container">
@@ -1601,7 +1922,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbzU0e95xz_0v-CVHTf1vF62Hq19X3iyMrk7mDETJYJ6MxX2my0KGa2v926OAoPRTWVQ/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbwJyVIdjgr3IgbKUeVkyjf5nmv7YS6-aR7UknEI4Q5OTzGRR7vC3TyHcujvavc5vyXS/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
@@ -1725,10 +2046,491 @@ document.addEventListener('DOMContentLoaded', function() {
     const backFromEventBtn = document.getElementById('backFromEventBtn');
     const resetEventBtn = document.getElementById('resetEventBtn');
     const eventForm = document.getElementById('eventRegistrationForm');
+    const alertSettingsBtn = document.getElementById('alert-settings-btn');
+    const alertSettingsPage = document.getElementById('alert-settings-page');
+    const backFromAlertBtn = document.getElementById('backFromAlertBtn');
+    const saveAlertSettingsBtn = document.getElementById('saveAlertSettingsBtn');
+
+    // 檢查元素是否存在
+    if (alertSettingsBtn) {
+        alertSettingsBtn.addEventListener('click', function() {
+            showAlertSettingsPage();
+            loadAlertSettings();
+            loadAlertHistory();
+            resetInactivityTimer();
+        });
+    }
+    
+    if (backFromAlertBtn) {
+        backFromAlertBtn.addEventListener('click', function() {
+            alertSettingsPage.style.display = 'none';
+            showDashboard();
+            resetInactivityTimer();
+        });
+    }
+    
+    if (saveAlertSettingsBtn) {
+        saveAlertSettingsBtn.addEventListener('click', function() {
+            saveAlertSettings();
+            resetInactivityTimer();
+        });
+    }
+    
+    // 測試按鈕事件
+    const testEmailBtn = document.getElementById('testEmailBtn');
+    const testLineBtn = document.getElementById('testLineBtn');
+    const testSystemBtn = document.getElementById('testSystemBtn');
+    
+    if (testEmailBtn) {
+        testEmailBtn.addEventListener('click', function() {
+            testNotification('email');
+        });
+    }
+    
+    if (testLineBtn) {
+        testLineBtn.addEventListener('click', function() {
+            testNotification('line');
+        });
+    }
+    
+    if (testSystemBtn) {
+        testSystemBtn.addEventListener('click', function() {
+            testNotification('system');
+        });
+    }
+    
+    // 🆕 頁面載入時檢查是否有新的預警通知
+    checkForNewAlerts();
+    
+    // 🆕 每5分鐘檢查一次新預警（如果用戶已登入）
+    setInterval(function() {
+        if (localStorage.getItem('isLoggedIn') === 'true') {
+            checkForNewAlerts();
+        }
+    }, 5 * 60 * 1000); // 5分鐘
+        
+
+// 🆕 檢查新預警通知
+async function checkForNewAlerts() {
+    try {
+        const lastCheckTime = localStorage.getItem('lastAlertCheck') || new Date(Date.now() - 24*60*60*1000).toISOString();
+        
+        const response = await fetch(`${scriptUrl}?action=getNewAlerts&since=${encodeURIComponent(lastCheckTime)}`);
+        const result = await response.json();
+        
+        if (result.success && result.newAlerts && result.newAlerts.length > 0) {
+            // 顯示新預警通知
+            showNewAlertsNotification(result.newAlerts);
+            
+            // 更新最後檢查時間
+            localStorage.setItem('lastAlertCheck', new Date().toISOString());
+        }
+    } catch (error) {
+        console.error('檢查新預警失敗:', error);
+    }
+}
+
+// 🆕 顯示新預警通知
+function showNewAlertsNotification(alerts) {
+    alerts.forEach((alert, index) => {
+        setTimeout(() => {
+            const riskLevel = getRiskLevel(alert.riskValue);
+            const message = `🚨 ${alert.department} 風險預警：${riskLevel.text} (R${alert.riskValue})`;
+            
+            // 顯示系統通知
+            if ('Notification' in window && Notification.permission === 'granted') {
+                const notification = new Notification('昶青實業 - 風險預警', {
+                    body: message,
+                    icon: 'LOGO.png',
+                    badge: 'LOGO.png',
+                    tag: `risk-alert-${alert.department}`,
+                    requireInteraction: true,
+                    actions: [
+                        {
+                            action: 'view',
+                            title: '查看詳情'
+                        },
+                        {
+                            action: 'dismiss',
+                            title: '忽略'
+                        }
+                    ]
+                });
+                
+                notification.onclick = function() {
+                    window.focus();
+                    // 跳轉到風險係數頁面
+                    showDeptRiskIndexPage();
+                    notification.close();
+                };
+            }
+            
+            // 同時顯示頁面內通知
+            showNotification(message, riskLevel.class === 'risk-critical' ? 'error' : 'warning');
+            
+        }, index * 1000); // 每個通知間隔1秒顯示
+    });
+}
+
+// 🆕 跳轉到部門風險係數頁面
+function showDeptRiskIndexPage() {
+    dashboardSection.style.display = 'none';
+    alertSettingsPage.style.display = 'none';
+    deptRiskIndexPage.style.display = 'block';
+    loadRiskIndexData();
+}
+    
+     // 預警設定按鈕點擊事件
+    alertSettingsBtn.addEventListener('click', function() {
+        showAlertSettingsPage();
+        loadAlertSettings();
+        loadAlertHistory();
+        resetInactivityTimer();
+    });
+    
+    // 返回按鈕
+    backFromAlertBtn.addEventListener('click', function() {
+        alertSettingsPage.style.display = 'none';
+        showDashboard();
+        resetInactivityTimer();
+    });
+    
+    // 儲存設定按鈕
+    saveAlertSettingsBtn.addEventListener('click', function() {
+        saveAlertSettings();
+        resetInactivityTimer();
+    });
+    
+    // 測試按鈕事件
+    document.getElementById('testEmailBtn').addEventListener('click', function() {
+        testNotification('email');
+    });
+    
+    document.getElementById('testLineBtn').addEventListener('click', function() {
+        testNotification('line');
+    });
+    
+    document.getElementById('testSystemBtn').addEventListener('click', function() {
+        testNotification('system');
+    });
     
     // 自動登出相關變數
     let inactivityTimer;
     const inactivityTimeout = 10 * 60 * 1000; // 10分鐘，以毫秒為單位
+    
+    // 顯示預警設定頁面
+function showAlertSettingsPage() {
+    // 隱藏所有其他頁面
+    loginSection.classList.add('hidden');
+    dashboardSection.classList.add('hidden');
+    inventorySection.classList.add('hidden');
+    deptRiskIndexPage.style.display = 'none';
+    dataAnalyticsPage.style.display = 'none';
+    eventRegistrationPage.style.display = 'none';
+    
+    // 隱藏主容器
+    document.querySelector('.container').classList.add('hidden');
+    
+    // 顯示預警設定頁面
+    alertSettingsPage.style.display = 'block';
+}
+
+// 載入預警設定
+async function loadAlertSettings() {
+    try {
+        const response = await fetch(`${scriptUrl}?action=getAlertSettings`);
+        const result = await response.json();
+        
+        if (result.success) {
+            const settings = result.settings;
+            
+            // 填入設定值
+            document.getElementById('lowRiskThreshold').value = settings.lowRiskThreshold || 15;
+            document.getElementById('mediumRiskThreshold').value = settings.mediumRiskThreshold || 30;
+            document.getElementById('criticalRiskThreshold').value = settings.criticalRiskThreshold || 50;
+            document.getElementById('checkFrequency').value = settings.checkFrequency || 'daily';
+            document.getElementById('notificationTime').value = settings.notificationTime || '09:00';
+            
+            document.getElementById('enableEmailAlert').checked = settings.enableEmailAlert || false;
+            document.getElementById('emailRecipients').value = settings.emailRecipients || '';
+            document.getElementById('enableLineAlert').checked = settings.enableLineAlert || false;
+            document.getElementById('lineToken').value = settings.lineToken || '';
+            document.getElementById('enableSystemAlert').checked = settings.enableSystemAlert || true;
+        }
+    } catch (error) {
+        console.error('載入預警設定失敗:', error);
+        showNotification('載入預警設定失敗', 'error');
+    }
+}
+
+// 儲存預警設定
+async function saveAlertSettings() {
+    const saveBtn = document.getElementById('saveAlertSettingsBtn');
+    const originalText = saveBtn.innerHTML;
+    
+    try {
+        // 顯示載入狀態
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 儲存中...';
+        saveBtn.disabled = true;
+        
+        const settings = {
+            lowRiskThreshold: parseFloat(document.getElementById('lowRiskThreshold').value),
+            mediumRiskThreshold: parseFloat(document.getElementById('mediumRiskThreshold').value),
+            criticalRiskThreshold: parseFloat(document.getElementById('criticalRiskThreshold').value),
+            checkFrequency: document.getElementById('checkFrequency').value,
+            notificationTime: document.getElementById('notificationTime').value,
+            enableEmailAlert: document.getElementById('enableEmailAlert').checked,
+            emailRecipients: document.getElementById('emailRecipients').value,
+            enableLineAlert: document.getElementById('enableLineAlert').checked,
+            lineToken: document.getElementById('lineToken').value,
+            enableSystemAlert: document.getElementById('enableSystemAlert').checked
+        };
+        
+        const response = await fetch(`${scriptUrl}?action=saveAlertSettings`, {
+            method: 'POST',
+            body: JSON.stringify(settings)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification('預警設定已成功儲存！', 'success');
+            
+            // 設置觸發器
+            await setupAlertTriggers(settings);
+        } else {
+            showNotification('儲存失敗: ' + result.message, 'error');
+        }
+        
+    } catch (error) {
+        console.error('儲存預警設定失敗:', error);
+        showNotification('儲存失敗，請稍後再試', 'error');
+    } finally {
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
+    }
+}
+
+// 設置預警觸發器
+async function setupAlertTriggers(settings) {
+    try {
+        const response = await fetch(`${scriptUrl}?action=setupAlertTriggers`, {
+            method: 'POST',
+            body: JSON.stringify(settings)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification('預警觸發器已設置完成', 'info');
+        }
+    } catch (error) {
+        console.error('設置觸發器失敗:', error);
+    }
+}
+
+// 載入預警歷史記錄
+async function loadAlertHistory() {
+    try {
+        const response = await fetch(`${scriptUrl}?action=getAlertHistory`);
+        const result = await response.json();
+        
+        if (result.success) {
+            updateAlertHistoryTable(result.history);
+        } else {
+            document.getElementById('alertHistoryTableBody').innerHTML = 
+                '<tr><td colspan="6" class="text-center text-danger">載入失敗</td></tr>';
+        }
+    } catch (error) {
+        console.error('載入預警歷史失敗:', error);
+        document.getElementById('alertHistoryTableBody').innerHTML = 
+            '<tr><td colspan="6" class="text-center text-danger">載入失敗</td></tr>';
+    }
+}
+
+// 更新預警歷史表格
+function updateAlertHistoryTable(history) {
+    const tableBody = document.getElementById('alertHistoryTableBody');
+    
+    if (history.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="text-center">暫無預警記錄</td></tr>';
+        return;
+    }
+    
+    const rows = history.map(record => {
+        const riskLevel = getRiskLevel(record.riskValue);
+        const statusClass = getStatusClass(record.status);
+        
+        return `
+            <tr>
+                <td>${formatDateTime(record.timestamp)}</td>
+                <td>${record.department}</td>
+                <td>
+                    <span class="risk-indicator ${riskLevel.class}"></span>
+                    ${riskLevel.text}
+                </td>
+                <td>R${record.riskValue}</td>
+                <td>${record.notificationMethods.join(', ')}</td>
+                <td>
+                    <span class="notification-status ${statusClass}">
+                        ${record.status}
+                    </span>
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
+    tableBody.innerHTML = rows;
+}
+
+// 測試通知功能
+async function testNotification(type) {
+    const btnId = `test${type.charAt(0).toUpperCase() + type.slice(1)}Btn`;
+    const btn = document.getElementById(btnId);
+    const originalText = btn.innerHTML;
+    
+    try {
+        // 顯示測試中狀態
+        btn.classList.add('btn-testing');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 測試中...';
+        btn.disabled = true;
+        
+        const response = await fetch(`${scriptUrl}?action=testNotification&type=${type}`, {
+            method: 'POST',
+            body: JSON.stringify({
+                department: localStorage.getItem('department'),
+                username: localStorage.getItem('username'),
+                name: localStorage.getItem('name')
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification(`${type.toUpperCase()} 測試通知發送成功！`, 'success');
+            
+            if (type === 'system') {
+                // 顯示系統通知
+                showSystemNotification('這是一個測試通知', 'info');
+            }
+        } else {
+            showNotification(`測試失敗: ${result.message}`, 'error');
+        }
+        
+    } catch (error) {
+        console.error('測試通知失敗:', error);
+        showNotification('測試通知失敗，請稍後再試', 'error');
+    } finally {
+        btn.classList.remove('btn-testing');
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+}
+
+// 顯示系統通知
+function showSystemNotification(message, type = 'info') {
+    // 檢查瀏覽器是否支援通知
+    if ('Notification' in window) {
+        // 請求通知權限
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                const notification = new Notification('昶青實業 - 風險預警', {
+                    body: message,
+                    icon: 'LOGO.png',
+                    badge: 'LOGO.png',
+                    tag: 'risk-alert',
+                    requireInteraction: true
+                });
+                
+                notification.onclick = function() {
+                    window.focus();
+                    notification.close();
+                };
+                
+                // 5秒後自動關閉
+                setTimeout(() => {
+                    notification.close();
+                }, 5000);
+            }
+        });
+    }
+    
+    // 同時顯示頁面內通知
+    showNotification(message, type);
+}
+
+// 通用通知顯示函數
+function showNotification(message, type = 'info') {
+    // 創建通知元素
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show notification-toast`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        border-radius: 8px;
+    `;
+    
+    notification.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'} me-2"></i>
+            <div>${message}</div>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // 3秒後自動移除
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 3000);
+}
+
+// 輔助函數
+function getRiskLevel(riskValue) {
+    const value = parseFloat(riskValue);
+    if (value <= 15) {
+        return { class: 'risk-low', text: '低風險' };
+    } else if (value <= 30) {
+        return { class: 'risk-medium', text: '中風險' };
+    } else if (value <= 50) {
+        return { class: 'risk-high', text: '高風險' };
+    } else {
+        return { class: 'risk-critical', text: '緊急風險' };
+    }
+}
+
+function getStatusClass(status) {
+    switch (status) {
+        case '已發送': return 'status-sent';
+        case '發送失敗': return 'status-failed';
+        case '待發送': return 'status-pending';
+        default: return 'status-pending';
+    }
+}
+
+function formatDateTime(dateTime) {
+    try {
+        const date = new Date(dateTime);
+        return date.toLocaleString('zh-TW', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    } catch (error) {
+        return dateTime;
+    }
+}
+    
+    
     
     // 監控用戶活動的函數
     function resetInactivityTimer() {
