@@ -1922,7 +1922,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbwJyVIdjgr3IgbKUeVkyjf5nmv7YS6-aR7UknEI4Q5OTzGRR7vC3TyHcujvavc5vyXS/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbxzIEi0OPIq1lRvRFXsoNzh4PazzI_178F0px4xBhINLVi6viIVKrY_fcpCQFPpiFo6/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
@@ -2235,10 +2235,23 @@ function showAlertSettingsPage() {
     alertSettingsPage.style.display = 'block';
 }
 
-// 載入預警設定
+// 🆕 改善的 loadAlertSettings 函數
 async function loadAlertSettings() {
     try {
-        const response = await fetch(`${scriptUrl}?action=getAlertSettings`);
+        showLoading('載入預警設定中...');
+        
+        const response = await fetch(`${scriptUrl}?action=getAlertSettings`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            mode: 'cors' // 明確指定 CORS 模式
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
         const result = await response.json();
         
         if (result.success) {
@@ -2250,18 +2263,128 @@ async function loadAlertSettings() {
             document.getElementById('criticalRiskThreshold').value = settings.criticalRiskThreshold || 50;
             document.getElementById('checkFrequency').value = settings.checkFrequency || 'daily';
             document.getElementById('notificationTime').value = settings.notificationTime || '09:00';
-            
             document.getElementById('enableEmailAlert').checked = settings.enableEmailAlert || false;
             document.getElementById('emailRecipients').value = settings.emailRecipients || '';
             document.getElementById('enableLineAlert').checked = settings.enableLineAlert || false;
             document.getElementById('lineToken').value = settings.lineToken || '';
-            document.getElementById('enableSystemAlert').checked = settings.enableSystemAlert || true;
+            document.getElementById('enableSystemAlert').checked = settings.enableSystemAlert !== false;
+            
+            // 根據啟用狀態顯示/隱藏相關欄位
+            toggleEmailSettings();
+            toggleLineSettings();
+            
+        } else {
+            throw new Error(result.message || '載入預警設定失敗');
         }
+        
     } catch (error) {
         console.error('載入預警設定失敗:', error);
-        showNotification('載入預警設定失敗', 'error');
+        showNotification('載入預警設定失敗: ' + error.message, 'error');
+        
+        // 設定預設值
+        document.getElementById('lowRiskThreshold').value = 15;
+        document.getElementById('mediumRiskThreshold').value = 30;
+        document.getElementById('criticalRiskThreshold').value = 50;
+        document.getElementById('checkFrequency').value = 'daily';
+        document.getElementById('notificationTime').value = '09:00';
+        document.getElementById('enableSystemAlert').checked = true;
+        
+    } finally {
+        hideLoading();
     }
 }
+
+// 🆕 改善的 loadAlertHistory 函數
+async function loadAlertHistory() {
+    try {
+        const response = await fetch(`${scriptUrl}?action=getAlertHistory`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            mode: 'cors'
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            displayAlertHistory(result.history || []);
+        } else {
+            throw new Error(result.message || '載入預警歷史失敗');
+        }
+        
+    } catch (error) {
+        console.error('載入預警歷史失敗:', error);
+        showNotification('載入預警歷史失敗: ' + error.message, 'error');
+        displayAlertHistory([]); // 顯示空的歷史記錄
+    }
+}
+
+// 🆕 改善的 saveAlertSettings 函數
+async function saveAlertSettings() {
+    try {
+        // 驗證設定
+        const lowRisk = parseFloat(document.getElementById('lowRiskThreshold').value);
+        const mediumRisk = parseFloat(document.getElementById('mediumRiskThreshold').value);
+        const criticalRisk = parseFloat(document.getElementById('criticalRiskThreshold').value);
+        
+        if (lowRisk >= mediumRisk || mediumRisk >= criticalRisk) {
+            showNotification('風險閾值設定錯誤：低風險 < 中風險 < 緊急風險', 'error');
+            return;
+        }
+        
+        const settings = {
+            lowRiskThreshold: lowRisk,
+            mediumRiskThreshold: mediumRisk,
+            criticalRiskThreshold: criticalRisk,
+            checkFrequency: document.getElementById('checkFrequency').value,
+            notificationTime: document.getElementById('notificationTime').value,
+            enableEmailAlert: document.getElementById('enableEmailAlert').checked,
+            emailRecipients: document.getElementById('emailRecipients').value,
+            enableLineAlert: document.getElementById('enableLineAlert').checked,
+            lineToken: document.getElementById('lineToken').value,
+            enableSystemAlert: document.getElementById('enableSystemAlert').checked
+        };
+        
+        showLoading('儲存設定中...');
+        
+        const response = await fetch(`${scriptUrl}?action=saveAlertSettings`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            mode: 'cors',
+            body: JSON.stringify(settings)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification('預警設定已成功儲存', 'success');
+            
+            // 設定觸發器
+            await setupAlertTriggers(settings);
+            
+        } else {
+            throw new Error(result.message || '儲存預警設定失敗');
+        }
+        
+    } catch (error) {
+        console.error('儲存預警設定失敗:', error);
+        showNotification('儲存預警設定失敗: ' + error.message, 'error');
+    } finally {
+        hideLoading();
+    }
+}
+
 
 // 儲存預警設定
 async function saveAlertSettings() {
