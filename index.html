@@ -1416,6 +1416,19 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     overflow: hidden;
 }
 
+        /* 🟢 低風險樣式 - 綠色漸層 */
+.alert-success {
+    background: linear-gradient(135deg, #4caf50 0%, #43a047 25%, #388e3c 50%, #2e7d32 75%, #1b5e20 100%) !important;
+    border: none !important;
+    color: white !important;
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.4), 
+                0 4px 12px rgba(67, 160, 71, 0.3) !important;
+    border-radius: 12px !important;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
 /* ✨ 動態光效背景 */
 .alert-danger::before,
 .alert-warning::before {
@@ -1598,6 +1611,14 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 </div>
+            <!-- 🧪 測試低風險樣式效果 -->
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="fas fa-check-circle"></i>
+    低風險提醒訊息
+    <button type="button" class="btn">確認</button>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+
             <div class="logo-container">
                 <img src="LOGO.png" alt="昶青實業 Logo" class="logo">
             </div>
