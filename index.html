@@ -1337,6 +1337,231 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     70% { box-shadow: 0 0 0 10px rgba(255, 107, 53, 0); }
     100% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0); }
 }
+/* 🎨 改善後的預警通知樣式 */
+.alert-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+    color: white;
+    border-radius: 12px;
+    padding: 0;
+    box-shadow: 0 8px 32px rgba(255, 107, 107, 0.3);
+    z-index: 10000;
+    max-width: 400px;
+    min-width: 320px;
+    animation: slideInRight 0.5s ease-out;
+    border-left: 5px solid #ff4757;
+    backdrop-filter: blur(10px);
+}
+
+.alert-content {
+    display: flex;
+    align-items: flex-start;
+    padding: 16px;
+    gap: 12px;
+}
+
+.alert-icon {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    animation: pulse 2s infinite;
+}
+
+.alert-icon i {
+    font-size: 18px;
+    color: #fff;
+}
+
+.alert-message {
+    flex: 1;
+    margin-right: 8px;
+}
+
+.alert-title {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 4px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.alert-text {
+    font-size: 14px;
+    line-height: 1.4;
+    opacity: 0.95;
+}
+
+.alert-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.alert-detail-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.alert-detail-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.alert-close-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    padding: 4px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.alert-close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    transform: rotate(90deg);
+}
+
+/* 動畫效果 */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+/* 響應式設計 */
+@media (max-width: 480px) {
+    .alert-notification {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        min-width: auto;
+    }
+    
+    .alert-content {
+        padding: 12px;
+    }
+    
+    .alert-actions {
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+/* 🆕 中等風險的樣式變化 */
+.alert-notification.medium-risk {
+    background: linear-gradient(135deg, #ffa726, #ff9800);
+    border-left-color: #ff9800;
+    box-shadow: 0 8px 32px rgba(255, 167, 38, 0.3);
+}
+
+/* 🆕 低風險的樣式變化 */
+.alert-notification.low-risk {
+    background: linear-gradient(135deg, #66bb6a, #4caf50);
+    border-left-color: #4caf50;
+    box-shadow: 0 8px 32px rgba(76, 175, 80, 0.3);
+}
+/* 🆕 添加滑出動畫 */
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+/* 預警詳情彈窗樣式 */
+.alert-details-modal {
+    text-align: center;
+    padding: 20px;
+}
+
+.alert-stats {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+    gap: 20px;
+}
+
+.stat-item {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    flex: 1;
+}
+
+.stat-item.critical {
+    background: linear-gradient(135deg, #ffebee, #ffcdd2);
+    border-left: 4px solid #f44336;
+}
+
+.stat-item.warning {
+    background: linear-gradient(135deg, #fff8e1, #ffecb3);
+    border-left: 4px solid #ff9800;
+}
+
+.stat-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #666;
+    margin-top: 4px;
+}
+
+.alert-actions-modal {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
 
 
     </style>
@@ -1371,13 +1596,28 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             <div id="user-info" class="user-info" style="width: 100%; text-align: center;">
     歡迎： <strong id="user-department"></strong> - <strong id="user-name"></strong>
 </div>
-  <div id="alert-status-indicator" class="alert-status-container" style="display: none;">
-    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle"></i>
-        <span id="alert-status-text">檢查預警狀態中...</span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+<!-- 預警通知區域 -->
+<div id="alertNotification" class="alert-notification" style="display: none;">
+    <div class="alert-content">
+        <div class="alert-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="alert-message">
+            <div class="alert-title">緊急預警！</div>
+            <div class="alert-text" id="alertText"></div>
+        </div>
+        <div class="alert-actions">
+            <!-- 🔧 修正：添加 onclick 事件和 cursor pointer -->
+            <button class="alert-detail-btn" onclick="showAlertDetails()" style="cursor: pointer;">
+                <i class="fas fa-search"></i> 查看詳情
+            </button>
+            <button class="alert-close-btn" onclick="closeAlert()" style="cursor: pointer;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
     </div>
 </div>
+
             <div class="logo-container">
                 <img src="LOGO.png" alt="昶青實業 Logo" class="logo">
             </div>
@@ -4047,6 +4287,72 @@ async function submitEventRegistration() {
 
 
 });
+    // 🔧 修正：查看預警詳情函數
+function showAlertDetails() {
+    console.log('查看預警詳情被點擊');
+    
+    // 方法1：直接跳轉到預警設定頁面
+    if (typeof showAlertSettings === 'function') {
+        showAlertSettings();
+        closeAlert();
+    } else {
+        // 方法2：顯示詳細的預警資訊彈窗
+        showAlertDetailsModal();
+    }
+}
+
+// 🔧 修正：關閉預警通知
+function closeAlert() {
+    const alertNotification = document.getElementById('alertNotification');
+    if (alertNotification) {
+        alertNotification.style.animation = 'slideOutRight 0.3s ease-in forwards';
+        setTimeout(() => {
+            alertNotification.style.display = 'none';
+        }, 300);
+    }
+}
+
+    // 🆕 顯示預警詳情彈窗
+function showAlertDetailsModal() {
+    // 獲取當前預警狀態的詳細資訊
+    fetch(`${scriptUrl}?action=getCurrentAlertStatus`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const modalContent = `
+                    <div class="alert-details-modal">
+                        <h3><i class="fas fa-exclamation-triangle"></i> 預警詳情</h3>
+                        <div class="alert-stats">
+                            <div class="stat-item critical">
+                                <div class="stat-number">${data.criticalCount || 0}</div>
+                                <div class="stat-label">緊急風險部門</div>
+                            </div>
+                            <div class="stat-item warning">
+                                <div class="stat-number">${data.alertCount || 0}</div>
+                                <div class="stat-label">總預警部門</div>
+                            </div>
+                        </div>
+                        <div class="alert-actions-modal">
+                            <button onclick="showAlertSettingsPage()" class="btn btn-primary">
+                                <i class="fas fa-cog"></i> 預警設定
+                            </button>
+                            <button onclick="showDeptRiskIndexPage()" class="btn btn-secondary">
+                                <i class="fas fa-chart-bar"></i> 查看分析
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                // 這裡需要您的 showModal 函數，或者直接使用 alert
+                alert('預警詳情：' + JSON.stringify(data, null, 2));
+            }
+        })
+        .catch(error => {
+            console.error('獲取預警詳情失敗:', error);
+            alert('獲取預警詳情失敗');
+        });
+}
+
 </script>
 
 
