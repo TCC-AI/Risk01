@@ -2411,7 +2411,7 @@ async function loadAlertHistory() {
     }
 }
 
-// 更新預警歷史表格
+// 修改更新預警歷史表格函數
 function updateAlertHistoryTable(history) {
     const tableBody = document.getElementById('alertHistoryTableBody');
     
@@ -2427,13 +2427,20 @@ function updateAlertHistoryTable(history) {
         return `
             <tr>
                 <td>${formatDateTime(record.timestamp)}</td>
-                <td>${record.department}</td>
+                <td>
+                    <span class="badge bg-secondary">${record.department}</span>
+                    ${riskLevel.class === 'risk-critical' ? '<i class="fas fa-exclamation-triangle text-danger ms-1"></i>' : ''}
+                </td>
                 <td>
                     <span class="risk-indicator ${riskLevel.class}"></span>
                     ${riskLevel.text}
                 </td>
-                <td>R${record.riskValue}</td>
-                <td>${record.notificationMethods.join(', ')}</td>
+                <td><strong>R${record.riskValue}</strong></td>
+                <td>
+                    ${record.notificationMethods.map(method => 
+                        `<span class="badge bg-info me-1">${method}</span>`
+                    ).join('')}
+                </td>
                 <td>
                     <span class="notification-status ${statusClass}">
                         ${record.status}
@@ -2445,6 +2452,7 @@ function updateAlertHistoryTable(history) {
     
     tableBody.innerHTML = rows;
 }
+
 
 // 測試通知功能
 async function testNotification(type) {
