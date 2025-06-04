@@ -1337,6 +1337,53 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     70% { box-shadow: 0 0 0 10px rgba(255, 107, 53, 0); }
     100% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0); }
 }
+/* 🟢 修正關閉按鈕樣式 */
+.alert .btn-close {
+    position: absolute !important;
+    top: 8px !important;
+    right: 8px !important;
+    width: 20px !important;
+    height: 20px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='m.235 1.027 1.027-.235 6.738 6.738 6.738-6.738 1.027.235-6.738 6.738 6.738 6.738-1.027.235-6.738-6.738-6.738 6.738-1.027-.235 6.738-6.738-6.738-6.738z'/%3e%3c/svg%3e") center/1em auto no-repeat !important;
+    border: none !important;
+    border-radius: 0.375rem !important;
+    opacity: 0.5 !important;
+    z-index: 2 !important;
+    font-size: 0 !important; /* 隱藏文字 */
+    cursor: pointer !important;
+}
+
+.alert .btn-close:hover {
+    opacity: 0.75 !important;
+    background-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.alert .btn-close:focus {
+    outline: 0 !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+    opacity: 1 !important;
+}
+
+/* 確保預警容器有相對定位 */
+.alert {
+    position: relative !important;
+    padding-right: 3rem !important; /* 為關閉按鈕留出空間 */
+}
+
+/* 白色關閉按鈕（用於深色背景） */
+.alert-danger .btn-close,
+.alert-warning .btn-close {
+    background: transparent url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fff'%3e%3cpath d='m.235 1.027 1.027-.235 6.738 6.738 6.738-6.738 1.027.235-6.738 6.738 6.738 6.738-1.027.235-6.738-6.738-6.738 6.738-1.027-.235 6.738-6.738-6.738-6.738z'/%3e%3c/svg%3e") center/1em auto no-repeat !important;
+    opacity: 0.8 !important;
+}
+
+.alert-danger .btn-close:hover,
+.alert-warning .btn-close:hover {
+    opacity: 1 !important;
+    background-color: rgba(255, 255, 255, 0.2) !important;
+}
 
 
     </style>
@@ -2725,50 +2772,46 @@ function showAlertStatusIndicator(alertCount, criticalCount) {
         indicator.className = 'alert-status-container';
         indicator.innerHTML = `
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-triangle"></i>
+                <i class="fas fa-exclamation-triangle me-2"></i>
                 <strong>緊急預警！</strong> 目前有 ${criticalCount} 個部門處於緊急風險狀態
                 <button type="button" class="btn btn-sm btn-outline-light ms-2" id="viewDetailsBtn">
                     查看詳情
                 </button>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="關閉"></button>
             </div>
         `;
-        
-        // 🆕 重新綁定事件監聽器
-        const viewDetailsBtn = document.getElementById('viewDetailsBtn');
-        if (viewDetailsBtn) {
-            viewDetailsBtn.addEventListener('click', function() {
-                showDeptRiskIndexPage();
-            });
-        }
         
     } else if (alertCount > 0) {
         indicator.className = 'alert-status-container';
         indicator.innerHTML = `
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                <i class="fas fa-info-circle"></i>
+                <i class="fas fa-info-circle me-2"></i>
                 目前有 ${alertCount} 個部門需要關注
                 <button type="button" class="btn btn-sm btn-outline-dark ms-2" id="viewDetailsBtn">
                     查看詳情
                 </button>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="關閉"></button>
             </div>
         `;
         
-        // 🆕 重新綁定事件監聽器
-        const viewDetailsBtn = document.getElementById('viewDetailsBtn');
-        if (viewDetailsBtn) {
-            viewDetailsBtn.addEventListener('click', function() {
-                showDeptRiskIndexPage();
-            });
-        }
     } else {
         indicator.style.display = 'none';
         return;
     }
 
     indicator.style.display = 'block';
+    
+    // 重新綁定查看詳情按鈕事件
+    setTimeout(() => {
+        const viewDetailsBtn = document.getElementById('viewDetailsBtn');
+        if (viewDetailsBtn) {
+            viewDetailsBtn.addEventListener('click', function() {
+                showDeptRiskIndexPage();
+            });
+        }
+    }, 100);
 }
+
 
 
 
