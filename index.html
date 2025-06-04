@@ -1562,25 +1562,31 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         rgba(255, 255, 255, 0.9));
 }
 
-.close-btn-gradient {
-    position: absolute;
-    top: 15px;
-    right: 15px;
-    width: 5px;
-    height: 20px;
-    border: none;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 12px;
-    transition: all 0.3s ease;
-    z-index: 3;
-    backdrop-filter: blur(10px);
+/* 🆕 取代舊版：關閉按鈕固定 32×32、無 padding、不再把首行文字蓋住 */
+.close-btn-gradient{
+  position:absolute;
+  top:8px;                 /* 靠右上角，但不緊貼邊 */
+  right:8px;
+  width:32px;
+  height:32px;
+  padding:0;               /* 關鍵：拿掉內邊距 */
+  border:none;
+  border-radius:50%;       /* 圓形 */
+  background:rgba(255,255,255,.25);
+  backdrop-filter:blur(6px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  color:#fff;
+  cursor:pointer;
+  transition:background .2s;
+  z-index:5;               /* 確保浮在最上面 */
 }
+.close-btn-gradient:hover{background:rgba(255,255,255,.35);}
+.close-btn-gradient:focus{outline:none;box-shadow:none;}
+.close-btn-gradient i{pointer-events:none;}
+
 
 .close-btn-gradient:hover {
     background: rgba(255, 255, 255, 0.3);
