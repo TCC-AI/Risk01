@@ -1384,6 +1384,179 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     opacity: 1 !important;
     background-color: rgba(255, 255, 255, 0.2) !important;
 }
+/* 🎨 美化預警狀態指示器 */
+.alert-status-container {
+    margin-bottom: 15px;
+    animation: slideDown 0.3s ease-out;
+}
+
+/* 🔥 緊急預警樣式 - 紅色漸層 */
+.alert-danger {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 25%, #ff4757 50%, #c44569 75%, #b33771 100%) !important;
+    border: none !important;
+    color: white !important;
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4), 
+                0 4px 12px rgba(238, 90, 82, 0.3) !important;
+    border-radius: 12px !important;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+/* 🟡 一般預警樣式 - 橙黃漸層 */
+.alert-warning {
+    background: linear-gradient(135deg, #ffa726 0%, #ff9800 25%, #ff8f00 50%, #f57c00 75%, #e65100 100%) !important;
+    border: none !important;
+    color: white !important;
+    box-shadow: 0 8px 25px rgba(255, 167, 38, 0.4), 
+                0 4px 12px rgba(255, 152, 0, 0.3) !important;
+    border-radius: 12px !important;
+    backdrop-filter: blur(10px);
+    position: relative;
+    overflow: hidden;
+}
+
+/* ✨ 動態光效背景 */
+.alert-danger::before,
+.alert-warning::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.2), 
+        transparent
+    );
+    animation: shimmer 3s infinite;
+    z-index: 1;
+}
+
+/* 🌟 光效動畫 */
+@keyframes shimmer {
+    0% { left: -100%; }
+    50% { left: 100%; }
+    100% { left: 100%; }
+}
+
+/* 📱 內容區域調整 */
+.alert-danger > *,
+.alert-warning > * {
+    position: relative;
+    z-index: 2;
+}
+
+/* 🚨 緊急預警圖標動畫 */
+.alert-danger .fas.fa-exclamation-triangle {
+    animation: urgentPulse 1.5s infinite;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.8));
+}
+
+@keyframes urgentPulse {
+    0%, 100% { 
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% { 
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+/* 🔔 一般預警圖標效果 */
+.alert-warning .fas.fa-info-circle {
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.6));
+    animation: gentlePulse 2s infinite;
+}
+
+@keyframes gentlePulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* 🎯 按鈕美化 - 保持原有大小和位置 */
+.alert .btn {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    border-radius: 8px !important;
+    backdrop-filter: blur(5px) !important;
+    transition: all 0.3s ease !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+.alert .btn:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+.alert .btn:active {
+    transform: translateY(0) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* 🔄 滑入動畫 */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 💫 額外的視覺增強 */
+.alert-danger {
+    animation: slideDown 0.5s ease-out, urgentGlow 2s infinite alternate;
+}
+
+.alert-warning {
+    animation: slideDown 0.5s ease-out, warningGlow 3s infinite alternate;
+}
+
+@keyframes urgentGlow {
+    0% { 
+        box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4), 
+                    0 4px 12px rgba(238, 90, 82, 0.3);
+    }
+    100% { 
+        box-shadow: 0 12px 35px rgba(255, 107, 107, 0.6), 
+                    0 6px 18px rgba(238, 90, 82, 0.5);
+    }
+}
+
+@keyframes warningGlow {
+    0% { 
+        box-shadow: 0 8px 25px rgba(255, 167, 38, 0.4), 
+                    0 4px 12px rgba(255, 152, 0, 0.3);
+    }
+    100% { 
+        box-shadow: 0 12px 35px rgba(255, 167, 38, 0.6), 
+                    0 6px 18px rgba(255, 152, 0, 0.5);
+    }
+}
+
+/* 📱 響應式調整 */
+@media (max-width: 768px) {
+    .alert-danger,
+    .alert-warning {
+        border-radius: 10px !important;
+        margin: 10px !important;
+    }
+    
+    .alert .btn {
+        font-size: 14px !important;
+        padding: 8px 12px !important;
+    }
+}
 
 
     </style>
