@@ -2713,55 +2713,63 @@ async function checkCurrentAlertStatus() {
     }
 }
 
-// 🆕 顯示預警狀態指示器
+// 🟢 修正後的 showAlertStatusIndicator 函數
 function showAlertStatusIndicator(alertCount, criticalCount) {
-    // 檢查參數類型
-    if (typeof criticalCount !== 'number' || typeof alertCount !== 'number') {
-        console.error('Invalid input: criticalCount and alertCount must be numbers.');
-        return;
-    }
-
-    // 獲取元素
     const indicator = document.getElementById('alert-status-indicator');
     if (!indicator) {
         console.error('Element with ID "alert-status-indicator" not found.');
         return;
     }
 
-    // 根據狀態更新內容
     if (criticalCount > 0) {
         indicator.className = 'alert-status-container';
         indicator.innerHTML = `
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="fas fa-exclamation-triangle"></i>
                 <strong>緊急預警！</strong> 目前有 ${criticalCount} 個部門處於緊急風險狀態
-                <button type="button" class="btn btn-sm btn-outline-light ms-2" onclick="showDeptRiskIndexPage()">
+                <button type="button" class="btn btn-sm btn-outline-light ms-2" id="viewDetailsBtn">
                     查看詳情
                 </button>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         `;
+        
+        // 🆕 重新綁定事件監聽器
+        const viewDetailsBtn = document.getElementById('viewDetailsBtn');
+        if (viewDetailsBtn) {
+            viewDetailsBtn.addEventListener('click', function() {
+                showDeptRiskIndexPage();
+            });
+        }
+        
     } else if (alertCount > 0) {
         indicator.className = 'alert-status-container';
         indicator.innerHTML = `
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                 <i class="fas fa-info-circle"></i>
                 目前有 ${alertCount} 個部門需要關注
-                <button type="button" class="btn btn-sm btn-outline-dark ms-2" onclick="showDeptRiskIndexPage()">
+                <button type="button" class="btn btn-sm btn-outline-dark ms-2" id="viewDetailsBtn">
                     查看詳情
                 </button>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         `;
+        
+        // 🆕 重新綁定事件監聽器
+        const viewDetailsBtn = document.getElementById('viewDetailsBtn');
+        if (viewDetailsBtn) {
+            viewDetailsBtn.addEventListener('click', function() {
+                showDeptRiskIndexPage();
+            });
+        }
     } else {
-        // 如果沒有警告，隱藏指示器
         indicator.style.display = 'none';
         return;
     }
 
-    // 顯示指示器
     indicator.style.display = 'block';
 }
+
 
 
 // 🆕 隱藏預警狀態指示器
