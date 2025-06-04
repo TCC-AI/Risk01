@@ -1562,50 +1562,29 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         rgba(255, 255, 255, 0.9));
 }
 
-/* 🆕 修改預警容器樣式 */
-.alert-critical,
-.alert-warning-custom {
-    position: relative; /* 確保相對定位 */
-    padding: 20px 50px 20px 20px; /* 右側留出關閉按鈕空間 */
-    /* 其他樣式保持不變 */
-}
-
-/* 🆕 重新設計關閉按鈕樣式 */
 .close-btn-gradient {
-    position: absolute !important;
-    top: 10px !important;
-    right: 10px !important;
-    width: 24px !important;           /* 縮小寬度 */
-    height: 24px !important;          /* 縮小高度 */
-    border: none !important;
-    border-radius: 50% !important;
-    background: rgba(255, 255, 255, 0.3) !important;
-    color: white !important;
-    cursor: pointer !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 12px !important;       /* 縮小圖示 */
-    transition: all 0.3s ease !important;
-    z-index: 10 !important;           /* 確保在最上層 */
-    backdrop-filter: blur(5px) !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 5px;
+    height: 20px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    z-index: 3;
+    backdrop-filter: blur(10px);
 }
 
 .close-btn-gradient:hover {
-    background: rgba(255, 255, 255, 0.5) !important;
-    transform: scale(1.1) !important;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.3) !important;
-}
-
-.close-btn-gradient:active {
-    transform: scale(0.95) !important;
-}
-
-/* 🆕 關閉按鈕圖示樣式 */
-.close-btn-gradient i {
-    font-size: 10px !important;
-    line-height: 1 !important;
+    background: rgba(255, 255, 255, 0.3);
+    transform: rotate(90deg) scale(1.1);
 }
 
 @media (max-width: 768px) {
@@ -2995,6 +2974,7 @@ async function checkCurrentAlertStatus() {
     }
 }
 
+// 🔄 替換現有的 showAlertStatusIndicator 函數
 function showAlertStatusIndicator(alertCount, criticalCount) {
     const indicator = document.getElementById('alert-status-indicator');
     if (!indicator) {
@@ -3006,11 +2986,6 @@ function showAlertStatusIndicator(alertCount, criticalCount) {
         indicator.className = 'alert-status-container';
         indicator.innerHTML = `
             <div class="alert-critical" role="alert">
-                <!-- 🆕 關閉按鈕移到內容區域外層 -->
-                <button type="button" class="close-btn-gradient" id="closeAlertBtn" title="關閉預警">
-                    <i class="fas fa-times"></i>
-                </button>
-                
                 <div class="alert-content">
                     <div class="d-flex align-items-center">
                         <i class="fas fa-exclamation-triangle alert-icon"></i>
@@ -3025,6 +3000,9 @@ function showAlertStatusIndicator(alertCount, criticalCount) {
                         <i class="fas fa-search me-2"></i>查看詳情
                     </button>
                 </div>
+                <button type="button" class="close-btn-gradient" id="closeAlertBtn">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
         `;
         
@@ -3032,11 +3010,6 @@ function showAlertStatusIndicator(alertCount, criticalCount) {
         indicator.className = 'alert-status-container';
         indicator.innerHTML = `
             <div class="alert-warning-custom" role="alert">
-                <!-- 🆕 關閉按鈕移到內容區域外層 -->
-                <button type="button" class="close-btn-gradient" id="closeAlertBtn" title="關閉預警">
-                    <i class="fas fa-times"></i>
-                </button>
-                
                 <div class="alert-content">
                     <div class="d-flex align-items-center">
                         <i class="fas fa-info-circle alert-icon"></i>
@@ -3051,8 +3024,12 @@ function showAlertStatusIndicator(alertCount, criticalCount) {
                         <i class="fas fa-eye me-2"></i>查看詳情
                     </button>
                 </div>
+                <button type="button" class="close-btn-gradient" id="closeAlertBtn">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
         `;
+        
     } else {
         indicator.style.display = 'none';
         return;
@@ -3060,7 +3037,7 @@ function showAlertStatusIndicator(alertCount, criticalCount) {
 
     indicator.style.display = 'block';
     
-    // 🆕 綁定事件（延遲確保DOM已渲染）
+    // 綁定事件
     setTimeout(() => {
         const viewDetailsBtn = document.getElementById('viewDetailsBtn');
         if (viewDetailsBtn) {
@@ -3072,22 +3049,11 @@ function showAlertStatusIndicator(alertCount, criticalCount) {
         const closeBtn = document.getElementById('closeAlertBtn');
         if (closeBtn) {
             closeBtn.addEventListener('click', function() {
-                // 🆕 添加淡出動畫
-                indicator.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                indicator.style.opacity = '0';
-                indicator.style.transform = 'translateY(-10px)';
-                
-                setTimeout(() => {
-                    indicator.style.display = 'none';
-                    // 重置樣式以備下次使用
-                    indicator.style.opacity = '1';
-                    indicator.style.transform = 'translateY(0)';
-                }, 300);
+                indicator.style.display = 'none';
             });
         }
     }, 100);
 }
-
 
 
 
