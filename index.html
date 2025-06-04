@@ -1371,7 +1371,13 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             <div id="user-info" class="user-info" style="width: 100%; text-align: center;">
     歡迎： <strong id="user-department"></strong> - <strong id="user-name"></strong>
 </div>
-
+  <div id="alert-status-indicator" class="alert-status-container" style="display: none;">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span id="alert-status-text">檢查預警狀態中...</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</div>
             <div class="logo-container">
                 <img src="LOGO.png" alt="昶青實業 Logo" class="logo">
             </div>
@@ -1386,13 +1392,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         <i class="fas fa-bell"></i> 風險預警設定
     </button>
             </div>
-            <div id="alert-status-indicator" class="alert-status-container" style="display: none;">
-    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-        <i class="fas fa-exclamation-triangle"></i>
-        <span id="alert-status-text">檢查預警狀態中...</span>
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-</div>
+          
             
             <!-- 登出下拉選單 -->
             <div class="dropdown">
@@ -1972,7 +1972,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbxxBUxl7Wtgmx0_jaFjHXseCZCcNrkKtQs4i_oNqIyBXbAr6-3Yr7LXSLY_wlRpMl5A/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbyOR92N7S7CHO-Wce_Z_627T48ooO_kL7s8PHS8_xws-KXBz0vtme7k8RVQsBgBwGqy/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
