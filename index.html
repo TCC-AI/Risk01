@@ -1294,6 +1294,49 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     backdrop-filter: blur(5px);
 }
 
+/* 預警狀態指示器樣式 */
+.alert-status-container {
+    margin-bottom: 15px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 預警通知樣式 */
+.notification-toast {
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* 預警按鈕閃爍效果 */
+.alert-button-warning {
+    animation: alertPulse 2s infinite;
+}
+
+@keyframes alertPulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 107, 53, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 107, 53, 0); }
+}
 
 
     </style>
@@ -1343,6 +1386,13 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         <i class="fas fa-bell"></i> 風險預警設定
     </button>
             </div>
+            <div id="alert-status-indicator" class="alert-status-container" style="display: none;">
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span id="alert-status-text">檢查預警狀態中...</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</div>
             
             <!-- 登出下拉選單 -->
             <div class="dropdown">
@@ -1922,7 +1972,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbwtH245RrpsgIm0IHXnEORc9IPZF26pCxb5uRfqHMh_Lk7vigAhOgVrCSsVmsirDvOG/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbxxBUxl7Wtgmx0_jaFjHXseCZCcNrkKtQs4i_oNqIyBXbAr6-3Yr7LXSLY_wlRpMl5A/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
@@ -2054,6 +2104,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // 檢查元素是否存在
     if (alertSettingsBtn) {
         alertSettingsBtn.addEventListener('click', function() {
+             // 移除閃爍效果
+    this.classList.remove('alert-button-warning');
             showAlertSettingsPage();
             loadAlertSettings();
             loadAlertHistory();
@@ -2073,6 +2125,15 @@ document.addEventListener('DOMContentLoaded', function() {
         saveAlertSettingsBtn.addEventListener('click', function() {
             saveAlertSettings();
             resetInactivityTimer();
+        });
+    }
+
+    // 🆕 請求瀏覽器通知權限
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                console.log('通知權限已獲得');
+            }
         });
     }
     
@@ -2182,6 +2243,8 @@ function showDeptRiskIndexPage() {
     
      // 預警設定按鈕點擊事件
     alertSettingsBtn.addEventListener('click', function() {
+        // 移除閃爍效果
+    this.classList.remove('alert-button-warning');
         showAlertSettingsPage();
         loadAlertSettings();
         loadAlertHistory();
@@ -2596,25 +2659,95 @@ function formatDateTime(dateTime) {
     }
     
     // 顯示主頁面
-    function showDashboard() {
-        loginSection.classList.add('hidden');
-        inventorySection.classList.add('hidden');
-        deptRiskIndexPage.style.display = 'none';
-        dataAnalyticsPage.style.display = 'none';
-        eventRegistrationPage.style.display = 'none';
-        document.querySelector('.container').classList.remove('hidden');
-        dashboardSection.classList.remove('hidden');
-        document.querySelector('.container').style.maxWidth = '500px';
+// 修改 showDashboard 函數
+function showDashboard() {
+    loginSection.classList.add('hidden');
+    inventorySection.classList.add('hidden');
+    deptRiskIndexPage.style.display = 'none';
+    dataAnalyticsPage.style.display = 'none';
+    eventRegistrationPage.style.display = 'none';
+    alertSettingsPage.style.display = 'none'; // 🆕 添加這行
+    document.querySelector('.container').classList.remove('hidden');
+    dashboardSection.classList.remove('hidden');
+    document.querySelector('.container').style.maxWidth = '500px';
+    
+    // 設置按鈕權限
+    setButtonPermissions();
+    
+    // 更新使用者資訊顯示
+    updateUserInfo();
+    
+    // 🆕 檢查當前預警狀態
+    checkCurrentAlertStatus();
+    
+    // 重置計時器
+    resetInactivityTimer();
+}
+
+// 🆕 檢查當前預警狀態
+async function checkCurrentAlertStatus() {
+    try {
+        const response = await fetch(`${scriptUrl}?action=getCurrentAlertStatus`);
+        const result = await response.json();
         
-        // 🆕 設置按鈕權限
-        setButtonPermissions();
-        
-        // 🆕 更新使用者資訊顯示
-        updateUserInfo();
-        
-        // 重置計時器
-        resetInactivityTimer();
+        if (result.success && result.hasActiveAlerts) {
+            showAlertStatusIndicator(result.alertCount, result.criticalCount);
+            
+            // 如果有緊急預警，讓預警設定按鈕閃爍
+            if (result.criticalCount > 0) {
+                document.getElementById('alert-settings-btn').classList.add('alert-button-warning');
+            }
+        } else {
+            hideAlertStatusIndicator();
+        }
+    } catch (error) {
+        console.error('檢查預警狀態失敗:', error);
     }
+}
+
+// 🆕 顯示預警狀態指示器
+function showAlertStatusIndicator(alertCount, criticalCount) {
+    const indicator = document.getElementById('alert-status-indicator');
+    const statusText = document.getElementById('alert-status-text');
+    
+    if (criticalCount > 0) {
+        indicator.className = 'alert-status-container';
+        indicator.innerHTML = `
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>緊急預警！</strong> 目前有 ${criticalCount} 個部門處於緊急風險狀態
+                <button type="button" class="btn btn-sm btn-outline-light ms-2" onclick="showDeptRiskIndexPage()">
+                    查看詳情
+                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    } else if (alertCount > 0) {
+        indicator.className = 'alert-status-container';
+        indicator.innerHTML = `
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="fas fa-info-circle"></i>
+                目前有 ${alertCount} 個部門需要關注
+                <button type="button" class="btn btn-sm btn-outline-dark ms-2" onclick="showDeptRiskIndexPage()">
+                    查看詳情
+                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    }
+    
+    indicator.style.display = 'block';
+}
+
+// 🆕 隱藏預警狀態指示器
+function hideAlertStatusIndicator() {
+    const indicator = document.getElementById('alert-status-indicator');
+    indicator.style.display = 'none';
+    
+    // 移除按鈕閃爍效果
+    document.getElementById('alert-settings-btn').classList.remove('alert-button-warning');
+}
+
     
     // 🆕 在使用者資訊區塊顯示權限等級
     function updateUserInfo() {
