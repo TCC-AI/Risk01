@@ -1562,31 +1562,25 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         rgba(255, 255, 255, 0.9));
 }
 
-/* 🆕 取代舊版：關閉按鈕固定 32×32、無 padding、不再把首行文字蓋住 */
-.close-btn-gradient{
-  position:absolute;
-  top:8px;                 /* 靠右上角，但不緊貼邊 */
-  right:8px;
-  width:32px;
-  height:32px;
-  padding:0;               /* 關鍵：拿掉內邊距 */
-  border:none;
-  border-radius:50%;       /* 圓形 */
-  background:rgba(255,255,255,.25);
-  backdrop-filter:blur(6px);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:16px;
-  color:#fff;
-  cursor:pointer;
-  transition:background .2s;
-  z-index:5;               /* 確保浮在最上面 */
+.close-btn-gradient {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 20px;
+    height: 20px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    transition: all 0.3s ease;
+    z-index: 3;
+    backdrop-filter: blur(10px);
 }
-.close-btn-gradient:hover{background:rgba(255,255,255,.35);}
-.close-btn-gradient:focus{outline:none;box-shadow:none;}
-.close-btn-gradient i{pointer-events:none;}
-
 
 .close-btn-gradient:hover {
     background: rgba(255, 255, 255, 0.3);
@@ -2980,6 +2974,7 @@ async function checkCurrentAlertStatus() {
     }
 }
 
+// 🔄 替換現有的 showAlertStatusIndicator 函數
 function showAlertStatusIndicator(alertCount, criticalCount) {
     const indicator = document.getElementById('alert-status-indicator');
     if (!indicator) {
@@ -2991,11 +2986,6 @@ function showAlertStatusIndicator(alertCount, criticalCount) {
         indicator.className = 'alert-status-container';
         indicator.innerHTML = `
             <div class="alert-critical" role="alert">
-                <!-- 🆕 關閉按鈕移到內容區域外層 -->
-                <button type="button" class="close-btn-gradient" id="closeAlertBtn" title="關閉預警">
-                    <i class="fas fa-times"></i>
-                </button>
-                
                 <div class="alert-content">
                     <div class="d-flex align-items-center">
                         <i class="fas fa-exclamation-triangle alert-icon"></i>
@@ -3010,6 +3000,9 @@ function showAlertStatusIndicator(alertCount, criticalCount) {
                         <i class="fas fa-search me-2"></i>查看詳情
                     </button>
                 </div>
+                <button type="button" class="close-btn-gradient" id="closeAlertBtn">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
         `;
         
@@ -3017,11 +3010,6 @@ function showAlertStatusIndicator(alertCount, criticalCount) {
         indicator.className = 'alert-status-container';
         indicator.innerHTML = `
             <div class="alert-warning-custom" role="alert">
-                <!-- 🆕 關閉按鈕移到內容區域外層 -->
-                <button type="button" class="close-btn-gradient" id="closeAlertBtn" title="關閉預警">
-                    <i class="fas fa-times"></i>
-                </button>
-                
                 <div class="alert-content">
                     <div class="d-flex align-items-center">
                         <i class="fas fa-info-circle alert-icon"></i>
@@ -3036,8 +3024,12 @@ function showAlertStatusIndicator(alertCount, criticalCount) {
                         <i class="fas fa-eye me-2"></i>查看詳情
                     </button>
                 </div>
+                <button type="button" class="close-btn-gradient" id="closeAlertBtn">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
         `;
+        
     } else {
         indicator.style.display = 'none';
         return;
@@ -3045,7 +3037,7 @@ function showAlertStatusIndicator(alertCount, criticalCount) {
 
     indicator.style.display = 'block';
     
-    // 🆕 綁定事件（延遲確保DOM已渲染）
+    // 綁定事件
     setTimeout(() => {
         const viewDetailsBtn = document.getElementById('viewDetailsBtn');
         if (viewDetailsBtn) {
@@ -3057,22 +3049,11 @@ function showAlertStatusIndicator(alertCount, criticalCount) {
         const closeBtn = document.getElementById('closeAlertBtn');
         if (closeBtn) {
             closeBtn.addEventListener('click', function() {
-                // 🆕 添加淡出動畫
-                indicator.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-                indicator.style.opacity = '0';
-                indicator.style.transform = 'translateY(-10px)';
-                
-                setTimeout(() => {
-                    indicator.style.display = 'none';
-                    // 重置樣式以備下次使用
-                    indicator.style.opacity = '1';
-                    indicator.style.transform = 'translateY(0)';
-                }, 300);
+                indicator.style.display = 'none';
             });
         }
     }, 100);
 }
-
 
 
 
