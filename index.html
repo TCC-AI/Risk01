@@ -1930,6 +1930,13 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                     <option value="all">全部部門</option>
                 </select>
             </div>
+             <!-- 🆕 新增強制刷新按鈕 -->
+            <div class="col-md-4">
+                <label class="form-label">&nbsp;</label>
+                <button type="button" class="btn btn-outline-primary w-100" id="forceRefreshBtn">
+                    <i class="fas fa-sync-alt"></i> 強制刷新
+                </button>
+            </div>
         </div>
 
         <!-- 統計卡片 -->
@@ -2192,7 +2199,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbyh8LAJrZ_dYWQ257ug_HDgDsl-B8DlYFDsjmjJkMQq0B-LKXVJ6iFDihnSALNznGe4/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbzz8u1ZwVZNwkGPYUbzt1uzglwhxEh7XFnr-0N0hw5xJml4dqUWFksjD8b_j3HwxFL2/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
@@ -3257,40 +3264,64 @@ function showEventRegistrationPage() {
         tableBody.innerHTML = rows;
     }
 
-    // 載入數據分析數據
-    async function loadAnalyticsData() {
-        try {
-            // 顯示載入狀態
-            showLoadingState();
-            
-            const dateRange = document.getElementById('dateRange').value;
-            const departmentFilter = document.getElementById('departmentFilter').value;
-            
-            // 獲取分析數據
-            const response = await fetch(`${scriptUrl}?action=getAnalyticsData&dateRange=${dateRange}&department=${departmentFilter}`);
-            const result = await response.json();
-            
-            if (result.success) {
-                // 更新統計卡片
-                updateStatCards(result.data.stats);
-                
-                // 更新部門篩選器選項
-                updateDepartmentFilter(result.data.departments);
-                
-                // 更新圖表
-                updateCharts(result.data);
-                
-                // 更新詳細數據表格
-                updateDetailTable(result.data.events);
-            } else {
-                console.error('獲取分析數據失敗:', result.message);
-                showErrorState(result.message);
+// 🆕 修改後的載入數據分析數據函數
+async function loadAnalyticsData(forceRefresh = false) {
+    try {
+        // 顯示載入狀態
+        showLoadingState();
+        
+        const dateRange = document.getElementById('dateRange').value;
+        const departmentFilter = document.getElementById('departmentFilter').value;
+        
+        // 🆕 構建請求參數，包含強制刷新選項
+        const params = new URLSearchParams({
+            action: 'getAnalyticsData',
+            dateRange: dateRange,
+            department: departmentFilter,
+            forceRefresh: forceRefresh.toString(),
+            t: new Date().getTime() // 防止瀏覽器快取
+        });
+        
+        // 🆕 獲取分析數據，加入防快取標頭
+        const response = await fetch(`${scriptUrl}?${params}`, {
+            method: 'GET',
+            headers: {
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Pragma': 'no-cache',
+                'Expires': '0'
             }
-        } catch (error) {
-            console.error('載入分析數據時發生錯誤:', error);
-            showErrorState('載入數據失敗，請稍後再試');
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // 更新統計卡片
+            updateStatCards(result.data.stats);
+            
+            // 更新部門篩選器選項
+            updateDepartmentFilter(result.data.departments);
+            
+            // 更新圖表
+            updateCharts(result.data);
+            
+            // 更新詳細數據表格
+            updateDetailTable(result.data.events);
+            
+            // 🆕 顯示數據來源資訊
+            console.log(`數據來源: ${result.fromCache ? '快取' : '即時'}`);
+            if (result.fromCache) {
+                console.log('提示：如需最新數據，請點擊強制刷新按鈕');
+            }
+        } else {
+            console.error('獲取分析數據失敗:', result.message);
+            showErrorState(result.message);
         }
+    } catch (error) {
+        console.error('載入分析數據時發生錯誤:', error);
+        showErrorState('載入數據失敗，請稍後再試');
     }
+}
+
     
     // 顯示載入狀態
     function showLoadingState() {
