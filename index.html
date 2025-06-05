@@ -2403,7 +2403,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbzh5S3OgQ-5djWVSqNdcSteixQCpn30X2G1MkHVC4h7k_LENwpwA8_aViCpigkUSjBa/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbwG1MkLpfBjE6d4a73k3PJqDamFAtI_95Zl0_rSkEXLk_JMDP_qYns6pJqF9AZuXnfi/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
@@ -2478,15 +2478,16 @@ function convertMarkdownToHTML(markdown) {
     return `<div class="markdown-content">${html}</div>`;
 }
 
-// 🆕 權限檢查函數
+// 🔄 覆蓋原有的 checkPermission 函數
 function checkPermission(requiredLevel) {
     const userPermission = localStorage.getItem('permission') || 's1';
     
-    // 權限等級對照：s3 > s2 > s1
+    // 權限等級對照：s4 > s3 > s2 > s1 (新增 s4)
     const permissionLevels = {
         's1': 1,
         's2': 2,
-        's3': 3
+        's3': 3,
+        's4': 4  // 🆕 新增這行
     };
     
     const userLevel = permissionLevels[userPermission] || 1;
@@ -2494,6 +2495,7 @@ function checkPermission(requiredLevel) {
     
     return userLevel >= requiredLevelNum;
 }
+
 
 // 🆕 全域變數定義
 const loginSection = document.getElementById('login-section');
@@ -3179,7 +3181,12 @@ function showDashboard() {
     document.querySelector('.container').classList.remove('hidden');
     dashboardSection.classList.remove('hidden');
     document.querySelector('.container').style.maxWidth = '500px';
-    
+        // 🆕 隱藏 s4 專屬頁面 (新增這段)
+    const s4Pages = ['user-management-page', 'system-settings-page', 'data-backup-page'];
+    s4Pages.forEach(pageId => {
+        const page = document.getElementById(pageId);
+        if (page) page.style.display = 'none';
+    });
     // 設置按鈕權限
     setButtonPermissions();
     
@@ -3188,6 +3195,9 @@ function showDashboard() {
     
     // 🆕 檢查當前預警狀態
     checkCurrentAlertStatus();
+
+    // 🆕 為 s4 用戶添加管理功能 (新增這行)
+    addManagementFeatures();
     
     // 重置計時器
     resetInactivityTimer();
@@ -3279,13 +3289,14 @@ function hideAlertStatusIndicator() {
 }
 
     
-    // 🆕 在使用者資訊區塊顯示權限等級
+    // 🔄 覆蓋原有的 updateUserInfo 函數
     function updateUserInfo() {
         const permission = localStorage.getItem('permission') || 's1';
         const permissionText = {
             's1': 's1級',
             's2': 's2級', 
-            's3': 's3級'
+            's3': 's3級',
+            's4': 's4級(管理)'  // 🆕 新增這行
         };
         
         document.getElementById('user-info').innerHTML = `
@@ -3294,6 +3305,7 @@ function hideAlertStatusIndicator() {
             <span style="color: #666; font-size: 12px;">(${permissionText[permission]})</span>
         `;
     }
+
     
     // 顯示登入頁面
     function showLogin() {
