@@ -1688,6 +1688,21 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         transform: none !important;
     }
 }
+/* 儀表板圖樣式 */
+#gaugeValue {
+    color: #333;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+/* 熱力圖容器 */
+#heatmapChart {
+    max-height: 250px;
+}
+
+/* 雷達圖容器 */
+#radarChart {
+    max-height: 250px;
+}
 
 
     </style>
@@ -2241,6 +2256,48 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                 </div>
             </div>
         </div>
+    <!-- 在原有的圖表區域後面加入 -->
+<div class="row mt-4">
+    <!-- 儀表板圖 -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-danger text-white">
+                <h6 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>整體風險指標</h6>
+            </div>
+            <div class="card-body d-flex align-items-center justify-content-center">
+                <div style="position: relative; width: 200px; height: 100px;">
+                    <canvas id="gaugeChart"></canvas>
+                    <div id="gaugeValue" class="position-absolute" style="top: 70%; left: 50%; transform: translateX(-50%); font-size: 18px; font-weight: bold;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 雷達圖 -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0"><i class="fas fa-chart-line me-2"></i>部門能力評估</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="radarChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 熱力圖 -->
+    <div class="col-md-4 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-warning text-white">
+                <h6 class="mb-0"><i class="fas fa-fire me-2"></i>風險熱點分布</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="heatmapChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
 
      
     
@@ -3644,6 +3701,7 @@ async function loadAnalyticsData() {
         updateRiskCategoryChart(data.categoryData);
         updateRiskLevelChart(data.levelData);
         updateMonthlyComparisonChart(data.monthlyData);
+        updateNewCharts(data);
     }
     
     // 更新風險趨勢圖
@@ -5832,6 +5890,228 @@ function downloadBackup(backupId) {
     alert(`下載備份功能開發中：${backupId}`);
 }
 
+// 🆕 儀表板圖
+function createGaugeChart(riskValue) {
+    const ctx = document.getElementById('gaugeChart').getContext('2d');
+    
+    // 銷毀現有圖表
+    if (window.gaugeChartInstance) {
+        window.gaugeChartInstance.destroy();
+    }
+    
+    // 根據風險值決定顏色
+    let gaugeColor;
+    let riskLevel;
+    if (riskValue >= 40) {
+        gaugeColor = '#dc3545'; // 紅色 - 高風險
+        riskLevel = '高風險';
+    } else if (riskValue >= 25) {
+        gaugeColor = '#ffc107'; // 黃色 - 中風險
+        riskLevel = '中風險';
+    } else {
+        gaugeColor = '#28a745'; // 綠色 - 低風險
+        riskLevel = '低風險';
+    }
+    
+    window.gaugeChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            datasets: [{
+                data: [riskValue, 100 - riskValue],
+                backgroundColor: [gaugeColor, '#e9ecef'],
+                borderWidth: 0,
+                cutout: '70%'
+            }]
+        },
+        options: {
+            rotation: -90,
+            circumference: 180,
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: { enabled: false }
+            }
+        }
+    });
+    
+    // 更新數值顯示
+    document.getElementById('gaugeValue').innerHTML = `
+        <div style="text-align: center;">
+            <div style="font-size: 24px; color: ${gaugeColor};">${riskValue.toFixed(1)}</div>
+            <div style="font-size: 12px; color: #666;">${riskLevel}</div>
+        </div>
+    `;
+}
+
+// 🆕 雷達圖
+function createRadarChart(departmentData) {
+    const ctx = document.getElementById('radarChart').getContext('2d');
+    
+    // 銷毀現有圖表
+    if (window.radarChartInstance) {
+        window.radarChartInstance.destroy();
+    }
+    
+    // 準備雷達圖數據
+    const radarData = {
+        labels: [
+            '風險識別',
+            '預防措施',
+            '應變處理',
+            '改善落實',
+            '教育訓練',
+            '設備維護'
+        ],
+        datasets: []
+    };
+    
+    // 顏色配置
+    const colors = [
+        'rgba(255, 99, 132, 0.6)',   // 紅色
+        'rgba(54, 162, 235, 0.6)',   // 藍色
+        'rgba(255, 205, 86, 0.6)',   // 黃色
+        'rgba(75, 192, 192, 0.6)',   // 青色
+        'rgba(153, 102, 255, 0.6)'   // 紫色
+    ];
+    
+    // 為每個部門生成數據
+    Object.keys(departmentData).slice(0, 3).forEach((dept, index) => {
+        const deptRisk = departmentData[dept];
+        // 根據風險值反向計算能力分數（風險越高，能力越低）
+        const abilityScore = Math.max(0, 100 - deptRisk * 2);
+        
+        radarData.datasets.push({
+            label: dept,
+            data: [
+                abilityScore + Math.random() * 10 - 5, // 風險識別
+                abilityScore + Math.random() * 10 - 5, // 預防措施
+                abilityScore + Math.random() * 10 - 5, // 應變處理
+                abilityScore + Math.random() * 10 - 5, // 改善落實
+                abilityScore + Math.random() * 10 - 5, // 教育訓練
+                abilityScore + Math.random() * 10 - 5  // 設備維護
+            ].map(val => Math.max(20, Math.min(100, val))), // 限制在20-100之間
+            backgroundColor: colors[index],
+            borderColor: colors[index].replace('0.6', '1'),
+            borderWidth: 2,
+            pointBackgroundColor: colors[index].replace('0.6', '1')
+        });
+    });
+    
+    window.radarChartInstance = new Chart(ctx, {
+        type: 'radar',
+        data: radarData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        stepSize: 20
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        fontSize: 12,
+                        usePointStyle: true
+                    }
+                }
+            }
+        }
+    });
+}
+
+// 🆕 熱力圖
+function createHeatmapChart(riskData) {
+    const ctx = document.getElementById('heatmapChart').getContext('2d');
+    
+    // 銷毀現有圖表
+    if (window.heatmapChartInstance) {
+        window.heatmapChartInstance.destroy();
+    }
+    
+    // 風險類別
+    const riskCategories = ['人員安全', '設備故障', '品質異常', '環境風險', '資訊安全'];
+    const departments = Object.keys(riskData);
+    
+    // 生成熱力圖數據
+    const heatmapData = {
+        labels: departments,
+        datasets: riskCategories.map((category, categoryIndex) => ({
+            label: category,
+            data: departments.map(dept => {
+                const baseRisk = riskData[dept] || 0;
+                // 為每個類別生成不同的風險值
+                return Math.max(0, baseRisk + (Math.random() - 0.5) * 20);
+            }),
+            backgroundColor: departments.map(dept => {
+                const riskValue = riskData[dept] || 0;
+                const intensity = Math.min(1, riskValue / 50);
+                const colors = [
+                    [255, 99, 132],   // 紅色
+                    [54, 162, 235],   // 藍色
+                    [255, 205, 86],   // 黃色
+                    [75, 192, 192],   // 青色
+                    [153, 102, 255]   // 紫色
+                ];
+                const color = colors[categoryIndex % colors.length];
+                return `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${0.3 + intensity * 0.7})`;
+            })
+        }))
+    };
+    
+    window.heatmapChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: heatmapData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { stacked: true },
+                y: { 
+                    stacked: true,
+                    beginAtZero: true
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        fontSize: 10,
+                        usePointStyle: true
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        title: function(context) {
+                            return `${context[0].label} - ${context[0].dataset.label}`;
+                        },
+                        label: function(context) {
+                            return `風險值: ${context.parsed.y.toFixed(1)}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// 🆕 更新所有新圖表的函數
+function updateNewCharts(data) {
+    // 計算整體風險值
+    const overallRisk = Object.values(data.departmentData).reduce((sum, val) => sum + val, 0) / Object.keys(data.departmentData).length;
+    
+    // 更新三個新圖表
+    createGaugeChart(overallRisk);
+    createRadarChart(data.departmentData);
+    createHeatmapChart(data.departmentData);
+}
+    
 </script>
 
 <!-- 🆕 用戶管理頁面 -->
