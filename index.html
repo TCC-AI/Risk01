@@ -1930,13 +1930,6 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                     <option value="all">全部部門</option>
                 </select>
             </div>
-             <!-- 🆕 新增強制刷新按鈕 -->
-            <div class="col-md-4">
-                <label class="form-label">&nbsp;</label>
-                <button type="button" class="btn btn-outline-primary w-100" id="forceRefreshBtn">
-                    <i class="fas fa-sync-alt"></i> 強制刷新
-                </button>
-            </div>
         </div>
 
         <!-- 統計卡片 -->
@@ -2199,7 +2192,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbw7RZNtLNsnfPx54j1l1gKFbt0CKXgxZt7OEnrLeD6x19YfH2ZFiF4gdl6qRRRu7uHi/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbwivxWC95GxcYn1UH56OKYlXDzlPLnfEpvjZG77ft1YrB6ZnO00xm7DEZzzUvxljEo/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
@@ -3144,23 +3137,22 @@ function showEventRegistrationPage() {
     });
     
     // 數據分析儀表板按鈕點擊事件
-dataAnalyticsBtn.addEventListener('click', function() {
-    // 🆕 再次檢查權限（雙重保險）
-    if (!checkPermission('s3')) {
-        alert('權限不足，無法訪問數據分析儀表板');
-        return;
-    }
-    
-    dashboardSection.style.display = 'none';
-    dataAnalyticsPage.style.display = 'block';
-    
-    // 🆕 載入數據分析，首次載入強制刷新
-    loadAnalyticsData(true);
-    
-    // 重置計時器
-    resetInactivityTimer();
-});
-
+    dataAnalyticsBtn.addEventListener('click', function() {
+        // 🆕 再次檢查權限（雙重保險）
+        if (!checkPermission('s3')) {
+            alert('權限不足，無法訪問數據分析儀表板');
+            return;
+        }
+        
+        dashboardSection.style.display = 'none';
+        dataAnalyticsPage.style.display = 'block';
+        
+        // 載入數據分析
+        loadAnalyticsData();
+        
+        // 重置計時器
+        resetInactivityTimer();
+    });
     
     // 返回按鈕點擊事件
     backFromRiskBtn.addEventListener('click', function() {
@@ -3265,64 +3257,40 @@ dataAnalyticsBtn.addEventListener('click', function() {
         tableBody.innerHTML = rows;
     }
 
-    // 🆕 修改後的載入數據分析數據函數
-async function loadAnalyticsData(forceRefresh = false) {
-    try {
-        // 顯示載入狀態
-        showLoadingState();
-        
-        const dateRange = document.getElementById('dateRange').value;
-        const departmentFilter = document.getElementById('departmentFilter').value;
-        
-        // 🆕 構建請求參數，包含強制刷新選項
-        const params = new URLSearchParams({
-            action: 'getAnalyticsData',
-            dateRange: dateRange,
-            department: departmentFilter,
-            forceRefresh: forceRefresh.toString(),
-            t: new Date().getTime() // 防止瀏覽器快取
-        });
-        
-        // 🆕 獲取分析數據，加入防快取標頭
-        const response = await fetch(`${scriptUrl}?${params}`, {
-            method: 'GET',
-            headers: {
-                'Cache-Control': 'no-cache, no-store, must-revalidate',
-                'Pragma': 'no-cache',
-                'Expires': '0'
+    // 載入數據分析數據
+    async function loadAnalyticsData() {
+        try {
+            // 顯示載入狀態
+            showLoadingState();
+            
+            const dateRange = document.getElementById('dateRange').value;
+            const departmentFilter = document.getElementById('departmentFilter').value;
+            
+            // 獲取分析數據
+            const response = await fetch(`${scriptUrl}?action=getAnalyticsData&dateRange=${dateRange}&department=${departmentFilter}`);
+            const result = await response.json();
+            
+            if (result.success) {
+                // 更新統計卡片
+                updateStatCards(result.data.stats);
+                
+                // 更新部門篩選器選項
+                updateDepartmentFilter(result.data.departments);
+                
+                // 更新圖表
+                updateCharts(result.data);
+                
+                // 更新詳細數據表格
+                updateDetailTable(result.data.events);
+            } else {
+                console.error('獲取分析數據失敗:', result.message);
+                showErrorState(result.message);
             }
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            // 更新統計卡片
-            updateStatCards(result.data.stats);
-            
-            // 更新部門篩選器選項
-            updateDepartmentFilter(result.data.departments);
-            
-            // 更新圖表
-            updateCharts(result.data);
-            
-            // 更新詳細數據表格
-            updateDetailTable(result.data.events);
-            
-            // 🆕 顯示數據來源資訊
-            console.log(`數據來源: ${result.fromCache ? '快取' : '即時'}`);
-            if (result.fromCache) {
-                console.log('提示：如需最新數據，請點擊強制刷新按鈕');
-            }
-        } else {
-            console.error('獲取分析數據失敗:', result.message);
-            showErrorState(result.message);
+        } catch (error) {
+            console.error('載入分析數據時發生錯誤:', error);
+            showErrorState('載入數據失敗，請稍後再試');
         }
-    } catch (error) {
-        console.error('載入分析數據時發生錯誤:', error);
-        showErrorState('載入數據失敗，請稍後再試');
     }
-}
-
     
     // 顯示載入狀態
     function showLoadingState() {
@@ -3758,37 +3726,6 @@ function updateDetailTable(events) {
             });
         });
     }
-
-    // 🆕 強制刷新按鈕事件
-document.getElementById('forceRefreshBtn').addEventListener('click', function() {
-    const btn = this;
-    const originalText = btn.innerHTML;
-    
-    // 顯示載入狀態
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 刷新中...';
-    btn.disabled = true;
-    
-    // 強制刷新數據
-    loadAnalyticsData(true).finally(() => {
-        // 恢復按鈕狀態
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    });
-    
-    resetInactivityTimer();
-});
-
-// 修改現有的時間範圍和部門篩選變更事件
-document.getElementById('dateRange').addEventListener('change', function() {
-    loadAnalyticsData(false); // 一般載入，使用快取
-    resetInactivityTimer();
-});
-
-document.getElementById('departmentFilter').addEventListener('change', function() {
-    loadAnalyticsData(false); // 一般載入，使用快取
-    resetInactivityTimer();
-});
-
     
     // 送出按鈕點擊事件
     submitInventoryBtn.addEventListener('click', function() {
@@ -3880,8 +3817,6 @@ document.getElementById('departmentFilter').addEventListener('change', function(
             
             if (data.success) {
                 alert('部門週期盤點已成功送出');
-                 // 🆕 新增：顯示數據更新通知
-            showDataUpdateNotification();
                 showDashboard();
             } else {
                 alert(data.message || '送出失敗，請稍後再試');
@@ -4344,8 +4279,6 @@ async function submitEventRegistration() {
         
         if (result.success) {
             alert('風險事件登錄成功！');
-            // 🆕 新增：顯示數據更新通知
-            showDataUpdateNotification();
             resetEventForm();
             // 可選：返回主頁面
             // showDashboard();
@@ -4363,39 +4296,6 @@ async function submitEventRegistration() {
 
 
 });
-
-    // 🆕 顯示數據更新通知
-function showDataUpdateNotification() {
-    const notification = document.createElement('div');
-    notification.className = 'alert alert-info alert-dismissible fade show';
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 9999;
-        min-width: 300px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        border-radius: 8px;
-    `;
-    
-    notification.innerHTML = `
-        <div class="d-flex align-items-center">
-            <i class="fas fa-info-circle me-2"></i>
-            <div>數據已更新！如需查看最新分析，請前往數據分析頁面。</div>
-            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
-        </div>
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // 5秒後自動移除
-    setTimeout(() => {
-        if (notification.parentNode) {
-            notification.remove();
-        }
-    }, 5000);
-}
-
 </script>
 
 
