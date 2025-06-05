@@ -1557,6 +1557,79 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         padding: 8px 12px !important;
     }
 }
+/* 預測分析相關樣式 */
+.prediction-stats {
+    background: rgba(26, 111, 196, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #1a6fc4;
+}
+
+.anomaly-stats {
+    background: rgba(231, 76, 60, 0.1);
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid #e74c3c;
+}
+
+.prediction-analysis,
+.anomaly-analysis {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.prediction-analysis h2,
+.prediction-analysis h3,
+.anomaly-analysis h2,
+.anomaly-analysis h3 {
+    color: #2c3e50;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.prediction-analysis strong,
+.anomaly-analysis strong {
+    color: #e74c3c;
+}
+
+/* 異常檢測表格樣式 */
+.table-danger {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+}
+
+.table-warning {
+    background-color: rgba(255, 193, 7, 0.1) !important;
+}
+
+/* 控制台樣式 */
+#prediction-controls .card {
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+#prediction-controls .card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* 響應式調整 */
+@media (max-width: 768px) {
+    .prediction-stats,
+    .anomaly-stats {
+        margin-bottom: 15px;
+    }
+    
+    #prediction-controls .col-md-4 {
+        margin-bottom: 15px;
+    }
+    
+    #refreshAnalysisBtn,
+    #exportAnalysisBtn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
 
 
     </style>
@@ -2192,7 +2265,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbwivxWC95GxcYn1UH56OKYlXDzlPLnfEpvjZG77ft1YrB6ZnO00xm7DEZzzUvxljEo/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbz6MajMa-FqGF0l2qzaBwH_7yMh6ZhW_AOqLUsh4OLmBhTYrq7Qf2mWB-t_NpNKNBMM/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
@@ -3726,6 +3799,35 @@ function updateDetailTable(events) {
             });
         });
     }
+    // 在現有的 DOMContentLoaded 事件監聽器中添加以下代碼
+
+// 預測分析控制按鈕事件
+document.getElementById('refreshAnalysisBtn').addEventListener('click', function() {
+    const departmentFilter = document.getElementById('departmentFilter').value;
+    loadPredictionAnalysis(departmentFilter);
+    resetInactivityTimer();
+});
+
+// 匯出分析報告按鈕事件
+document.getElementById('exportAnalysisBtn').addEventListener('click', function() {
+    exportAnalysisReport();
+    resetInactivityTimer();
+});
+
+// 預測天數變更事件
+document.getElementById('predictionDays').addEventListener('change', function() {
+    const departmentFilter = document.getElementById('departmentFilter').value;
+    loadPredictionAnalysis(departmentFilter);
+    resetInactivityTimer();
+});
+
+// 分析類型變更事件
+document.getElementById('analysisType').addEventListener('change', function() {
+    const departmentFilter = document.getElementById('departmentFilter').value;
+    loadPredictionAnalysis(departmentFilter);
+    resetInactivityTimer();
+});
+
     
     // 送出按鈕點擊事件
     submitInventoryBtn.addEventListener('click', function() {
@@ -4296,6 +4398,558 @@ async function submitEventRegistration() {
 
 
 });
+
+    // 在現有的 JavaScript 代碼中添加以下函數
+
+/**
+ * 載入預測分析數據
+ */
+async function loadPredictionAnalysis(department = 'all') {
+    try {
+        const response = await fetch(`${scriptUrl}?action=getPredictionAnalysis&department=${encodeURIComponent(department)}&days=30`);
+        const result = await response.json();
+        
+        if (result.success) {
+            updatePredictionDisplay(result);
+            updateAnomalyDisplay(result);
+        } else {
+            console.error('載入預測分析失敗:', result.message);
+        }
+    } catch (error) {
+        console.error('載入預測分析時發生錯誤:', error);
+    }
+}
+
+/**
+ * 更新預測分析顯示
+ */
+function updatePredictionDisplay(analysisResult) {
+    if (!analysisResult.prediction.success) {
+        return;
+    }
+    
+    const prediction = analysisResult.prediction;
+    
+    // 創建預測分析卡片
+    const predictionCard = document.createElement('div');
+    predictionCard.className = 'chart-container';
+    predictionCard.innerHTML = `
+        <h5 class="chart-title">📈 風險趨勢預測分析</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="prediction-stats">
+                    <h6>預測結果</h6>
+                    <p><strong>30天後預測值：</strong> R${prediction.nextMonthPrediction.toFixed(2)}</p>
+                    <p><strong>趨勢方向：</strong> 
+                        <span class="badge ${getTrendBadgeClass(prediction.trendDirection)}">
+                            ${getTrendText(prediction.trendDirection)}
+                        </span>
+                    </p>
+                    <p><strong>預測可靠度：</strong> 
+                        <span class="badge ${getConfidenceBadgeClass(prediction.confidenceLevel)}">
+                            ${prediction.confidenceLevel.toUpperCase()} (${(prediction.confidence * 100).toFixed(1)}%)
+                        </span>
+                    </p>
+                    <p><strong>回歸方程式：</strong> <code>${prediction.equation}</code></p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <canvas id="predictionChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+        <div class="mt-3">
+            <div class="alert alert-info">
+                <div class="prediction-analysis">${convertMarkdownToHTML(prediction.analysis)}</div>
+            </div>
+        </div>
+    `;
+    
+    // 將預測卡片插入到數據分析頁面
+    const analyticsPage = document.getElementById('data-analytics-page');
+    const chartRow = analyticsPage.querySelector('.row');
+    chartRow.appendChild(predictionCard);
+    
+    // 繪製預測圖表
+    drawPredictionChart(prediction, analysisResult.historicalData);
+}
+
+/**
+ * 更新異常檢測顯示
+ */
+function updateAnomalyDisplay(analysisResult) {
+    if (!analysisResult.anomalies.success) {
+        return;
+    }
+    
+    const anomalies = analysisResult.anomalies;
+    
+    // 創建異常檢測卡片
+    const anomalyCard = document.createElement('div');
+    anomalyCard.className = 'chart-container';
+    anomalyCard.innerHTML = `
+        <h5 class="chart-title">🔍 異常檢測分析</h5>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="anomaly-stats">
+                    <h6>檢測統計</h6>
+                    <p><strong>數據點總數：</strong> ${anomalies.statistics.dataPoints}</p>
+                    <p><strong>異常數量：</strong> ${anomalies.totalAnomalies}</p>
+                    <p><strong>異常率：</strong> ${anomalies.anomalyRate}%</p>
+                    <p><strong>平均值：</strong> ${anomalies.statistics.mean.toFixed(2)}</p>
+                    <p><strong>標準差：</strong> ${anomalies.statistics.stdDev.toFixed(2)}</p>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <canvas id="anomalyChart" width="600" height="200"></canvas>
+            </div>
+        </div>
+        
+        ${anomalies.zScoreAnomalies.length > 0 ? `
+        <div class="mt-3">
+            <h6>🚨 異常數據點詳情</h6>
+            <div class="table-responsive">
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>日期</th>
+                            <th>部門</th>
+                            <th>風險值</th>
+                            <th>Z-Score</th>
+                            <th>嚴重程度</th>
+                            <th>類型</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${anomalies.zScoreAnomalies.map(anomaly => `
+                            <tr class="${anomaly.severity === 'extreme' ? 'table-danger' : 'table-warning'}">
+                                <td>${new Date(anomaly.date).toLocaleDateString('zh-TW')}</td>
+                                <td>${anomaly.department}</td>
+                                <td>R${anomaly.riskValue.toFixed(2)}</td>
+                                <td>${anomaly.zScore.toFixed(2)}</td>
+                                <td>
+                                    <span class="badge ${anomaly.severity === 'extreme' ? 'bg-danger' : 'bg-warning'}">
+                                        ${anomaly.severity === 'extreme' ? '極端' : '中等'}
+                                    </span>
+                                </td>
+                                <td>${anomaly.type === 'high_outlier' ? '高值異常' : '低值異常'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        ` : ''}
+        
+        <div class="mt-3">
+            <div class="alert alert-info">
+                <div class="anomaly-analysis">${convertMarkdownToHTML(anomalies.analysis)}</div>
+            </div>
+        </div>
+    `;
+    <!-- 在現有的數據分析頁面中添加預測分析控制區域 -->
+<div class="row mb-4" id="prediction-controls">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">🔮 智能分析控制台</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label for="predictionDays" class="form-label">預測天數：</label>
+                        <select id="predictionDays" class="form-select">
+                            <option value="7">7天</option>
+                            <option value="14">14天</option>
+                            <option value="30" selected>30天</option>
+                            <option value="60">60天</option>
+                            <option value="90">90天</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="analysisType" class="form-label">分析類型：</label>
+                        <select id="analysisType" class="form-select">
+                            <option value="both" selected>預測 + 異常檢測</option>
+                            <option value="prediction">僅預測分析</option>
+                            <option value="anomaly">僅異常檢測</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 d-flex align-items-end">
+                        <button type="button" class="btn btn-primary me-2" id="refreshAnalysisBtn">
+                            <i class="fas fa-sync-alt"></i> 重新分析
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" id="exportAnalysisBtn">
+                            <i class="fas fa-download"></i> 匯出報告
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    // 將異常檢測卡片插入到數據分析頁面
+    const analyticsPage = document.getElementById('data-analytics-page');
+    const chartRow = analyticsPage.querySelector('.row');
+    chartRow.appendChild(anomalyCard);
+    
+    // 繪製異常檢測圖表
+    drawAnomalyChart(anomalies, analysisResult.historicalData);
+}
+
+/**
+ * 繪製預測圖表
+ */
+function drawPredictionChart(prediction, historicalData) {
+    const ctx = document.getElementById('predictionChart').getContext('2d');
+    
+    // 準備歷史數據
+    const historicalLabels = historicalData.map(d => new Date(d.date).toLocaleDateString('zh-TW'));
+    const historicalValues = historicalData.map(d => d.riskValue);
+    
+    // 準備預測數據
+    const predictionLabels = prediction.predictions.slice(0, 10).map(p => new Date(p.date).toLocaleDateString('zh-TW'));
+    const predictionValues = prediction.predictions.slice(0, 10).map(p => p.predictedValue);
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: [...historicalLabels, ...predictionLabels],
+            datasets: [
+                {
+                    label: '歷史數據',
+                    data: [...historicalValues, ...Array(predictionLabels.length).fill(null)],
+                    borderColor: '#1a6fc4',
+                    backgroundColor: 'rgba(26, 111, 196, 0.1)',
+                    tension: 0.4,
+                    pointRadius: 4
+                },
+                {
+                    label: '預測數據',
+                    data: [...Array(historicalLabels.length).fill(null), ...predictionValues],
+                    borderColor: '#e74c3c',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    borderDash: [5, 5],
+                    tension: 0.4,
+                    pointRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '風險值 (R)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: '日期'
+                    }
+                }
+            }
+        }
+    });
+}
+
+/**
+ * 繪製異常檢測圖表
+ */
+function drawAnomalyChart(anomalies, historicalData) {
+    const ctx = document.getElementById('anomalyChart').getContext('2d');
+    
+    const labels = historicalData.map(d => new Date(d.date).toLocaleDateString('zh-TW'));
+    const values = historicalData.map(d => d.riskValue);
+    const mean = anomalies.statistics.mean;
+    const upperBound = mean + 2 * anomalies.statistics.stdDev;
+    const lowerBound = mean - 2 * anomalies.statistics.stdDev;
+    
+    // 標記異常點
+    const pointColors = values.map((value, index) => {
+        const isAnomaly = anomalies.zScoreAnomalies.some(a => a.index === index);
+        return isAnomaly ? '#e74c3c' : '#1a6fc4';
+    });
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: '風險值',
+                    data: values,
+                    borderColor: '#1a6fc4',
+                    backgroundColor: pointColors,
+                    pointBackgroundColor: pointColors,
+                    pointBorderColor: pointColors,
+                    pointRadius: 6,
+                    tension: 0.4
+                },
+                {
+                    label: '平均值',
+                    data: Array(values.length).fill(mean),
+                    borderColor: '#2ecc71',
+                    borderDash: [3, 3],
+                    pointRadius: 0
+                },
+                {
+                    label: '上界限 (+2σ)',
+                    data: Array(values.length).fill(upperBound),
+                    borderColor: '#f39c12',
+                    borderDash: [5, 5],
+                    pointRadius: 0
+                },
+                {
+                    label: '下界限 (-2σ)',
+                    data: Array(values.length).fill(lowerBound),
+                    borderColor: '#f39c12',
+                    borderDash: [5, 5],
+                    pointRadius: 0
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top'
+                                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        afterBody: function(context) {
+                            const dataIndex = context[0].dataIndex;
+                            const anomaly = anomalies.zScoreAnomalies.find(a => a.index === dataIndex);
+                            if (anomaly) {
+                                return [
+                                    `異常類型: ${anomaly.type === 'high_outlier' ? '高值異常' : '低值異常'}`,
+                                    `Z-Score: ${anomaly.zScore.toFixed(2)}`,
+                                    `嚴重程度: ${anomaly.severity === 'extreme' ? '極端' : '中等'}`
+                                ];
+                            }
+                            return [];
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: '風險值 (R)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: '日期'
+                    }
+                }
+            }
+        }
+    });
+}
+
+/**
+ * 輔助函數：獲取趨勢徽章樣式
+ */
+function getTrendBadgeClass(trendDirection) {
+    switch (trendDirection) {
+        case 'increasing': return 'bg-danger';
+        case 'decreasing': return 'bg-success';
+        case 'stable': return 'bg-info';
+        default: return 'bg-secondary';
+    }
+}
+
+/**
+ * 輔助函數：獲取趨勢文字
+ */
+function getTrendText(trendDirection) {
+    switch (trendDirection) {
+        case 'increasing': return '📈 上升趨勢';
+        case 'decreasing': return '📉 下降趨勢';
+        case 'stable': return '📊 穩定趨勢';
+        default: return '❓ 未知';
+    }
+}
+
+/**
+ * 輔助函數：獲取置信度徽章樣式
+ */
+function getConfidenceBadgeClass(confidenceLevel) {
+    switch (confidenceLevel) {
+        case 'high': return 'bg-success';
+        case 'medium': return 'bg-warning';
+        case 'low': return 'bg-danger';
+        default: return 'bg-secondary';
+    }
+}
+
+// 修改現有的 loadAnalyticsData 函數，在最後添加預測分析
+async function loadAnalyticsData() {
+    try {
+        // 顯示載入狀態
+        showLoadingState();
+        
+        const dateRange = document.getElementById('dateRange').value;
+        const departmentFilter = document.getElementById('departmentFilter').value;
+        
+        // 獲取分析數據
+        const response = await fetch(`${scriptUrl}?action=getAnalyticsData&dateRange=${dateRange}&department=${departmentFilter}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            // 更新統計卡片
+            updateStatCards(result.data.stats);
+            
+            // 更新部門篩選器選項
+            updateDepartmentFilter(result.data.departments);
+            
+            // 更新圖表
+            updateCharts(result.data);
+            
+            // 更新詳細數據表格
+            updateDetailTable(result.data.events);
+            
+            // 🆕 載入預測分析和異常檢測
+            await loadPredictionAnalysis(departmentFilter);
+            
+        } else {
+            console.error('獲取分析數據失敗:', result.message);
+            showErrorState(result.message);
+        }
+    } catch (error) {
+        console.error('載入分析數據時發生錯誤:', error);
+        showErrorState('載入數據失敗，請稍後再試');
+    }
+}
+
+/**
+ * 匯出分析報告
+ */
+async function exportAnalysisReport() {
+    try {
+        const departmentFilter = document.getElementById('departmentFilter').value;
+        const response = await fetch(`${scriptUrl}?action=getPredictionAnalysis&department=${encodeURIComponent(departmentFilter)}&days=30`);
+        const result = await response.json();
+        
+        if (result.success) {
+            // 生成報告內容
+            const reportContent = generateAnalysisReport(result);
+            
+            // 創建並下載文件
+            const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `風險分析報告_${departmentFilter}_${new Date().toISOString().split('T')[0]}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+            
+            showNotification('分析報告已成功匯出！', 'success');
+        } else {
+            showNotification('匯出報告失敗：' + result.message, 'error');
+        }
+    } catch (error) {
+        console.error('匯出報告時發生錯誤:', error);
+        showNotification('匯出報告失敗，請稍後再試', 'error');
+    }
+}
+
+/**
+ * 生成分析報告內容
+ */
+function generateAnalysisReport(analysisResult) {
+    const now = new Date();
+    const reportDate = now.toLocaleString('zh-TW');
+    
+    let report = `昶青實業 - 風險智能分析報告
+========================================
+
+生成時間：${reportDate}
+分析部門：${analysisResult.department === 'all' ? '全部部門' : analysisResult.department}
+數據點數：${analysisResult.dataPoints}
+
+`;
+
+    // 預測分析部分
+    if (analysisResult.prediction.success) {
+        const pred = analysisResult.prediction;
+        report += `📈 預測分析結果
+----------------------------------------
+30天後預測值：R${pred.nextMonthPrediction.toFixed(2)}
+趨勢方向：${getTrendText(pred.trendDirection)}
+預測可靠度：${pred.confidenceLevel.toUpperCase()} (R² = ${(pred.confidence * 100).toFixed(1)}%)
+回歸方程式：${pred.equation}
+
+${pred.analysis}
+
+`;
+    }
+
+    // 異常檢測部分
+    if (analysisResult.anomalies.success) {
+        const anom = analysisResult.anomalies;
+        report += `🔍 異常檢測結果
+----------------------------------------
+數據點總數：${anom.statistics.dataPoints}
+異常數量：${anom.totalAnomalies}
+異常率：${anom.anomalyRate}%
+平均值：${anom.statistics.mean.toFixed(2)}
+標準差：${anom.statistics.stdDev.toFixed(2)}
+
+`;
+
+        if (anom.zScoreAnomalies.length > 0) {
+            report += `異常數據點詳情：
+`;
+            anom.zScoreAnomalies.forEach((anomaly, index) => {
+                report += `${index + 1}. ${new Date(anomaly.date).toLocaleDateString('zh-TW')} - ${anomaly.department}
+   風險值：R${anomaly.riskValue.toFixed(2)}
+   Z-Score：${anomaly.zScore.toFixed(2)}
+   類型：${anomaly.type === 'high_outlier' ? '高值異常' : '低值異常'}
+   嚴重程度：${anomaly.severity === 'extreme' ? '極端' : '中等'}
+
+`;
+            });
+        }
+
+        report += `${anom.analysis}
+
+`;
+    }
+
+    report += `========================================
+報告結束
+
+此報告由昶青實業風險管理系統自動生成
+T.C.C.管理本部
+`;
+
+    return report;
+}
+
 </script>
 
 
