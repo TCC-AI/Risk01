@@ -2005,47 +2005,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         </div>
     </div>
 
-    <!-- 🆕 智能分析控制台 -->
-    <div class="row mb-4" id="prediction-controls">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">🔮 智能分析控制台</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <label for="predictionDays" class="form-label">預測天數：</label>
-                            <select id="predictionDays" class="form-select">
-                                <option value="7">7天</option>
-                                <option value="14">14天</option>
-                                <option value="30" selected>30天</option>
-                                <option value="60">60天</option>
-                                <option value="90">90天</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="analysisType" class="form-label">分析類型：</label>
-                            <select id="analysisType" class="form-select">
-                                <option value="both" selected>預測 + 異常檢測</option>
-                                <option value="prediction">僅預測分析</option>
-                                <option value="anomaly">僅異常檢測</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4 d-flex align-items-end">
-                            <button type="button" class="btn btn-primary me-2" id="refreshAnalysisBtn">
-                                <i class="fas fa-sync-alt"></i> 重新分析
-                            </button>
-                            <button type="button" class="btn btn-outline-secondary" id="exportAnalysisBtn">
-                                <i class="fas fa-download"></i> 匯出報告
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
+   
         <!-- 統計卡片 -->
         <div class="row mb-4">
             <div class="col-md-3">
@@ -2148,6 +2108,48 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                 </div>
             </div>
         </div>
+
+     <!-- 🆕 智能分析控制台 -->
+    <div class="row mb-4" id="prediction-controls">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">🔮 智能分析控制台</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="predictionDays" class="form-label">預測天數：</label>
+                            <select id="predictionDays" class="form-select">
+                                <option value="7">7天</option>
+                                <option value="14">14天</option>
+                                <option value="30" selected>30天</option>
+                                <option value="60">60天</option>
+                                <option value="90">90天</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="analysisType" class="form-label">分析類型：</label>
+                            <select id="analysisType" class="form-select">
+                                <option value="both" selected>預測 + 異常檢測</option>
+                                <option value="prediction">僅預測分析</option>
+                                <option value="anomaly">僅異常檢測</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="button" class="btn btn-primary me-2" id="refreshAnalysisBtn">
+                                <i class="fas fa-sync-alt"></i> 重新分析
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="exportAnalysisBtn">
+                                <i class="fas fa-download"></i> 匯出報告
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
         
         <button class="btn btn-secondary mt-3" id="back-to-dashboard-from-analytics">返回</button>
     </div>
