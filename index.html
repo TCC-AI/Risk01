@@ -2437,13 +2437,17 @@ function checkPermission(requiredLevel) {
     return userLevel >= requiredLevelNum;
 }
 
+// 🆕 全域變數定義
+const loginSection = document.getElementById('login-section');
+const dashboardSection = document.getElementById('dashboard-section');
+const inventorySection = document.getElementById('inventory-section');
+const deptRiskIndexPage = document.getElementById('dept-risk-index-page');
+const dataAnalyticsPage = document.getElementById('data-analytics-page');
+const eventRegistrationPage = document.getElementById('event-registration-page');
+const alertSettingsPage = document.getElementById('alert-settings-page');
+const riskPredictionPage = document.getElementById('risk-prediction-page');
 document.addEventListener('DOMContentLoaded', function() {
-    const loginSection = document.getElementById('login-section');
-    const dashboardSection = document.getElementById('dashboard-section');
-    const inventorySection = document.getElementById('inventory-section');
-    const deptRiskIndexPage = document.getElementById('dept-risk-index-page');
-    const dataAnalyticsPage = document.getElementById('data-analytics-page');
-    const eventRegistrationPage = document.getElementById('event-registration-page');
+    
     const loginBtn = document.getElementById('login-btn');
     const usernameInput = document.getElementById('username');
     const passwordInput = document.getElementById('password');
@@ -2470,11 +2474,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const resetEventBtn = document.getElementById('resetEventBtn');
     const eventForm = document.getElementById('eventRegistrationForm');
     const alertSettingsBtn = document.getElementById('alert-settings-btn');
-    const alertSettingsPage = document.getElementById('alert-settings-page');
+    
     const backFromAlertBtn = document.getElementById('backFromAlertBtn');
     const saveAlertSettingsBtn = document.getElementById('saveAlertSettingsBtn');
     const riskPredictionBtn = document.getElementById('risk-prediction-btn');
-    const riskPredictionPage = document.getElementById('risk-prediction-page');
+   
     const backFromPredictionBtn = document.getElementById('back-to-dashboard-from-prediction');
 
     // 🆕 風險趨勢預判分析按鈕點擊事件
@@ -3112,6 +3116,7 @@ function showDashboard() {
     dataAnalyticsPage.style.display = 'none';
     eventRegistrationPage.style.display = 'none';
     alertSettingsPage.style.display = 'none'; // 🆕 添加這行
+    riskPredictionPage.style.display = 'none'; // 🆕 使用全域變數
     document.getElementById('risk-prediction-page').style.display = 'none';
     document.querySelector('.container').classList.remove('hidden');
     dashboardSection.classList.remove('hidden');
