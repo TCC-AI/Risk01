@@ -1978,32 +1978,73 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     <button class="btn btn-secondary mt-3" id="back-to-dashboard-from-risk">返回</button>
 </div>
 
-    <!-- 數據分析儀表板頁面 -->
-    <div id="data-analytics-page" class="dashboard-page" style="display: none;">
-        <div class="logo-container">
-            <img src="LOGO.png" alt="TCC.AI Logo" class="logo">
+<!-- 數據分析儀表板頁面 -->
+<div id="data-analytics-page" class="dashboard-page" style="display: none;">
+    <div class="logo-container">
+        <img src="LOGO.png" alt="TCC.AI Logo" class="logo">
+    </div>
+    <h2 class="text-center mb-4">數據分析儀表板</h2>
+    
+    <!-- 時間範圍選擇器 -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label for="dateRange" class="form-label">選擇時間範圍：</label>
+            <select id="dateRange" class="form-select">
+                <option value="7">最近7天</option>
+                <option value="30" selected>最近30天</option>
+                <option value="90">最近90天</option>
+                <option value="365">最近一年</option>
+                <option value="all">全部時間</option>
+            </select>
         </div>
-        <h2 class="text-center mb-4">數據分析儀表板</h2>
-        
-        <!-- 時間範圍選擇器 -->
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <label for="dateRange" class="form-label">選擇時間範圍：</label>
-                <select id="dateRange" class="form-select">
-                    <option value="7">最近7天</option>
-                    <option value="30" selected>最近30天</option>
-                    <option value="90">最近90天</option>
-                    <option value="365">最近一年</option>
-                    <option value="all">全部時間</option>
-                </select>
-            </div>
-            <div class="col-md-6">
-                <label for="departmentFilter" class="form-label">部門篩選：</label>
-                <select id="departmentFilter" class="form-select">
-                    <option value="all">全部部門</option>
-                </select>
+        <div class="col-md-6">
+            <label for="departmentFilter" class="form-label">部門篩選：</label>
+            <select id="departmentFilter" class="form-select">
+                <option value="all">全部部門</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- 🆕 智能分析控制台 -->
+    <div class="row mb-4" id="prediction-controls">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">🔮 智能分析控制台</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label for="predictionDays" class="form-label">預測天數：</label>
+                            <select id="predictionDays" class="form-select">
+                                <option value="7">7天</option>
+                                <option value="14">14天</option>
+                                <option value="30" selected>30天</option>
+                                <option value="60">60天</option>
+                                <option value="90">90天</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="analysisType" class="form-label">分析類型：</label>
+                            <select id="analysisType" class="form-select">
+                                <option value="both" selected>預測 + 異常檢測</option>
+                                <option value="prediction">僅預測分析</option>
+                                <option value="anomaly">僅異常檢測</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <button type="button" class="btn btn-primary me-2" id="refreshAnalysisBtn">
+                                <i class="fas fa-sync-alt"></i> 重新分析
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="exportAnalysisBtn">
+                                <i class="fas fa-download"></i> 匯出報告
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
+    </div>
 
         <!-- 統計卡片 -->
         <div class="row mb-4">
@@ -3330,40 +3371,45 @@ function showEventRegistrationPage() {
         tableBody.innerHTML = rows;
     }
 
-    // 載入數據分析數據
-    async function loadAnalyticsData() {
-        try {
-            // 顯示載入狀態
-            showLoadingState();
+// 🔧 修正：合併後的 loadAnalyticsData 函數
+async function loadAnalyticsData() {
+    try {
+        // 顯示載入狀態
+        showLoadingState();
+        
+        const dateRange = document.getElementById('dateRange').value;
+        const departmentFilter = document.getElementById('departmentFilter').value;
+        
+        // 獲取分析數據
+        const response = await fetch(`${scriptUrl}?action=getAnalyticsData&dateRange=${dateRange}&department=${departmentFilter}`);
+        const result = await response.json();
+        
+        if (result.success) {
+            // 更新統計卡片
+            updateStatCards(result.data.stats);
             
-            const dateRange = document.getElementById('dateRange').value;
-            const departmentFilter = document.getElementById('departmentFilter').value;
+            // 更新部門篩選器選項
+            updateDepartmentFilter(result.data.departments);
             
-            // 獲取分析數據
-            const response = await fetch(`${scriptUrl}?action=getAnalyticsData&dateRange=${dateRange}&department=${departmentFilter}`);
-            const result = await response.json();
+            // 更新圖表
+            updateCharts(result.data);
             
-            if (result.success) {
-                // 更新統計卡片
-                updateStatCards(result.data.stats);
-                
-                // 更新部門篩選器選項
-                updateDepartmentFilter(result.data.departments);
-                
-                // 更新圖表
-                updateCharts(result.data);
-                
-                // 更新詳細數據表格
-                updateDetailTable(result.data.events);
-            } else {
-                console.error('獲取分析數據失敗:', result.message);
-                showErrorState(result.message);
-            }
-        } catch (error) {
-            console.error('載入分析數據時發生錯誤:', error);
-            showErrorState('載入數據失敗，請稍後再試');
+            // 更新詳細數據表格
+            updateDetailTable(result.data.events);
+            
+            // 🆕 載入預測分析和異常檢測
+            await loadPredictionAnalysis(departmentFilter);
+            
+        } else {
+            console.error('獲取分析數據失敗:', result.message);
+            showErrorState(result.message);
         }
+    } catch (error) {
+        console.error('載入分析數據時發生錯誤:', error);
+        showErrorState('載入數據失敗，請稍後再試');
     }
+}
+
     
     // 顯示載入狀態
     function showLoadingState() {
@@ -3799,35 +3845,7 @@ function updateDetailTable(events) {
             });
         });
     }
-    // 在現有的 DOMContentLoaded 事件監聽器中添加以下代碼
-
-// 預測分析控制按鈕事件
-document.getElementById('refreshAnalysisBtn').addEventListener('click', function() {
-    const departmentFilter = document.getElementById('departmentFilter').value;
-    loadPredictionAnalysis(departmentFilter);
-    resetInactivityTimer();
-});
-
-// 匯出分析報告按鈕事件
-document.getElementById('exportAnalysisBtn').addEventListener('click', function() {
-    exportAnalysisReport();
-    resetInactivityTimer();
-});
-
-// 預測天數變更事件
-document.getElementById('predictionDays').addEventListener('change', function() {
-    const departmentFilter = document.getElementById('departmentFilter').value;
-    loadPredictionAnalysis(departmentFilter);
-    resetInactivityTimer();
-});
-
-// 分析類型變更事件
-document.getElementById('analysisType').addEventListener('change', function() {
-    const departmentFilter = document.getElementById('departmentFilter').value;
-    loadPredictionAnalysis(departmentFilter);
-    resetInactivityTimer();
-});
-
+  
     
     // 送出按鈕點擊事件
     submitInventoryBtn.addEventListener('click', function() {
@@ -4020,6 +4038,43 @@ backFromEventBtn.addEventListener('click', function() {
             .then(response => response.json())
             .catch(error => console.error('登出請求失敗:', error));
     });
+    // 🆕 在這裡添加新的事件監聽器
+    const refreshAnalysisBtn = document.getElementById('refreshAnalysisBtn');
+    const exportAnalysisBtn = document.getElementById('exportAnalysisBtn');
+    const predictionDays = document.getElementById('predictionDays');
+    const analysisType = document.getElementById('analysisType');
+
+    if (refreshAnalysisBtn) {
+        refreshAnalysisBtn.addEventListener('click', function() {
+            const departmentFilter = document.getElementById('departmentFilter').value;
+            loadPredictionAnalysis(departmentFilter);
+            resetInactivityTimer();
+        });
+    }
+
+    if (exportAnalysisBtn) {
+        exportAnalysisBtn.addEventListener('click', function() {
+            exportAnalysisReport();
+            resetInactivityTimer();
+        });
+    }
+
+    if (predictionDays) {
+        predictionDays.addEventListener('change', function() {
+            const departmentFilter = document.getElementById('departmentFilter').value;
+            loadPredictionAnalysis(departmentFilter);
+            resetInactivityTimer();
+        });
+    }
+
+    if (analysisType) {
+        analysisType.addEventListener('change', function() {
+            const departmentFilter = document.getElementById('departmentFilter').value;
+            loadPredictionAnalysis(departmentFilter);
+            resetInactivityTimer();
+        });
+    }
+
 
     // 本地登出函數
     function performLocalLogout() {
@@ -4546,46 +4601,7 @@ function updateAnomalyDisplay(analysisResult) {
             </div>
         </div>
     `;
-    <!-- 在現有的數據分析頁面中添加預測分析控制區域 -->
-<div class="row mb-4" id="prediction-controls">
-    <div class="col-12">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                <h5 class="mb-0">🔮 智能分析控制台</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4">
-                        <label for="predictionDays" class="form-label">預測天數：</label>
-                        <select id="predictionDays" class="form-select">
-                            <option value="7">7天</option>
-                            <option value="14">14天</option>
-                            <option value="30" selected>30天</option>
-                            <option value="60">60天</option>
-                            <option value="90">90天</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="analysisType" class="form-label">分析類型：</label>
-                        <select id="analysisType" class="form-select">
-                            <option value="both" selected>預測 + 異常檢測</option>
-                            <option value="prediction">僅預測分析</option>
-                            <option value="anomaly">僅異常檢測</option>
-                        </select>
-                    </div>
-                    <div class="col-md-4 d-flex align-items-end">
-                        <button type="button" class="btn btn-primary me-2" id="refreshAnalysisBtn">
-                            <i class="fas fa-sync-alt"></i> 重新分析
-                        </button>
-                        <button type="button" class="btn btn-outline-secondary" id="exportAnalysisBtn">
-                            <i class="fas fa-download"></i> 匯出報告
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+
 
     // 將異常檢測卡片插入到數據分析頁面
     const analyticsPage = document.getElementById('data-analytics-page');
