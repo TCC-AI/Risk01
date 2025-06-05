@@ -3531,31 +3531,39 @@ function showEventRegistrationPage() {
         });
     }
     
-    // 更新詳細數據表格
-    function updateDetailTable(events) {
-        const tableBody = document.getElementById('detailDataTableBody');
-        
-        if (events.length === 0) {
-            tableBody.innerHTML = '<tr><td colspan="6" class="text-center">無數據</td></tr>';
-            return;
-        }
-        
-        const rows = events.map(event => {
-            const riskValue = (event.riskLevel * event.occurrences).toFixed(1);
-            return `
-                <tr>
-                    <td>${formatDate(event.timestamp)}</td>
-                    <td>${event.department}</td>
-                    <td>${event.riskName}</td>
-                    <td>${event.riskLevel}</td>
-                    <td>${event.occurrences}</td>
-                    <td>${riskValue}</td>
-                </tr>
-            `;
-        }).join('');
-        
-        tableBody.innerHTML = rows;
+// 更新詳細數據表格
+function updateDetailTable(events) {
+    const tableBody = document.getElementById('detailDataTableBody');
+    
+    if (events.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="text-center">無數據</td></tr>';
+        return;
     }
+    
+    // 🆕 按時間戳記降序排列（最新的在前面）
+    const sortedEvents = events.sort((a, b) => {
+        const dateA = new Date(a.timestamp);
+        const dateB = new Date(b.timestamp);
+        return dateB - dateA; // 降序排列：最新的在前
+    });
+    
+    const rows = sortedEvents.map(event => {
+        const riskValue = (event.riskLevel * event.occurrences).toFixed(1);
+        return `
+            <tr>
+                <td>${formatDate(event.timestamp)}</td>
+                <td>${event.department}</td>
+                <td>${event.riskName}</td>
+                <td>${event.riskLevel}</td>
+                <td>${event.occurrences}</td>
+                <td>${riskValue}</td>
+            </tr>
+        `;
+    }).join('');
+    
+    tableBody.innerHTML = rows;
+}
+
     
     // 格式化日期
     function formatDate(dateValue) {
