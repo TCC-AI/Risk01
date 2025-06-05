@@ -2403,7 +2403,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbwG1MkLpfBjE6d4a73k3PJqDamFAtI_95Zl0_rSkEXLk_JMDP_qYns6pJqF9AZuXnfi/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbyRvwrImfYPIJwciZaymq5hI5WBw_a2-RMfTTYTRlmxrFGc0VDXBAVG8zfWCsHdhCE9/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
@@ -5574,8 +5574,465 @@ async function exportStandalonePredictionReport() {
     }
 }
 
+    // 🆕 新增 s4 專屬功能按鈕
+function addManagementFeatures() {
+    const permission = localStorage.getItem('permission') || 's1';
+    
+    if (permission === 's4') {
+        const buttonGroup = document.querySelector('.button-group');
+        
+        // 檢查是否已經添加過管理按鈕，避免重複添加
+        if (document.getElementById('user-management-btn')) {
+            return;
+        }
+        
+        // 🆕 用戶管理按鈕
+        const userManagementBtn = document.createElement('button');
+        userManagementBtn.id = 'user-management-btn';
+        userManagementBtn.className = 'feature-btn';
+        userManagementBtn.style.background = 'linear-gradient(to right, #6f42c1, #e83e8c)';
+        userManagementBtn.innerHTML = '<i class="fas fa-users-cog"></i> 用戶管理';
+        
+        // 🆕 系統設定按鈕
+        const systemSettingsBtn = document.createElement('button');
+        systemSettingsBtn.id = 'system-settings-btn';
+        systemSettingsBtn.className = 'feature-btn';
+        systemSettingsBtn.style.background = 'linear-gradient(to right, #6c757d, #495057)';
+        systemSettingsBtn.innerHTML = '<i class="fas fa-cogs"></i> 系統設定';
+        
+        // 🆕 數據備份按鈕
+        const dataBackupBtn = document.createElement('button');
+        dataBackupBtn.id = 'data-backup-btn';
+        dataBackupBtn.className = 'feature-btn';
+        dataBackupBtn.style.background = 'linear-gradient(to right, #17a2b8, #20c997)';
+        dataBackupBtn.innerHTML = '<i class="fas fa-database"></i> 數據備份';
+        
+        // 插入到按鈕組
+        buttonGroup.appendChild(userManagementBtn);
+        buttonGroup.appendChild(systemSettingsBtn);
+        buttonGroup.appendChild(dataBackupBtn);
+        
+        // 🆕 綁定事件監聽器
+        userManagementBtn.addEventListener('click', function() {
+            showUserManagementPage();
+            resetInactivityTimer();
+        });
+        
+        systemSettingsBtn.addEventListener('click', function() {
+            showSystemSettingsPage();
+            resetInactivityTimer();
+        });
+        
+        dataBackupBtn.addEventListener('click', function() {
+            showDataBackupPage();
+            resetInactivityTimer();
+        });
+    }
+}
+
+// 🆕 顯示用戶管理頁面
+function showUserManagementPage() {
+    if (!checkPermission('s4')) {
+        alert('權限不足，僅限 s4 管理用戶使用');
+        return;
+    }
+    
+    hideAllPages();
+    document.getElementById('user-management-page').style.display = 'block';
+    loadUserList();
+}
+
+// 🆕 顯示系統設定頁面
+function showSystemSettingsPage() {
+    if (!checkPermission('s4')) {
+        alert('權限不足，僅限 s4 管理用戶使用');
+        return;
+    }
+    
+    hideAllPages();
+    document.getElementById('system-settings-page').style.display = 'block';
+    loadSystemSettings();
+}
+
+// 🆕 顯示數據備份頁面
+function showDataBackupPage() {
+    if (!checkPermission('s4')) {
+        alert('權限不足，僅限 s4 管理用戶使用');
+        return;
+    }
+    
+    hideAllPages();
+    document.getElementById('data-backup-page').style.display = 'block';
+    loadBackupHistory();
+}
+
+// 🆕 隱藏所有頁面的輔助函數
+function hideAllPages() {
+    const pages = [
+        'login-section', 'dashboard-section', 'inventory-section',
+        'dept-risk-index-page', 'data-analytics-page', 'event-registration-page',
+        'alert-settings-page', 'risk-prediction-page', 'user-management-page',
+        'system-settings-page', 'data-backup-page'
+    ];
+    
+    pages.forEach(pageId => {
+        const page = document.getElementById(pageId);
+        if (page) {
+            page.style.display = 'none';
+            page.classList.add('hidden');
+        }
+    });
+    
+    document.querySelector('.container').classList.add('hidden');
+}
+
+// 🆕 載入用戶列表
+async function loadUserList() {
+    try {
+        const response = await fetch(`${scriptUrl}?action=getUserList`);
+        const result = await response.json();
+        
+        if (result.success) {
+            updateUserListTable(result.users);
+        } else {
+            showNotification('載入用戶列表失敗: ' + result.message, 'error');
+        }
+    } catch (error) {
+        console.error('載入用戶列表時發生錯誤:', error);
+        showNotification('載入用戶列表失敗', 'error');
+    }
+}
+
+// 🆕 更新用戶列表表格
+function updateUserListTable(users) {
+    const tableBody = document.getElementById('userListTableBody');
+    
+    if (users.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="text-center">暫無用戶資料</td></tr>';
+        return;
+    }
+    
+    const rows = users.map(user => {
+        const permissionBadge = getPermissionBadge(user.permission);
+        const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleString('zh-TW') : '從未登入';
+        
+        return `
+            <tr>
+                <td>${user.department}</td>
+                <td>${user.name}</td>
+                <td>${user.username}</td>
+                <td>${permissionBadge}</td>
+                <td>${lastLogin}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editUser('${user.username}')">
+                        <i class="fas fa-edit"></i> 編輯
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${user.username}')">
+                        <i class="fas fa-trash"></i> 刪除
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
+    tableBody.innerHTML = rows;
+}
+
+// 🆕 獲取權限徽章樣式
+function getPermissionBadge(permission) {
+    const badges = {
+        's1': '<span class="badge bg-secondary">s1-基本</span>',
+        's2': '<span class="badge bg-primary">s2-中級</span>',
+        's3': '<span class="badge bg-success">s3-高級</span>',
+        's4': '<span class="badge bg-danger">s4-管理</span>'
+    };
+    return badges[permission] || '<span class="badge bg-secondary">未知</span>';
+}
+
+// 🆕 載入系統設定
+async function loadSystemSettings() {
+    try {
+        const response = await fetch(`${scriptUrl}?action=getSystemSettings`);
+        const result = await response.json();
+        
+        if (result.success) {
+            // 填入設定值
+            document.getElementById('sessionTimeout').value = result.settings.sessionTimeout || 10;
+            document.getElementById('maxLoginAttempts').value = result.settings.maxLoginAttempts || 3;
+            document.getElementById('dataRetentionDays').value = result.settings.dataRetentionDays || 365;
+            document.getElementById('backupFrequency').value = result.settings.backupFrequency || 'weekly';
+        } else {
+            showNotification('載入系統設定失敗: ' + result.message, 'error');
+        }
+    } catch (error) {
+        console.error('載入系統設定時發生錯誤:', error);
+        showNotification('載入系統設定失敗', 'error');
+    }
+}
+
+// 🆕 載入備份歷史
+async function loadBackupHistory() {
+    try {
+        const response = await fetch(`${scriptUrl}?action=getBackupHistory`);
+        const result = await response.json();
+        
+        if (result.success) {
+            updateBackupHistoryTable(result.backups);
+        } else {
+            showNotification('載入備份歷史失敗: ' + result.message, 'error');
+        }
+    } catch (error) {
+        console.error('載入備份歷史時發生錯誤:', error);
+        showNotification('載入備份歷史失敗', 'error');
+    }
+}
+
+// 🆕 更新備份歷史表格
+function updateBackupHistoryTable(backups) {
+    const tableBody = document.getElementById('backupHistoryTableBody');
+    
+    if (backups.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="5" class="text-center">暫無備份記錄</td></tr>';
+        return;
+    }
+    
+    const rows = backups.map(backup => {
+        return `
+            <tr>
+                <td>${formatDateTime(backup.timestamp)}</td>
+                <td><span class="badge bg-info">${backup.type}</span></td>
+                <td>${backup.fileSize}</td>
+                <td><span class="badge ${backup.status === '成功' ? 'bg-success' : 'bg-danger'}">${backup.status}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" onclick="downloadBackup('${backup.id}')">
+                        <i class="fas fa-download"></i> 下載
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
+    tableBody.innerHTML = rows;
+}
+
+// 🆕 編輯用戶（佔位函數）
+function editUser(username) {
+    alert(`編輯用戶功能開發中：${username}`);
+}
+
+// 🆕 刪除用戶（佔位函數）
+function deleteUser(username) {
+    if (confirm(`確定要刪除用戶 ${username} 嗎？`)) {
+        alert(`刪除用戶功能開發中：${username}`);
+    }
+}
+
+// 🆕 下載備份（佔位函數）
+function downloadBackup(backupId) {
+    alert(`下載備份功能開發中：${backupId}`);
+}
+
 </script>
 
+<!-- 🆕 用戶管理頁面 -->
+<div id="user-management-page" class="dashboard-page" style="display: none;">
+    <div class="logo-container">
+        <img src="LOGO.png" alt="昶青實業 Logo" class="logo">
+    </div>
+    <h2 class="text-center mb-4">
+        <i class="fas fa-users-cog text-primary"></i> 用戶管理
+    </h2>
+    
+    <!-- 新增用戶區塊 -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-user-plus"></i> 新增用戶</h5>
+        </div>
+        <div class="card-body">
+            <form id="addUserForm">
+                <div class="row">
+                    <div class="col-md-3">
+                        <label for="newUserDepartment" class="form-label">部門</label>
+                        <input type="text" class="form-control" id="newUserDepartment" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="newUserName" class="form-label">姓名</label>
+                        <input type="text" class="form-control" id="newUserName" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="newUserAccount" class="form-label">帳號</label>
+                        <input type="text" class="form-control" id="newUserAccount" required>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="newUserPermission" class="form-label">權限等級</label>
+                        <select class="form-select" id="newUserPermission" required>
+                            <option value="s1">s1 - 基本用戶</option>
+                            <option value="s2">s2 - 中級用戶</option>
+                            <option value="s3">s3 - 高級用戶</option>
+                            <option value="s4">s4 - 管理用戶</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <label for="newUserPassword" class="form-label">初始密碼</label>
+                        <input type="password" class="form-control" id="newUserPassword" required>
+                    </div>
+                    <div class="col-md-6 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> 新增用戶
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- 用戶列表區塊 -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-list"></i> 用戶列表</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped" id="userListTable">
+                    <thead>
+                        <tr>
+                            <th>部門</th>
+                            <th>姓名</th>
+                            <th>帳號</th>
+                            <th>權限等級</th>
+                            <th>最後登入</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userListTableBody">
+                        <tr>
+                            <td colspan="6" class="text-center">載入中...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <button class="btn btn-secondary mt-3" onclick="showDashboard()">返回</button>
+</div>
+
+<!-- 🆕 系統設定頁面 -->
+<div id="system-settings-page" class="dashboard-page" style="display: none;">
+    <div class="logo-container">
+        <img src="LOGO.png" alt="昶青實業 Logo" class="logo">
+    </div>
+    <h2 class="text-center mb-4">
+        <i class="fas fa-cogs text-secondary"></i> 系統設定
+    </h2>
+    
+    <!-- 系統參數設定 -->
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0"><i class="fas fa-sliders-h"></i> 系統參數</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="sessionTimeout" class="form-label">登入逾時時間 (分鐘)</label>
+                    <input type="number" class="form-control" id="sessionTimeout" value="10" min="5" max="60">
+                </div>
+                <div class="col-md-6">
+                    <label for="maxLoginAttempts" class="form-label">最大登入嘗試次數</label>
+                    <input type="number" class="form-control" id="maxLoginAttempts" value="3" min="3" max="10">
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-6">
+                    <label for="dataRetentionDays" class="form-label">數據保留天數</label>
+                    <input type="number" class="form-control" id="dataRetentionDays" value="365" min="30">
+                </div>
+                <div class="col-md-6">
+                    <label for="backupFrequency" class="form-label">自動備份頻率</label>
+                    <select class="form-select" id="backupFrequency">
+                        <option value="daily">每日</option>
+                        <option value="weekly" selected>每週</option>
+                        <option value="monthly">每月</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-3">
+                <button type="button" class="btn btn-primary" onclick="saveSystemSettings()">
+                    <i class="fas fa-save"></i> 儲存設定
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <button class="btn btn-secondary mt-3" onclick="showDashboard()">返回</button>
+</div>
+
+<!-- 🆕 數據備份頁面 -->
+<div id="data-backup-page" class="dashboard-page" style="display: none;">
+    <div class="logo-container">
+        <img src="LOGO.png" alt="昶青實業 Logo" class="logo">
+    </div>
+    <h2 class="text-center mb-4">
+        <i class="fas fa-database text-info"></i> 數據備份管理
+    </h2>
+    
+    <!-- 立即備份區塊 -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"><i class="fas fa-download"></i> 立即備份</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-outline-primary w-100 mb-2" onclick="createBackup('users')">
+                        <i class="fas fa-users"></i> 備份用戶資料
+                    </button>
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-outline-success w-100 mb-2" onclick="createBackup('risks')">
+                        <i class="fas fa-exclamation-triangle"></i> 備份風險資料
+                    </button>
+                </div>
+                <div class="col-md-4">
+                    <button type="button" class="btn btn-outline-warning w-100 mb-2" onclick="createBackup('all')">
+                        <i class="fas fa-database"></i> 完整備份
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 備份歷史區塊 -->
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0"><i class="fas fa-history"></i> 備份歷史</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped" id="backupHistoryTable">
+                    <thead>
+                        <tr>
+                            <th>備份時間</th>
+                            <th>備份類型</th>
+                            <th>檔案大小</th>
+                            <th>狀態</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="backupHistoryTableBody">
+                        <tr>
+                            <td colspan="5" class="text-center">載入中...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <button class="btn btn-secondary mt-3" onclick="showDashboard()">返回</button>
+</div>
 
 </body>
 </html>
