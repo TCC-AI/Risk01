@@ -2540,7 +2540,71 @@ document.addEventListener('DOMContentLoaded', function() {
     const riskPredictionBtn = document.getElementById('risk-prediction-btn');
    
     const backFromPredictionBtn = document.getElementById('back-to-dashboard-from-prediction');
-
+// 🔧 添加s4頁面返回按鈕的事件監聽器
+    function bindS4ReturnButtons() {
+        // 用戶管理返回按鈕
+        const backFromUserManagement = document.getElementById('backFromUserManagement');
+        if (backFromUserManagement) {
+            backFromUserManagement.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('用戶管理返回按鈕被點擊');
+                showDashboard();
+            });
+        }
+        
+        // 系統設定返回按鈕
+        const backFromSystemSettings = document.getElementById('backFromSystemSettings');
+        if (backFromSystemSettings) {
+            backFromSystemSettings.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('系統設定返回按鈕被點擊');
+                showDashboard();
+            });
+        }
+        
+        // 數據備份返回按鈕
+        const backFromDataBackup = document.getElementById('backFromDataBackup');
+        if (backFromDataBackup) {
+            backFromDataBackup.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('數據備份返回按鈕被點擊');
+                showDashboard();
+            });
+        }
+    }
+    
+    // 立即嘗試綁定
+    bindS4ReturnButtons();
+    
+    // 也在500ms後再次嘗試綁定（確保DOM完全載入）
+    setTimeout(bindS4ReturnButtons, 500);
+    
+    // 🔧 添加事件委託作為備用方案
+    document.addEventListener('click', function(e) {
+        if (e.target && (
+            e.target.id === 'backFromUserManagement' || 
+            e.target.id === 'backFromSystemSettings' || 
+            e.target.id === 'backFromDataBackup'
+        )) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('事件委託捕獲到返回按鈕點擊:', e.target.id);
+            
+            try {
+                showDashboard();
+            } catch (error) {
+                console.error('showDashboard 執行錯誤:', error);
+                // 備用方案：直接操作DOM
+                hideAllPages();
+                const container = document.querySelector('.container');
+                const dashboardSection = document.getElementById('dashboard-section');
+                if (container) container.classList.remove('hidden');
+                if (dashboardSection) dashboardSection.classList.remove('hidden');
+            }
+        }
+    });
+});
+    
     // 🆕 風險趨勢預判分析按鈕點擊事件
     if (riskPredictionBtn) {
         riskPredictionBtn.addEventListener('click', function() {
@@ -5627,6 +5691,10 @@ function addManagementFeatures() {
             showDataBackupPage();
             resetInactivityTimer();
         });
+        // 🆕 在添加按鈕後，延遲綁定返回按鈕事件
+        setTimeout(() => {
+            bindS4ReturnButtons();
+        }, 200);
     }
 }
 
@@ -5916,7 +5984,7 @@ function downloadBackup(backupId) {
         </div>
     </div>
     
-    <button class="btn btn-secondary mt-3" onclick="showDashboard()">返回</button>
+   <button class="btn btn-secondary mt-3" id="backFromUserManagement">返回</button>
 </div>
 
 <!-- 🆕 系統設定頁面 -->
@@ -5966,7 +6034,7 @@ function downloadBackup(backupId) {
         </div>
     </div>
     
-    <button class="btn btn-secondary mt-3" onclick="showDashboard()">返回</button>
+    <button class="btn btn-secondary mt-3" id="backFromUserManagement">返回</button>
 </div>
 
 <!-- 🆕 數據備份頁面 -->
@@ -6031,7 +6099,7 @@ function downloadBackup(backupId) {
         </div>
     </div>
     
-    <button class="btn btn-secondary mt-3" onclick="showDashboard()">返回</button>
+    <button class="btn btn-secondary mt-3" id="backFromUserManagement">返回</button>
 </div>
 
 </body>
