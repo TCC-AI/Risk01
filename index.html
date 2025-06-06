@@ -3307,10 +3307,31 @@ function setButtonPermissions() {
             alertSettingsBtn.style.cursor = 'pointer';
             alertSettingsBtn.style.background = 'linear-gradient(to right, #ff6b35, #f7931e)';
             alertSettingsBtn.title = '';
+            
+       // 🆕 檢查並設置現有預警詳情按鈕的權限
+    const existingViewDetailsBtn = document.getElementById('viewDetailsBtn');
+    if (existingViewDetailsBtn) {
+        if (!checkPermission('s2')) {
+            existingViewDetailsBtn.disabled = true;
+            existingViewDetailsBtn.style.opacity = '0.5';
+            existingViewDetailsBtn.style.cursor = 'not-allowed';
+            existingViewDetailsBtn.title = '此功能需要 s2 以上權限';
+            
+            // 移除原有事件並添加權限提示
+            existingViewDetailsBtn.replaceWith(existingViewDetailsBtn.cloneNode(true));
+            const newViewDetailsBtn = document.getElementById('viewDetailsBtn');
+            newViewDetailsBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('抱歉，您的權限等級不足，無法查看緊急預警詳情。\n需要權限：s2 以上\n您的權限：' + (localStorage.getItem('permission') || 's1'));
+            });
+        } else {
+            existingViewDetailsBtn.disabled = false;
+            existingViewDetailsBtn.style.opacity = '1';
+            existingViewDetailsBtn.style.cursor = 'pointer';
+            existingViewDetailsBtn.title = '';
         }
     }
 }
-
 
     
     // 顯示主頁面
@@ -3349,7 +3370,7 @@ function showDashboard() {
     resetInactivityTimer();
 }
 
-// 🆕 檢查當前預警狀態
+// 🆕 檢查當前預警狀態 (修正版)
 async function checkCurrentAlertStatus() {
     try {
         const response = await fetch(`${scriptUrl}?action=getCurrentAlertStatus`);
@@ -3360,7 +3381,10 @@ async function checkCurrentAlertStatus() {
             
             // 如果有緊急預警，讓預警設定按鈕閃爍
             if (result.criticalCount > 0) {
-                document.getElementById('alert-settings-btn').classList.add('alert-button-warning');
+                const alertSettingsBtn = document.getElementById('alert-settings-btn');
+                if (alertSettingsBtn) {
+                    alertSettingsBtn.classList.add('alert-button-warning');
+                }
             }
         } else {
             hideAlertStatusIndicator();
@@ -3369,6 +3393,7 @@ async function checkCurrentAlertStatus() {
         console.error('檢查預警狀態失敗:', error);
     }
 }
+
 
 // 🟢 修正後的 showAlertStatusIndicator 函數
 function showAlertStatusIndicator(alertCount, criticalCount) {
@@ -3379,7 +3404,6 @@ function showAlertStatusIndicator(alertCount, criticalCount) {
     }
 
     if (criticalCount > 0) {
-        indicator.className = 'alert-status-container';
         indicator.innerHTML = `
             <div class="alert alert-danger alert-dismissible fade show" role="alert">
                 <i class="fas fa-exclamation-triangle me-2"></i>
@@ -3392,7 +3416,6 @@ function showAlertStatusIndicator(alertCount, criticalCount) {
         `;
         
     } else if (alertCount > 0) {
-        indicator.className = 'alert-status-container';
         indicator.innerHTML = `
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                 <i class="fas fa-info-circle me-2"></i>
@@ -3403,7 +3426,6 @@ function showAlertStatusIndicator(alertCount, criticalCount) {
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="關閉"></button>
             </div>
         `;
-        
     } else {
         indicator.style.display = 'none';
         return;
@@ -3411,16 +3433,31 @@ function showAlertStatusIndicator(alertCount, criticalCount) {
 
     indicator.style.display = 'block';
     
-    // 重新綁定查看詳情按鈕事件
+    // 🆕 為查看詳情按鈕添加權限控制 - s1不行，其餘皆可
     setTimeout(() => {
         const viewDetailsBtn = document.getElementById('viewDetailsBtn');
         if (viewDetailsBtn) {
-            viewDetailsBtn.addEventListener('click', function() {
-                showDeptRiskIndexPage();
-            });
+            if (!checkPermission('s2')) {
+                // s1用戶：禁用按鈕並添加權限提示
+                viewDetailsBtn.disabled = true;
+                viewDetailsBtn.style.opacity = '0.5';
+                viewDetailsBtn.style.cursor = 'not-allowed';
+                viewDetailsBtn.title = '此功能需要 s2 以上權限';
+                
+                viewDetailsBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    alert('抱歉，您的權限等級不足，無法查看緊急預警詳情。\n需要權限：s2 以上\n您的權限：' + (localStorage.getItem('permission') || 's1'));
+                });
+            } else {
+                // s2以上用戶：正常功能
+                viewDetailsBtn.addEventListener('click', function() {
+                    showDeptRiskIndexPage();
+                });
+            }
         }
     }, 100);
 }
+
 
 
 
