@@ -162,13 +162,13 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 #alert-settings-btn:hover::before {
     left: 100%;
 }
-/* 🆕 為數據分析儀表板按鈕添加水波紋效果 */
-#data-analytics-btn {
+/* 🔄 統一水波紋效果 - 適用於所有需要此效果的按鈕 */
+.wave-ripple-btn {
     position: relative;
     overflow: hidden;
 }
 
-#data-analytics-btn::before {
+.wave-ripple-btn::before {
     content: '';
     position: absolute;
     top: 0;
@@ -179,17 +179,21 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     transition: left 0.5s;
 }
 
-#data-analytics-btn:hover::before {
+.wave-ripple-btn:hover::before {
     left: 100%;
 }
 
-/* 🆕 為風險趨勢預判分析按鈕添加水波紋效果 */
-#risk-prediction-btn {
+/* 🎨 應用到特定按鈕 */
+#data-analytics-btn,
+#risk-prediction-btn,
+#alert-settings-btn {
     position: relative;
     overflow: hidden;
 }
 
-#risk-prediction-btn::before {
+#data-analytics-btn::before,
+#risk-prediction-btn::before,
+#alert-settings-btn::before {
     content: '';
     position: absolute;
     top: 0;
@@ -200,9 +204,12 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     transition: left 0.5s;
 }
 
-#risk-prediction-btn:hover::before {
+#data-analytics-btn:hover::before,
+#risk-prediction-btn:hover::before,
+#alert-settings-btn:hover::before {
     left: 100%;
 }
+
 
 
 
@@ -1847,6 +1854,14 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 /* 雷達圖容器 */
 #radarChart {
     max-height: 250px;
+}
+/* 🔧 響應式調整 */
+@media (max-width: 768px) {
+    #data-analytics-btn::before,
+    #risk-prediction-btn::before,
+    #alert-settings-btn::before {
+        transition: left 0.4s; /* 手機版稍微快一點 */
+    }
 }
 
 
