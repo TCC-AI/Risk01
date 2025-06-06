@@ -2595,10 +2595,38 @@ document.addEventListener('DOMContentLoaded', function() {
     const backFromAlertBtn = document.getElementById('backFromAlertBtn');
     const saveAlertSettingsBtn = document.getElementById('saveAlertSettingsBtn');
     const riskPredictionBtn = document.getElementById('risk-prediction-btn');
-   
+   // 🆕 添加管理頁面的返回按鈕事件監聽器
+    const backFromUserManagement = document.getElementById('backFromUserManagement');
+    const backFromSystemSettings = document.getElementById('backFromSystemSettings');
+    const backFromDataBackup = document.getElementById('backFromDataBackup');
     const backFromPredictionBtn = document.getElementById('back-to-dashboard-from-prediction');
 
-// 🆕 風險趨勢預判分析按鈕點擊事件 - 需要s3以上權限
+// 用戶管理頁面返回按鈕
+    if (backFromUserManagement) {
+        backFromUserManagement.addEventListener('click', function() {
+            document.getElementById('user-management-page').style.display = 'none';
+            showDashboard();
+            resetInactivityTimer();
+        });
+    }
+    // 系統設定頁面返回按鈕
+    if (backFromSystemSettings) {
+        backFromSystemSettings.addEventListener('click', function() {
+            document.getElementById('system-settings-page').style.display = 'none';
+            showDashboard();
+            resetInactivityTimer();
+        });
+    }
+    
+    // 數據備份頁面返回按鈕
+    if (backFromDataBackup) {
+        backFromDataBackup.addEventListener('click', function() {
+            document.getElementById('data-backup-page').style.display = 'none';
+            showDashboard();
+            resetInactivityTimer();
+        });
+    }
+    // 🆕 風險趨勢預判分析按鈕點擊事件 - 需要s3以上權限
 if (riskPredictionBtn) {
     riskPredictionBtn.addEventListener('click', function() {
         // 🆕 檢查s3以上權限
