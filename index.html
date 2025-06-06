@@ -2653,7 +2653,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbyRvwrImfYPIJwciZaymq5hI5WBw_a2-RMfTTYTRlmxrFGc0VDXBAVG8zfWCsHdhCE9/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbxxB3Lh4PJ00M1ta5X6Sc_hR82ZYItO2V36hhRFJv0QPdFiTYfJVtloT2NsBRsr54bw/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
@@ -2793,7 +2793,79 @@ document.addEventListener('DOMContentLoaded', function() {
     const backFromSystemSettings = document.getElementById('backFromSystemSettings');
     const backFromDataBackup = document.getElementById('backFromDataBackup');
     const backFromPredictionBtn = document.getElementById('back-to-dashboard-from-prediction');
-
+    // 🆕 新增用戶表單事件監聽器
+    const addUserForm = document.getElementById('addUserForm');
+    if (addUserForm) {
+        addUserForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // 防止表單默認提交
+            handleAddUserSubmit();
+            resetInactivityTimer();
+        });
+    }
+// 🆕 新增處理用戶提交的函數
+async function handleAddUserSubmit() {
+    try {
+        // 獲取表單數據
+        const formData = {
+            department: document.getElementById('newUserDepartment').value.trim(),
+            name: document.getElementById('newUserName').value.trim(),
+            username: document.getElementById('newUserAccount').value.trim(),
+            permission: document.getElementById('newUserPermission').value,
+            password: document.getElementById('newUserPassword').value
+        };
+        
+        // 驗證必填欄位
+        if (!formData.department || !formData.name || !formData.username || !formData.password) {
+            alert('請填寫所有必填欄位');
+            return;
+        }
+        
+        // 驗證帳號格式（可選）
+        if (formData.username.length < 3) {
+            alert('帳號長度至少需要3個字元');
+            return;
+        }
+        
+        // 顯示載入狀態
+        const submitBtn = document.querySelector('#addUserForm button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 新增中...';
+        submitBtn.disabled = true;
+        
+        // 發送請求到後端
+        const response = await fetch(`${scriptUrl}?action=addUser`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData)
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('用戶新增成功！');
+            
+            // 清空表單
+            document.getElementById('addUserForm').reset();
+            
+            // 重新載入用戶列表
+            loadUserList();
+        } else {
+            alert('新增失敗：' + result.message);
+        }
+        
+    } catch (error) {
+        console.error('新增用戶時發生錯誤:', error);
+        alert('新增失敗，請稍後再試');
+    } finally {
+        // 恢復按鈕狀態
+        const submitBtn = document.querySelector('#addUserForm button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-plus"></i> 新增用戶';
+        submitBtn.disabled = false;
+    }
+}
+    
 // 用戶管理頁面返回按鈕
     if (backFromUserManagement) {
         backFromUserManagement.addEventListener('click', function() {
