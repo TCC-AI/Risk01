@@ -2604,7 +2604,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // 用戶管理頁面返回按鈕
     if (backFromUserManagement) {
         backFromUserManagement.addEventListener('click', function() {
-            document.getElementById('user-management-page').style.display = 'none';
+            document.getElementById('user-management-page').style.display = 'dashboard-section';
             showDashboard();
             resetInactivityTimer();
         });
