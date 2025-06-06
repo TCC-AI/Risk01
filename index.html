@@ -2598,14 +2598,21 @@ document.addEventListener('DOMContentLoaded', function() {
    
     const backFromPredictionBtn = document.getElementById('back-to-dashboard-from-prediction');
 
-    // 🆕 風險趨勢預判分析按鈕點擊事件
-    if (riskPredictionBtn) {
-        riskPredictionBtn.addEventListener('click', function() {
-            showRiskPredictionPage();
-            loadStandalonePredictionAnalysis();
-            resetInactivityTimer();
-        });
-    }
+// 🆕 風險趨勢預判分析按鈕點擊事件 - 需要s3以上權限
+if (riskPredictionBtn) {
+    riskPredictionBtn.addEventListener('click', function() {
+        // 🆕 檢查s3以上權限
+        if (!checkPermission('s3')) {
+            alert('權限不足，無法訪問風險趨勢預判分析功能\n需要權限：s3 以上\n您的權限：' + (localStorage.getItem('permission') || 's1'));
+            return;
+        }
+        
+        showRiskPredictionPage();
+        loadStandalonePredictionAnalysis();
+        resetInactivityTimer();
+    });
+}
+
     
     // 🆕 返回按鈕
     if (backFromPredictionBtn) {
@@ -2659,17 +2666,24 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     
-    // 檢查元素是否存在
-    if (alertSettingsBtn) {
-        alertSettingsBtn.addEventListener('click', function() {
-             // 移除閃爍效果
-    this.classList.remove('alert-button-warning');
-            showAlertSettingsPage();
-            loadAlertSettings();
-            loadAlertHistory();
-            resetInactivityTimer();
-        });
-    }
+// 檢查預警設定按鈕是否存在並添加s4權限檢查
+if (alertSettingsBtn) {
+    alertSettingsBtn.addEventListener('click', function() {
+        // 🆕 檢查s4權限
+        if (!checkPermission('s4')) {
+            alert('權限不足，無法訪問風險預警設定功能\n需要權限：s4 管理權限\n您的權限：' + (localStorage.getItem('permission') || 's1'));
+            return;
+        }
+        
+        // 移除閃爍效果
+        this.classList.remove('alert-button-warning');
+        showAlertSettingsPage();
+        loadAlertSettings();
+        loadAlertHistory();
+        resetInactivityTimer();
+    });
+}
+
     
     if (backFromAlertBtn) {
         backFromAlertBtn.addEventListener('click', function() {
@@ -3196,22 +3210,22 @@ function formatDateTime(dateTime) {
         document.addEventListener(event, resetInactivityTimer, true);
     });
     
-// 🆕 設置按鈕權限狀態 (修改版)
+// 🆕 設置按鈕權限狀態 (修正版)
 function setButtonPermissions() {
-    // 🔄 部門風險係數按鈕 - 改為需要s2權限
+    // 🔄 部門風險係數按鈕 - s1不行，其餘皆可 (需要s2以上)
     if (!checkPermission('s2')) {
         deptRiskIndexBtn.disabled = true;
         deptRiskIndexBtn.style.opacity = '0.5';
         deptRiskIndexBtn.style.cursor = 'not-allowed';
         deptRiskIndexBtn.style.background = 'linear-gradient(to right, #6c757d, #495057)';
-        deptRiskIndexBtn.title = '此功能需要 s2 權限等級';
+        deptRiskIndexBtn.title = '此功能需要 s2 以上權限';
         
         // 移除原有事件並添加權限提示
         deptRiskIndexBtn.replaceWith(deptRiskIndexBtn.cloneNode(true));
         const newDeptBtn = document.getElementById('dept-risk-index-btn');
         newDeptBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            alert('抱歉，您的權限等級不足，無法使用此功能。\n需要權限：s2\n您的權限：' + (localStorage.getItem('permission') || 's1'));
+            alert('抱歉，您的權限等級不足，無法使用此功能。\n需要權限：s2 以上\n您的權限：' + (localStorage.getItem('permission') || 's1'));
         });
     } else {
         deptRiskIndexBtn.disabled = false;
@@ -3221,20 +3235,20 @@ function setButtonPermissions() {
         deptRiskIndexBtn.title = '';
     }
 
-    // 🔄 數據分析儀表板按鈕 - 保持s3權限
+    // 🔄 數據分析儀表板按鈕 - s1、s2不行，其餘皆可 (需要s3以上)
     if (!checkPermission('s3')) {
         dataAnalyticsBtn.disabled = true;
         dataAnalyticsBtn.style.opacity = '0.5';
         dataAnalyticsBtn.style.cursor = 'not-allowed';
         dataAnalyticsBtn.style.background = 'linear-gradient(to right, #6c757d, #495057)';
-        dataAnalyticsBtn.title = '此功能需要 s3 權限等級';
+        dataAnalyticsBtn.title = '此功能需要 s3 以上權限';
         
         // 移除原有事件並添加權限提示
         dataAnalyticsBtn.replaceWith(dataAnalyticsBtn.cloneNode(true));
         const newAnalyticsBtn = document.getElementById('data-analytics-btn');
         newAnalyticsBtn.addEventListener('click', function(e) {
             e.preventDefault();
-            alert('抱歉，您的權限等級不足，無法使用此功能。\n需要權限：s3\n您的權限：' + (localStorage.getItem('permission') || 's1'));
+            alert('抱歉，您的權限等級不足，無法使用此功能。\n需要權限：s3 以上\n您的權限：' + (localStorage.getItem('permission') || 's1'));
         });
     } else {
         dataAnalyticsBtn.disabled = false;
@@ -3244,7 +3258,7 @@ function setButtonPermissions() {
         dataAnalyticsBtn.title = '';
     }
 
-    // 🔄 風險趨勢預判分析按鈕 - 改為需要s3權限
+    // 🔄 風險趨勢預判分析按鈕 - s1、s2不行，其餘皆可 (需要s3以上)
     const riskPredictionBtn = document.getElementById('risk-prediction-btn');
     if (riskPredictionBtn) {
         if (!checkPermission('s3')) {
@@ -3252,14 +3266,14 @@ function setButtonPermissions() {
             riskPredictionBtn.style.opacity = '0.5';
             riskPredictionBtn.style.cursor = 'not-allowed';
             riskPredictionBtn.style.background = 'linear-gradient(to right, #6c757d, #495057)';
-            riskPredictionBtn.title = '此功能需要 s3 權限等級';
+            riskPredictionBtn.title = '此功能需要 s3 以上權限';
             
             // 移除原有事件並添加權限提示
             riskPredictionBtn.replaceWith(riskPredictionBtn.cloneNode(true));
             const newPredictionBtn = document.getElementById('risk-prediction-btn');
             newPredictionBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-                alert('抱歉，您的權限等級不足，無法使用此功能。\n需要權限：s3\n您的權限：' + (localStorage.getItem('permission') || 's1'));
+                alert('抱歉，您的權限等級不足，無法使用此功能。\n需要權限：s3 以上\n您的權限：' + (localStorage.getItem('permission') || 's1'));
             });
         } else {
             riskPredictionBtn.disabled = false;
@@ -3270,7 +3284,7 @@ function setButtonPermissions() {
         }
     }
 
-    // 🔄 風險預警設定按鈕 - 改為需要s4權限
+    // 🔄 風險預警設定按鈕 - 只有s4可以
     const alertSettingsBtn = document.getElementById('alert-settings-btn');
     if (alertSettingsBtn) {
         if (!checkPermission('s4')) {
@@ -3278,14 +3292,14 @@ function setButtonPermissions() {
             alertSettingsBtn.style.opacity = '0.5';
             alertSettingsBtn.style.cursor = 'not-allowed';
             alertSettingsBtn.style.background = 'linear-gradient(to right, #6c757d, #495057)';
-            alertSettingsBtn.title = '此功能需要 s4 權限等級';
+            alertSettingsBtn.title = '此功能僅限 s4 管理權限';
             
             // 移除原有事件並添加權限提示
             alertSettingsBtn.replaceWith(alertSettingsBtn.cloneNode(true));
             const newAlertBtn = document.getElementById('alert-settings-btn');
             newAlertBtn.addEventListener('click', function(e) {
                 e.preventDefault();
-                alert('抱歉，您的權限等級不足，無法使用此功能。\n需要權限：s4\n您的權限：' + (localStorage.getItem('permission') || 's1'));
+                alert('抱歉，您的權限等級不足，無法使用此功能。\n需要權限：s4 管理權限\n您的權限：' + (localStorage.getItem('permission') || 's1'));
             });
         } else {
             alertSettingsBtn.disabled = false;
@@ -3296,6 +3310,7 @@ function setButtonPermissions() {
         }
     }
 }
+
 
     
     // 顯示主頁面
@@ -3599,23 +3614,24 @@ if (alertSettingsBtn) {
 }
 
     
-    // 數據分析儀表板按鈕點擊事件
-    dataAnalyticsBtn.addEventListener('click', function() {
-        // 🆕 再次檢查權限（雙重保險）
-        if (!checkPermission('s3')) {
-            alert('權限不足，無法訪問數據分析儀表板');
-            return;
-        }
-        
-        dashboardSection.style.display = 'none';
-        dataAnalyticsPage.style.display = 'block';
-        
-        // 載入數據分析
-        loadAnalyticsData();
-        
-        // 重置計時器
-        resetInactivityTimer();
-    });
+// 數據分析儀表板按鈕點擊事件 - 需要s3以上權限
+dataAnalyticsBtn.addEventListener('click', function() {
+    // 🆕 檢查s3以上權限
+    if (!checkPermission('s3')) {
+        alert('權限不足，無法訪問數據分析儀表板\n需要權限：s3 以上\n您的權限：' + (localStorage.getItem('permission') || 's1'));
+        return;
+    }
+    
+    dashboardSection.style.display = 'none';
+    dataAnalyticsPage.style.display = 'block';
+    
+    // 載入數據分析
+    loadAnalyticsData();
+    
+    // 重置計時器
+    resetInactivityTimer();
+});
+
     
     // 返回按鈕點擊事件
     backFromRiskBtn.addEventListener('click', function() {
