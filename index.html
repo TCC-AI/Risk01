@@ -162,85 +162,52 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 #alert-settings-btn:hover::before {
     left: 100%;
 }
-
-/* 🌊 脈衝波擴散動畫 - 為預警設定按鈕添加 */
-#alert-settings-btn {
+/* 🔄 統一水波紋效果 - 適用於所有需要此效果的按鈕 */
+.wave-ripple-btn {
     position: relative;
-    overflow: visible; /* 改為 visible 讓波紋可以擴散到按鈕外 */
+    overflow: hidden;
 }
 
-/* 脈衝波擴散效果 */
-#alert-settings-btn::after {
+.wave-ripple-btn::before {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
+    top: 0;
+    left: -100%;
     width: 100%;
     height: 100%;
-    border: 2px solid rgba(255, 107, 53, 0.6); /* 橙色波紋 */
-    border-radius: 50px; /* 配合按鈕的圓角 */
-    transform: translate(-50%, -50%);
-    animation: pulseWave 2s infinite; /* 每2秒一次脈衝 */
-    pointer-events: none; /* 不影響按鈕點擊 */
-    z-index: -1; /* 放在按鈕後面 */
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
 }
 
-/* 脈衝波動畫關鍵幀 */
-@keyframes pulseWave {
-    0% {
-        transform: translate(-50%, -50%) scale(1);
-        opacity: 0.8;
-        border-width: 3px;
-    }
-    50% {
-        transform: translate(-50%, -50%) scale(1.3);
-        opacity: 0.4;
-        border-width: 2px;
-    }
-    100% {
-        transform: translate(-50%, -50%) scale(1.6);
-        opacity: 0;
-        border-width: 1px;
-    }
+.wave-ripple-btn:hover::before {
+    left: 100%;
 }
 
-/* 🆕 如果您也想為數據分析和風險趨勢預判分析按鈕添加相同效果 */
-#data-analytics-btn::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100%;
-    height: 100%;
-    border: 2px solid rgba(156, 39, 176, 0.6); /* 紫色波紋 */
-    border-radius: 50px;
-    transform: translate(-50%, -50%);
-    animation: pulseWave 2s infinite;
-    pointer-events: none;
-    z-index: -1;
-}
-
-#risk-prediction-btn::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100%;
-    height: 100%;
-    border: 2px solid rgba(52, 152, 219, 0.6); /* 藍色波紋 */
-    border-radius: 50px;
-    transform: translate(-50%, -50%);
-    animation: pulseWave 2s infinite;
-    pointer-events: none;
-    z-index: -1;
-}
-
-/* 🎯 讓這三個按鈕都支援脈衝擴散 */
+/* 🎨 應用到特定按鈕 */
 #data-analytics-btn,
 #risk-prediction-btn,
 #alert-settings-btn {
     position: relative;
-    overflow: visible; /* 重要：讓波紋可以擴散到按鈕外 */
+    overflow: hidden;
+}
+
+#data-analytics-btn::before,
+#risk-prediction-btn::before,
+#alert-settings-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+}
+
+#data-analytics-btn:hover::before,
+#risk-prediction-btn:hover::before,
+#alert-settings-btn:hover::before {
+    left: 100%;
 }
 
 
@@ -1890,12 +1857,11 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 }
 /* 🔧 響應式調整 */
 @media (max-width: 768px) {
-#data-analytics-btn,
-#risk-prediction-btn,
-#alert-settings-btn {
-    position: relative;
-    overflow: visible; /* ✅ 改為 visible 讓脈衝波可以擴散 */
-}
+    #data-analytics-btn::before,
+    #risk-prediction-btn::before,
+    #alert-settings-btn::before {
+        transition: left 0.4s; /* 手機版稍微快一點 */
+    }
 }
 
 
