@@ -3283,6 +3283,29 @@ function setButtonPermissions() {
             riskPredictionBtn.title = '';
         }
     }
+     // 🆕 檢查並設置現有預警詳情按鈕的權限
+    const existingViewDetailsBtn = document.getElementById('viewDetailsBtn');
+    if (existingViewDetailsBtn) {
+        if (!checkPermission('s2')) {
+            existingViewDetailsBtn.disabled = true;
+            existingViewDetailsBtn.style.opacity = '0.5';
+            existingViewDetailsBtn.style.cursor = 'not-allowed';
+            existingViewDetailsBtn.title = '此功能需要 s2 以上權限';
+            
+            // 移除原有事件並添加權限提示
+            existingViewDetailsBtn.replaceWith(existingViewDetailsBtn.cloneNode(true));
+            const newViewDetailsBtn = document.getElementById('viewDetailsBtn');
+            newViewDetailsBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('抱歉，您的權限等級不足，無法查看緊急預警詳情。\n需要權限：s2 以上\n您的權限：' + (localStorage.getItem('permission') || 's1'));
+            });
+        } else {
+            existingViewDetailsBtn.disabled = false;
+            existingViewDetailsBtn.style.opacity = '1';
+            existingViewDetailsBtn.style.cursor = 'pointer';
+            existingViewDetailsBtn.title = '';
+        }
+    }
 
     // 🔄 風險預警設定按鈕 - 只有s4可以
     const alertSettingsBtn = document.getElementById('alert-settings-btn');
@@ -3307,31 +3330,10 @@ function setButtonPermissions() {
             alertSettingsBtn.style.cursor = 'pointer';
             alertSettingsBtn.style.background = 'linear-gradient(to right, #ff6b35, #f7931e)';
             alertSettingsBtn.title = '';
-            
-       // 🆕 檢查並設置現有預警詳情按鈕的權限
-    const existingViewDetailsBtn = document.getElementById('viewDetailsBtn');
-    if (existingViewDetailsBtn) {
-        if (!checkPermission('s2')) {
-            existingViewDetailsBtn.disabled = true;
-            existingViewDetailsBtn.style.opacity = '0.5';
-            existingViewDetailsBtn.style.cursor = 'not-allowed';
-            existingViewDetailsBtn.title = '此功能需要 s2 以上權限';
-            
-            // 移除原有事件並添加權限提示
-            existingViewDetailsBtn.replaceWith(existingViewDetailsBtn.cloneNode(true));
-            const newViewDetailsBtn = document.getElementById('viewDetailsBtn');
-            newViewDetailsBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                alert('抱歉，您的權限等級不足，無法查看緊急預警詳情。\n需要權限：s2 以上\n您的權限：' + (localStorage.getItem('permission') || 's1'));
-            });
-        } else {
-            existingViewDetailsBtn.disabled = false;
-            existingViewDetailsBtn.style.opacity = '1';
-            existingViewDetailsBtn.style.cursor = 'pointer';
-            existingViewDetailsBtn.title = '';
         }
     }
 }
+
 
     
     // 顯示主頁面
