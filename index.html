@@ -10,9 +10,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- 新增 Chart.js 庫 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- 🆕 添加 TensorFlow.js -->
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.2.0/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis@1.5.1/dist/tfjs-vis.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.10.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-vis@1.5.1/dist/tfjs-vis.umd.min.js"></script>
   
     <style>
         /* 基礎樣式設定 */
@@ -1898,7 +1897,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     overflow: visible; /* ✅ 改為 visible 讓脈衝波可以擴散 */
 }
 }
-        /* 🆕 深度學習相關樣式 */
+/* 🆕 深度學習相關樣式 */
 .prediction-stats .stat-item {
     padding: 10px;
     border-left: 4px solid #007bff;
@@ -1984,17 +1983,6 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         margin-top: 20px;
     }
 }
-/* 🔴 問題：深度學習開關在小螢幕上可能顯示不佳 */
-@media (max-width: 768px) {
-    .form-check-label {
-        font-size: 14px; /* 添加這行 */
-    }
-    
-    .form-check-input {
-        transform: scale(0.9); /* 添加這行，縮小開關大小 */
-    }
-}
-
 
 
     </style>
@@ -2144,8 +2132,8 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                                 <option value="anomaly">僅異常檢測</option>
                             </select>
                         </div>
-                    <!-- 🆕 深度學習選項 -->
-    <div class="col-md-3">
+                        <!-- 🆕 深度學習選項 -->
+    <div class="col-md-2">
         <label class="form-label">預測方法</label>
         <div class="form-check form-switch">
             <input class="form-check-input" type="checkbox" id="useDeepLearning">
@@ -2192,7 +2180,6 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
         </div>
     </div>
 </div>
-
                         <div class="col-md-3 d-flex align-items-end">
                             <button type="button" class="btn btn-primary me-2" id="refreshPredictionBtn">
                                 <i class="fas fa-sync-alt"></i> 重新分析
@@ -4062,7 +4049,20 @@ deptRiskIndexBtn.addEventListener('click', function() {
     resetInactivityTimer();
 });
 
-   
+    // 🆕 風險趨勢預判分析按鈕點擊事件 - 添加s3權限檢查
+if (riskPredictionBtn) {
+    riskPredictionBtn.addEventListener('click', function() {
+        // 🆕 檢查s3權限
+        if (!checkPermission('s3')) {
+            alert('權限不足，無法訪問風險趨勢預判分析功能\n需要權限：s3\n您的權限：' + (localStorage.getItem('permission') || 's1'));
+            return;
+        }
+        
+        showRiskPredictionPage();
+        loadStandalonePredictionAnalysis();
+        resetInactivityTimer();
+    });
+}
 // 檢查預警設定按鈕是否存在並添加s4權限檢查
 if (alertSettingsBtn) {
     alertSettingsBtn.addEventListener('click', function() {
@@ -4242,8 +4242,7 @@ async function loadAnalyticsData() {
         showErrorState('載入數據失敗，請稍後再試');
     }
 }
-
-    // 🆕 在現有代碼的全域變數區域添加
+// 🆕 在現有代碼的全域變數區域添加
 let deepLearningModel = null;
 let isModelLoaded = false;
 
@@ -7759,49 +7758,6 @@ function updateNewCharts(data) {
     createRadarChart(data.departmentData);
     createHeatmapChart(data.departmentData);
 }
-    // 在深度學習預測函數中添加更詳細的錯誤處理
-async function performDeepLearningPrediction(department, days, analysisType) {
-    try {
-        // 檢查瀏覽器支援
-        if (typeof tf === 'undefined') {
-            throw new Error('TensorFlow.js 未正確載入，請檢查網路連線');
-        }
-        
-        // 檢查 WebGL 支援
-        if (!tf.ENV.get('WEBGL_VERSION')) {
-            console.warn('WebGL 不可用，將使用 CPU 運算，速度可能較慢');
-        }
-        
-        // 原有的預測邏輯...
-        
-    } catch (error) {
-        console.error('❌ 深度學習預測失敗:', error);
-        // 更詳細的錯誤訊息
-        let errorMessage = error.message;
-        if (error.message.includes('WebGL')) {
-            errorMessage = '您的瀏覽器不支援 WebGL，無法使用深度學習功能。請使用統計方法進行預測。';
-        }
-        // 顯示錯誤並回退...
-    }
-}
-// 添加模型快取機制
-class DeepLearningRiskPredictor {
-    constructor() {
-        this.modelCache = new Map();
-        // 其他初始化...
-    }
-    
-    async getOrCreateModel(cacheKey) {
-        if (this.modelCache.has(cacheKey)) {
-            return this.modelCache.get(cacheKey);
-        }
-        
-        const model = await this.initializeModel();
-        this.modelCache.set(cacheKey, model);
-        return model;
-    }
-}
-
     
 </script>
 
