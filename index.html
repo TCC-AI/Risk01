@@ -1895,7 +1895,123 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     overflow: visible; /* ✅ 改為 visible 讓脈衝波可以擴散 */
 }
 }
-
+.hidden { display: none !important; }
+  
+  .tutorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  .tutorial-box {
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    width: 90%;
+    max-width: 450px;
+    position: relative;
+    z-index: 10001;
+  }
+  
+  .tutorial-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .tutorial-header h3 {
+    margin: 0;
+    color: #333;
+  }
+  
+  .tutorial-close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #999;
+  }
+  
+  .tutorial-content {
+    padding: 20px;
+    min-height: 120px;
+  }
+  
+  .tutorial-footer {
+    padding: 15px 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .tutorial-btn {
+    padding: 8px 16px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    background-color: #f5f5f5;
+    cursor: pointer;
+  }
+  
+  .tutorial-btn.primary {
+    background-color: #4285f4;
+    color: white;
+    border-color: #4285f4;
+  }
+  
+  .tutorial-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  
+  .tutorial-highlight {
+    position: absolute;
+    border: 2px solid #4285f4;
+    border-radius: 4px;
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+    z-index: 10000;
+    pointer-events: none;
+    transition: all 0.3s ease;
+  }
+  
+  .tutorial-try-btn {
+    display: block;
+    margin-top: 15px;
+    padding: 8px 16px;
+    background-color: #34a853;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+  }
+  
+  .tutorial-success {
+    color: #34a853;
+    font-weight: bold;
+    display: none;
+    margin-top: 10px;
+  }
+  
+  @media (max-width: 768px) {
+    .tutorial-box {
+      width: 95%;
+      max-width: 350px;
+    }
+    
+    .tutorial-content {
+      min-height: 100px;
+    }
+  }
 
     </style>
 </head>
@@ -1968,7 +2084,25 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                 </ul>
             </div>
         </div>
-        
+        複製
+<!-- 添加到您的 HTML 模板中 -->
+<div id="interactive-tutorial" class="tutorial-overlay hidden">
+  <div class="tutorial-box">
+    <div class="tutorial-header">
+      <h3 id="tutorial-title">歡迎使用</h3>
+      <button id="tutorial-close" class="tutorial-close-btn">×</button>
+    </div>
+    <div id="tutorial-content" class="tutorial-content">
+      <!-- 教學內容將動態插入這裡 -->
+    </div>
+    <div class="tutorial-footer">
+      <button id="tutorial-prev" class="tutorial-btn" disabled>上一步</button>
+      <span id="tutorial-progress">1/5</span>
+      <button id="tutorial-next" class="tutorial-btn primary">下一步</button>
+    </div>
+  </div>
+  <div id="tutorial-highlight" class="tutorial-highlight"></div>
+</div>
         <!-- 更改密碼的彈出視窗 -->
         <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
             <div class="modal-dialog">
@@ -2653,7 +2787,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbzLjpMUnrfSGfdGzsk-83yglIbpTf4_eMCKEIypTwGeQ4MrDyPcys1Mj5sFOSpgRv0j/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbxQ3Uj79GiRxWSWe42qb7cBe0EQxzJ3RThhG_slnTVr2rSITdVOZC68yXza8Ji-02ia/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
@@ -6572,6 +6706,223 @@ function updateNewCharts(data) {
     createRadarChart(data.departmentData);
     createHeatmapChart(data.departmentData);
 }
+/**
+ * 互動式教學引導系統
+ */
+function initInteractiveTutorial() {
+  // 定義教學步驟
+  const tutorialSteps = [
+    {
+      title: "歡迎使用我們的系統",
+      content: "這個簡短的教學將指導您完成基本操作。點擊「下一步」開始。",
+      element: null,
+      action: null
+    },
+    {
+      title: "認識功能區",
+      content: "這是主要功能區，您可以在這裡找到所有操作選項。",
+      element: ".main-menu", // 選擇器，指向要高亮的元素
+      action: null
+    },
+    {
+      title: "試試看：新增記錄",
+      content: "請點擊「新增」按鈕來創建一筆新記錄。<button id='tutorial-try-1' class='tutorial-try-btn'>試一試</button><div id='tutorial-success-1' class='tutorial-success'>✓ 太棒了！您成功完成了操作</div>",
+      element: "#add-button", // 假設您的新增按鈕ID是add-button
+      action: {
+        targetId: "add-button",
+        event: "click",
+        successElement: "tutorial-success-1",
+        tryButton: "tutorial-try-1",
+        callback: function() {
+          // 這裡可以添加特定的回調函數
+          document.getElementById("tutorial-success-1").style.display = "block";
+          document.getElementById("tutorial-try-1").style.display = "none";
+          return true; // 返回true表示操作成功
+        }
+      }
+    },
+    {
+      title: "試試看：填寫表單",
+      content: "在表單中填寫名稱欄位。<button id='tutorial-try-2' class='tutorial-try-btn'>試一試</button><div id='tutorial-success-2' class='tutorial-success'>✓ 做得好！您已學會如何填寫表單</div>",
+      element: "#name-field", // 假設您的名稱欄位ID是name-field
+      action: {
+        targetId: "name-field",
+        event: "input",
+        successElement: "tutorial-success-2",
+        tryButton: "tutorial-try-2",
+        callback: function(event) {
+          if (event.target.value.trim() !== "") {
+            document.getElementById("tutorial-success-2").style.display = "block";
+            document.getElementById("tutorial-try-2").style.display = "none";
+            return true;
+          }
+          return false;
+        }
+      }
+    },
+    {
+      title: "恭喜完成！",
+      content: "您已成功學習了基本操作。現在您可以開始使用系統了。",
+      element: null,
+      action: null
+    }
+  ];
+
+  let currentStep = 0;
+  const tutorialOverlay = document.getElementById("interactive-tutorial");
+  const tutorialTitle = document.getElementById("tutorial-title");
+  const tutorialContent = document.getElementById("tutorial-content");
+  const tutorialPrev = document.getElementById("tutorial-prev");
+  const tutorialNext = document.getElementById("tutorial-next");
+  const tutorialClose = document.getElementById("tutorial-close");
+  const tutorialProgress = document.getElementById("tutorial-progress");
+  const tutorialHighlight = document.getElementById("tutorial-highlight");
+
+  // 顯示教學
+  function showTutorial() {
+    tutorialOverlay.classList.remove("hidden");
+    updateTutorialStep();
+  }
+
+  // 隱藏教學
+  function hideTutorial() {
+    tutorialOverlay.classList.add("hidden");
+    // 移除所有可能的事件監聽器
+    removeActionListeners();
+    // 保存用戶已完成教學的狀態
+    localStorage.setItem("tutorialCompleted", "true");
+  }
+
+  // 更新當前步驟
+  function updateTutorialStep() {
+    const step = tutorialSteps[currentStep];
+    
+    // 更新內容
+    tutorialTitle.textContent = step.title;
+    tutorialContent.innerHTML = step.content;
+    tutorialProgress.textContent = `${currentStep + 1}/${tutorialSteps.length}`;
+    
+    // 更新按鈕狀態
+    tutorialPrev.disabled = currentStep === 0;
+    tutorialNext.textContent = currentStep === tutorialSteps.length - 1 ? "完成" : "下一步";
+    
+    // 高亮目標元素
+    highlightElement(step.element);
+    
+    // 設置互動事件
+    setupAction(step.action);
+  }
+
+  // 高亮目標元素
+  function highlightElement(selector) {
+    if (!selector) {
+      tutorialHighlight.style.display = "none";
+      return;
+    }
+    
+    const element = document.querySelector(selector);
+    if (!element) {
+      tutorialHighlight.style.display = "none";
+      return;
+    }
+    
+    const rect = element.getBoundingClientRect();
+    tutorialHighlight.style.display = "block";
+    tutorialHighlight.style.top = rect.top + "px";
+    tutorialHighlight.style.left = rect.left + "px";
+    tutorialHighlight.style.width = rect.width + "px";
+    tutorialHighlight.style.height = rect.height + "px";
+  }
+
+  // 當前步驟的事件監聽器
+  let currentActionListener = null;
+  let currentActionTarget = null;
+
+  // 設置互動事件
+  function setupAction(action) {
+    // 先移除之前的事件監聽器
+    removeActionListeners();
+    
+    if (!action) return;
+    
+    const targetElement = document.getElementById(action.targetId);
+    if (!targetElement) return;
+    
+    // 為"試一試"按鈕添加事件
+    const tryButton = document.getElementById(action.tryButton);
+    if (tryButton) {
+      tryButton.addEventListener("click", function() {
+        // 高亮目標元素並引導用戶點擊
+        highlightElement(`#${action.targetId}`);
+        tutorialHighlight.style.zIndex = "10002"; // 確保高亮在最上層
+      });
+    }
+    
+    // 為目標元素添加事件監聽器
+    currentActionListener = function(event) {
+      const success = action.callback ? action.callback(event) : true;
+      if (success) {
+        // 如果操作成功，可以自動進入下一步
+        // 或者等待用戶手動點擊下一步
+      }
+    };
+    
+    targetElement.addEventListener(action.event, currentActionListener);
+    currentActionTarget = {
+      element: targetElement,
+      event: action.event
+    };
+  }
+
+  // 移除事件監聽器
+  function removeActionListeners() {
+    if (currentActionTarget) {
+      currentActionTarget.element.removeEventListener(
+        currentActionTarget.event,
+        currentActionListener
+      );
+      currentActionTarget = null;
+      currentActionListener = null;
+    }
+  }
+
+  // 上一步
+  tutorialPrev.addEventListener("click", function() {
+    if (currentStep > 0) {
+      currentStep--;
+      updateTutorialStep();
+    }
+  });
+
+  // 下一步
+  tutorialNext.addEventListener("click", function() {
+    if (currentStep < tutorialSteps.length - 1) {
+      currentStep++;
+      updateTutorialStep();
+    } else {
+      hideTutorial();
+    }
+  });
+
+  // 關閉教學
+  tutorialClose.addEventListener("click", hideTutorial);
+
+  // 檢查是否是首次訪問
+  if (!localStorage.getItem("tutorialCompleted")) {
+    // 延遲顯示教學，確保頁面已完全加載
+    setTimeout(showTutorial, 1000);
+  }
+  
+  // 提供手動啟動教學的方法
+  window.startTutorial = function() {
+    currentStep = 0;
+    showTutorial();
+  };
+}
+
+// 在頁面加載完成後初始化教學
+document.addEventListener("DOMContentLoaded", initInteractiveTutorial);
+
     
 </script>
 
@@ -6774,6 +7125,7 @@ function updateNewCharts(data) {
     
     <button class="btn btn-secondary mt-3" id="backFromDataBackup">返回</button>
 </div>
-
+<!-- 這一行引入 InteractiveTutorial.html 的內容 -->
+    <?!= include('InteractiveTutorial'); ?>
 </body>
 </html>
