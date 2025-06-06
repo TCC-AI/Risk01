@@ -162,18 +162,13 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 #alert-settings-btn:hover::before {
     left: 100%;
 }
-
-        /* 🌊 統一水波紋效果 - 適用於所有需要此效果的按鈕 */
-#data-analytics-btn,
-#risk-prediction-btn,
-#alert-settings-btn {
+/* 🆕 為數據分析儀表板按鈕添加水波紋效果 */
+#data-analytics-btn {
     position: relative;
     overflow: hidden;
 }
 
-#data-analytics-btn::before,
-#risk-prediction-btn::before,
-#alert-settings-btn::before {
+#data-analytics-btn::before {
     content: '';
     position: absolute;
     top: 0;
@@ -184,11 +179,31 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
     transition: left 0.5s;
 }
 
-#data-analytics-btn:hover::before,
-#risk-prediction-btn:hover::before,
-#alert-settings-btn:hover::before {
+#data-analytics-btn:hover::before {
     left: 100%;
 }
+
+/* 🆕 為風險趨勢預判分析按鈕添加水波紋效果 */
+#risk-prediction-btn {
+    position: relative;
+    overflow: hidden;
+}
+
+#risk-prediction-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.5s;
+}
+
+#risk-prediction-btn:hover::before {
+    left: 100%;
+}
+
 
 
 /* 風險等級指示器 */
