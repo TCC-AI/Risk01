@@ -2674,7 +2674,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycby-8sxVGhtZc-Dl_epAwMDb5lw5vwlOuo-uAjA34MGFlX1QLZqH6VXgVGBNsI6HZhUq/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbwzis2bpshIUzcAWk5W-Pzb0n4LGHVP3h_swYLMm7vlsU9BSt2bmepLLpB9vUgU7cUq/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
@@ -3273,53 +3273,75 @@ async function loadAlertSettings() {
 }
 
 
-// 儲存預警設定
+// 🔧 完全重寫 saveAlertSettings 函數
 async function saveAlertSettings() {
-    const saveBtn = document.getElementById('saveAlertSettingsBtn');
-    const originalText = saveBtn.innerHTML;
-    
     try {
-        // 顯示載入狀態
-        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 儲存中...';
-        saveBtn.disabled = true;
+        // 獲取時間輸入值並確保格式正確
+        const timeInput = document.getElementById('notificationTime');
+        let notificationTime = timeInput.value;
         
-        const settings = {
-            lowRiskThreshold: parseFloat(document.getElementById('lowRiskThreshold').value),
-            mediumRiskThreshold: parseFloat(document.getElementById('mediumRiskThreshold').value),
-            criticalRiskThreshold: parseFloat(document.getElementById('criticalRiskThreshold').value),
-            checkFrequency: document.getElementById('checkFrequency').value,
-            notificationTime: document.getElementById('notificationTime').value,
-            enableEmailAlert: document.getElementById('enableEmailAlert').checked,
-            emailRecipients: document.getElementById('emailRecipients').value,
-            enableLineAlert: document.getElementById('enableLineAlert').checked,
-            lineToken: document.getElementById('lineToken').value,
-            enableSystemAlert: document.getElementById('enableSystemAlert').checked
-        };
+        // 🔧 關鍵修正：確保時間格式為 HH:mm
+        if (notificationTime) {
+            // 如果時間包含秒數，去掉秒數部分
+            if (notificationTime.includes(':')) {
+                const timeParts = notificationTime.split(':');
+                if (timeParts.length >= 2) {
+                    const hours = timeParts[0].padStart(2, '0');
+                    const minutes = timeParts[1].padStart(2, '0');
+                    notificationTime = `${hours}:${minutes}`;
+                }
+            }
+        } else {
+            notificationTime = '09:00'; // 預設值
+        }
         
-        const response = await fetch(`${scriptUrl}?action=saveAlertSettings`, {
-            method: 'POST',
-            body: JSON.stringify(settings)
+        console.log('處理後的通知時間:', notificationTime);
+        
+        // 構建表單數據 - 🔧 使用字符串而不是對象
+        const formData = new URLSearchParams({
+            action: 'saveAlertSettings',
+            lowRiskThreshold: document.getElementById('lowRiskThreshold').value || '3',
+            mediumRiskThreshold: document.getElementById('mediumRiskThreshold').value || '5',
+            criticalRiskThreshold: document.getElementById('criticalRiskThreshold').value || '8',
+            checkFrequency: document.getElementById('checkFrequency').value || 'daily',
+            notificationTime: notificationTime,
+            enableEmailAlert: document.getElementById('enableEmailAlert').checked ? 'true' : 'false',
+            emailRecipients: document.getElementById('emailRecipients').value || '',
+            enableLineAlert: document.getElementById('enableLineAlert').checked ? 'true' : 'false',
+            lineToken: document.getElementById('lineToken').value || '',
+            enableSystemAlert: document.getElementById('enableSystemAlert').checked ? 'true' : 'false'
         });
         
+        console.log('發送的表單數據:', formData.toString());
+        
+        // 發送請求
+        const response = await fetch(scriptUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData.toString()
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP錯誤: ${response.status}`);
+        }
+        
         const result = await response.json();
+        console.log('後端回應:', result);
         
         if (result.success) {
-            showNotification('預警設定已成功儲存！', 'success');
-            
-            // 設置觸發器
-            await setupAlertTriggers(settings);
+            showNotification('預警設定已儲存', 'success');
         } else {
-            showNotification('儲存失敗: ' + result.message, 'error');
+            showNotification('儲存失敗: ' + (result.message || '未知錯誤'), 'error');
         }
         
     } catch (error) {
         console.error('儲存預警設定失敗:', error);
-        showNotification('儲存失敗，請稍後再試', 'error');
-    } finally {
-        saveBtn.innerHTML = originalText;
-        saveBtn.disabled = false;
+        showNotification('儲存失敗: ' + error.message, 'error');
     }
 }
+
 
 // 設置預警觸發器
 async function setupAlertTriggers(settings) {
