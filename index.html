@@ -2256,6 +2256,25 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
             </div>
         </div>
 
+                <!-- 🔍 在測試通知區塊後面新增 -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-play-circle"></i> 測試監控系統</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>測試整個風險監控系統是否正常運作：</p>
+                        <button type="button" class="btn btn-success" id="testMonitoringBtn">
+                            <i class="fas fa-play"></i> 執行監控測試
+                        </button>
+                        <div id="testMonitoringResult" class="mt-3" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
         <!-- 操作按鈕 -->
         <div class="text-center">
             <button type="button" class="btn btn-primary btn-lg me-3" id="saveAlertSettingsBtn">
@@ -2655,7 +2674,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbzkUxPF6eaQj7lvf70m5-gAYy4I_IF3ygjtySh6p7vi-17eycX6aHKYPReJhNlkygm5/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbzg8juAaEo4CfwHMNiWYUccum-nq0p-Z8j_nhurT_GpIik2yYsMlrSj5IQMQHBlumyt/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
@@ -3037,7 +3056,62 @@ if (alertSettingsBtn) {
         }
     }, 5 * 60 * 1000); // 5分鐘
         
+// 🔍 在現有的測試按鈕事件後面新增
+const testMonitoringBtn = document.getElementById('testMonitoringBtn');
+if (testMonitoringBtn) {
+    testMonitoringBtn.addEventListener('click', function() {
+        testMonitoringSystem();
+    });
+}
 
+// 🆕 測試監控系統函數
+async function testMonitoringSystem() {
+    const btn = document.getElementById('testMonitoringBtn');
+    const resultDiv = document.getElementById('testMonitoringResult');
+    
+    try {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 測試中...';
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = '<div class="alert alert-info">正在測試監控系統...</div>';
+        
+        // 調用後端的手動監控測試
+        const response = await fetch(`${scriptUrl}?action=manualRiskCheck`, {
+            method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <h6>✅ 監控系統測試成功！</h6>
+                    <p>系統已檢查所有部門的R值並執行預警邏輯。</p>
+                    <small>測試時間：${new Date().toLocaleString()}</small>
+                </div>
+            `;
+        } else {
+            resultDiv.innerHTML = `
+                <div class="alert alert-warning">
+                    <h6>⚠️ 測試完成，但發現問題</h6>
+                    <p>${result.message || '請檢查系統設定'}</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        resultDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <h6>❌ 測試失敗</h6>
+                <p>錯誤：${error.message}</p>
+            </div>
+        `;
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-play"></i> 執行監控測試';
+    }
+}
+
+    
 // 🆕 檢查新預警通知
 async function checkForNewAlerts() {
     try {
