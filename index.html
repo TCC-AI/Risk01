@@ -2823,6 +2823,14 @@ document.addEventListener('DOMContentLoaded', function() {
             resetInactivityTimer();
         });
     }
+    // 🔧 確保測試監控按鈕事件正確綁定
+    const testMonitoringBtn = document.getElementById('testMonitoringBtn');
+    if (testMonitoringBtn) {
+        testMonitoringBtn.addEventListener('click', function() {
+            testMonitoringSystem();
+            resetInactivityTimer();
+        });
+    }
 // 🆕 新增處理用戶提交的函數
 async function handleAddUserSubmit() {
     try {
@@ -3056,15 +3064,9 @@ if (alertSettingsBtn) {
         }
     }, 5 * 60 * 1000); // 5分鐘
         
-// 🔍 在現有的測試按鈕事件後面新增
-const testMonitoringBtn = document.getElementById('testMonitoringBtn');
-if (testMonitoringBtn) {
-    testMonitoringBtn.addEventListener('click', function() {
-        testMonitoringSystem();
-    });
-}
 
-// 🆕 測試監控系統函數
+
+// 🔧 修正版：測試監控系統函數
 async function testMonitoringSystem() {
     const btn = document.getElementById('testMonitoringBtn');
     const resultDiv = document.getElementById('testMonitoringResult');
@@ -3075,18 +3077,23 @@ async function testMonitoringSystem() {
         resultDiv.style.display = 'block';
         resultDiv.innerHTML = '<div class="alert alert-info">正在測試監控系統...</div>';
         
-        // 調用後端的手動監控測試
-        const response = await fetch(`${scriptUrl}?action=manualRiskCheck`, {
-            method: 'POST'
+        // 🔧 修正：使用正確的測試端點
+        const response = await fetch(`${scriptUrl}?action=testNotification&type=system&timestamp=${Date.now()}`, {
+            method: 'GET'  // 🔧 改為 GET 請求
         });
         
+        if (!response.ok) {
+            throw new Error(`HTTP錯誤: ${response.status}`);
+        }
+        
         const result = await response.json();
+        console.log('測試結果:', result);
         
         if (result.success) {
             resultDiv.innerHTML = `
                 <div class="alert alert-success">
                     <h6>✅ 監控系統測試成功！</h6>
-                    <p>系統已檢查所有部門的R值並執行預警邏輯。</p>
+                    <p>系統運作正常。</p>
                     <small>測試時間：${new Date().toLocaleString()}</small>
                 </div>
             `;
@@ -3099,6 +3106,7 @@ async function testMonitoringSystem() {
             `;
         }
     } catch (error) {
+        console.error('測試失敗:', error);
         resultDiv.innerHTML = `
             <div class="alert alert-danger">
                 <h6>❌ 測試失敗</h6>
@@ -3110,6 +3118,7 @@ async function testMonitoringSystem() {
         btn.innerHTML = '<i class="fas fa-play"></i> 執行監控測試';
     }
 }
+
 
     
 // 🆕 檢查新預警通知
@@ -3273,23 +3282,20 @@ async function loadAlertSettings() {
 }
 
 
-// 🔧 完全重寫 saveAlertSettings 函數
+// 🔧 修正版：儲存預警設定函數
 async function saveAlertSettings() {
     try {
-        // 獲取時間輸入值並確保格式正確
+        // 🔧 關鍵修正：獲取並正確處理時間
         const timeInput = document.getElementById('notificationTime');
         let notificationTime = timeInput.value;
         
-        // 🔧 關鍵修正：確保時間格式為 HH:mm
-        if (notificationTime) {
-            // 如果時間包含秒數，去掉秒數部分
-            if (notificationTime.includes(':')) {
-                const timeParts = notificationTime.split(':');
-                if (timeParts.length >= 2) {
-                    const hours = timeParts[0].padStart(2, '0');
-                    const minutes = timeParts[1].padStart(2, '0');
-                    notificationTime = `${hours}:${minutes}`;
-                }
+        // 確保時間格式正確
+        if (notificationTime && notificationTime.includes(':')) {
+            const timeParts = notificationTime.split(':');
+            if (timeParts.length >= 2) {
+                const hours = timeParts[0].padStart(2, '0');
+                const minutes = timeParts[1].padStart(2, '0');
+                notificationTime = `${hours}:${minutes}`;
             }
         } else {
             notificationTime = '09:00'; // 預設值
@@ -3297,30 +3303,28 @@ async function saveAlertSettings() {
         
         console.log('處理後的通知時間:', notificationTime);
         
-        // 構建表單數據 - 🔧 使用字符串而不是對象
-        const formData = new URLSearchParams({
-            action: 'saveAlertSettings',
-            lowRiskThreshold: document.getElementById('lowRiskThreshold').value || '3',
-            mediumRiskThreshold: document.getElementById('mediumRiskThreshold').value || '5',
-            criticalRiskThreshold: document.getElementById('criticalRiskThreshold').value || '8',
-            checkFrequency: document.getElementById('checkFrequency').value || 'daily',
-            notificationTime: notificationTime,
-            enableEmailAlert: document.getElementById('enableEmailAlert').checked ? 'true' : 'false',
-            emailRecipients: document.getElementById('emailRecipients').value || '',
-            enableLineAlert: document.getElementById('enableLineAlert').checked ? 'true' : 'false',
-            lineToken: document.getElementById('lineToken').value || '',
-            enableSystemAlert: document.getElementById('enableSystemAlert').checked ? 'true' : 'false'
-        });
+        // 🔧 修正：直接使用字符串參數
+        const params = new URLSearchParams();
+        params.append('action', 'saveAlertSettings');
+        params.append('lowRiskThreshold', document.getElementById('lowRiskThreshold').value || '3');
+        params.append('mediumRiskThreshold', document.getElementById('mediumRiskThreshold').value || '5');
+        params.append('criticalRiskThreshold', document.getElementById('criticalRiskThreshold').value || '8');
+        params.append('checkFrequency', document.getElementById('checkFrequency').value || 'daily');
+        params.append('notificationTime', notificationTime);
+        params.append('enableEmailAlert', document.getElementById('enableEmailAlert').checked ? 'true' : 'false');
+        params.append('emailRecipients', document.getElementById('emailRecipients').value || '');
+        params.append('enableLineAlert', document.getElementById('enableLineAlert').checked ? 'true' : 'false');
+        params.append('lineToken', document.getElementById('lineToken').value || '');
+        params.append('enableSystemAlert', document.getElementById('enableSystemAlert').checked ? 'true' : 'false');
         
-        console.log('發送的表單數據:', formData.toString());
+        console.log('發送參數:', params.toString());
         
-        // 發送請求
         const response = await fetch(scriptUrl, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: formData.toString()
+            body: params.toString()
         });
         
         if (!response.ok) {
@@ -3341,6 +3345,7 @@ async function saveAlertSettings() {
         showNotification('儲存失敗: ' + error.message, 'error');
     }
 }
+
 
 
 // 設置預警觸發器
