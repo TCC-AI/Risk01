@@ -2095,24 +2095,26 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                     <div class="card-body">
                         <form id="alertRulesForm">
                             <div class="row mb-3">
-                                <div class="col-md-4">
-                                    <label for="lowRiskThreshold" class="form-label">低風險閾值 (R值)</label>
-                                    <input type="number" class="form-control" id="lowRiskThreshold" 
-                                           value="15" min="1" max="100" step="0.1">
-                                    <small class="text-muted">低於此值為綠燈</small>
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="mediumRiskThreshold" class="form-label">中風險閾值 (R值)</label>
-                                    <input type="number" class="form-control" id="mediumRiskThreshold" 
-                                           value="30" min="1" max="100" step="0.1">
-                                    <small class="text-muted">超過此值為紅燈</small>
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="criticalRiskThreshold" class="form-label">緊急風險閾值 (R值)</label>
-                                    <input type="number" class="form-control" id="criticalRiskThreshold" 
-                                           value="50" min="1" max="100" step="0.1">
-                                    <small class="text-muted">超過此值立即通知</small>
-                                </div>
+                               <!-- 🔍 找到預警規則設定區塊，修正預設值 -->
+                    <div class="col-md-4">
+                        <label for="lowRiskThreshold" class="form-label">低風險閾值 (R值)</label>
+                        <input type="number" class="form-control" id="lowRiskThreshold" 
+                               value="3" min="1" max="100" step="0.1">  <!-- 🔧 改為3 -->
+                        <small class="text-muted">低於此值為綠燈</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="mediumRiskThreshold" class="form-label">中風險閾值 (R值)</label>
+                        <input type="number" class="form-control" id="mediumRiskThreshold" 
+                               value="5" min="1" max="100" step="0.1">  <!-- 🔧 改為5 -->
+                        <small class="text-muted">超過此值為黃燈</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="criticalRiskThreshold" class="form-label">緊急風險閾值 (R值)</label>
+                        <input type="number" class="form-control" id="criticalRiskThreshold" 
+                               value="8" min="1" max="100" step="0.1">  <!-- 🔧 改為8 -->
+                        <small class="text-muted">超過此值立即通知</small>
+                    </div>
+
                             </div>
                             
                             <div class="row mb-3">
@@ -3163,7 +3165,7 @@ function showAlertSettingsPage() {
     alertSettingsPage.style.display = 'block';
 }
 
-// 載入預警設定
+// 🔍 找到 loadAlertSettings 函數，在最後加入這段
 async function loadAlertSettings() {
     try {
         const response = await fetch(`${scriptUrl}?action=getAlertSettings`);
@@ -3173,23 +3175,29 @@ async function loadAlertSettings() {
             const settings = result.settings;
             
             // 填入設定值
-            document.getElementById('lowRiskThreshold').value = settings.lowRiskThreshold || 15;
-            document.getElementById('mediumRiskThreshold').value = settings.mediumRiskThreshold || 30;
-            document.getElementById('criticalRiskThreshold').value = settings.criticalRiskThreshold || 50;
-            document.getElementById('checkFrequency').value = settings.checkFrequency || 'daily';
+            document.getElementById('lowRiskThreshold').value = settings.lowRiskThreshold || 3;      // 🔧 改為3
+            document.getElementById('mediumRiskThreshold').value = settings.mediumRiskThreshold || 5;  // 🔧 改為5
+            document.getElementById('criticalRiskThreshold').value = settings.criticalRiskThreshold || 8; // 🔧 改為8
+            document.getElementById('checkFrequency').value = settings.checkFrequency || 'hourly';    // 🔧 改為hourly
             document.getElementById('notificationTime').value = settings.notificationTime || '09:00';
             
-            document.getElementById('enableEmailAlert').checked = settings.enableEmailAlert || false;
+            document.getElementById('enableEmailAlert').checked = settings.enableEmailAlert !== false; // 🔧 預設為true
             document.getElementById('emailRecipients').value = settings.emailRecipients || '';
             document.getElementById('enableLineAlert').checked = settings.enableLineAlert || false;
             document.getElementById('lineToken').value = settings.lineToken || '';
-            document.getElementById('enableSystemAlert').checked = settings.enableSystemAlert || true;
+            document.getElementById('enableSystemAlert').checked = settings.enableSystemAlert !== false; // 🔧 預設為true
+            
+            // 🆕 如果沒有設定Email，顯示提醒
+            if (!settings.emailRecipients) {
+                showNotification('請記得設定Email收件人以接收預警通知', 'warning');
+            }
         }
     } catch (error) {
         console.error('載入預警設定失敗:', error);
         showNotification('載入預警設定失敗', 'error');
     }
 }
+
 
 // 儲存預警設定
 async function saveAlertSettings() {
