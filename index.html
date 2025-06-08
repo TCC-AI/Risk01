@@ -2095,26 +2095,24 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                     <div class="card-body">
                         <form id="alertRulesForm">
                             <div class="row mb-3">
-                               <!-- 🔍 找到預警規則設定區塊，修正預設值 -->
-                    <div class="col-md-4">
-                        <label for="lowRiskThreshold" class="form-label">低風險閾值 (R值)</label>
-                        <input type="number" class="form-control" id="lowRiskThreshold" 
-                               value="3" min="1" max="100" step="0.1">  <!-- 🔧 改為3 -->
-                        <small class="text-muted">低於此值為綠燈</small>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="mediumRiskThreshold" class="form-label">中風險閾值 (R值)</label>
-                        <input type="number" class="form-control" id="mediumRiskThreshold" 
-                               value="5" min="1" max="100" step="0.1">  <!-- 🔧 改為5 -->
-                        <small class="text-muted">超過此值為黃燈</small>
-                    </div>
-                    <div class="col-md-4">
-                        <label for="criticalRiskThreshold" class="form-label">緊急風險閾值 (R值)</label>
-                        <input type="number" class="form-control" id="criticalRiskThreshold" 
-                               value="8" min="1" max="100" step="0.1">  <!-- 🔧 改為8 -->
-                        <small class="text-muted">超過此值立即通知</small>
-                    </div>
-
+                                <div class="col-md-4">
+                                    <label for="lowRiskThreshold" class="form-label">低風險閾值 (R值)</label>
+                                    <input type="number" class="form-control" id="lowRiskThreshold" 
+                                           value="15" min="1" max="100" step="0.1">
+                                    <small class="text-muted">低於此值為綠燈</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="mediumRiskThreshold" class="form-label">中風險閾值 (R值)</label>
+                                    <input type="number" class="form-control" id="mediumRiskThreshold" 
+                                           value="30" min="1" max="100" step="0.1">
+                                    <small class="text-muted">超過此值為紅燈</small>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="criticalRiskThreshold" class="form-label">緊急風險閾值 (R值)</label>
+                                    <input type="number" class="form-control" id="criticalRiskThreshold" 
+                                           value="50" min="1" max="100" step="0.1">
+                                    <small class="text-muted">超過此值立即通知</small>
+                                </div>
                             </div>
                             
                             <div class="row mb-3">
@@ -2255,25 +2253,6 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
                 </div>
             </div>
         </div>
-
-                <!-- 🔍 在測試通知區塊後面新增 -->
-        <div class="row mb-4">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0"><i class="fas fa-play-circle"></i> 測試監控系統</h5>
-                    </div>
-                    <div class="card-body">
-                        <p>測試整個風險監控系統是否正常運作：</p>
-                        <button type="button" class="btn btn-success" id="testMonitoringBtn">
-                            <i class="fas fa-play"></i> 執行監控測試
-                        </button>
-                        <div id="testMonitoringResult" class="mt-3" style="display: none;"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
 
         <!-- 操作按鈕 -->
         <div class="text-center">
@@ -2674,7 +2653,7 @@ div:contains("歡迎"), /* 針對包含「歡迎」文字的元素 */
 
 <script>
 // Google Apps Script Web App URL (部署為網頁應用程式後的URL)
-const scriptUrl = 'https://script.google.com/macros/s/AKfycbzaN2u_iWllTkDgC0rmVt2vAcF8LICMpq2n78SjkxH1G-PD4Oj2152fRC3JPP3Ton9t/exec';
+const scriptUrl = 'https://script.google.com/macros/s/AKfycbx4vbFfmK7500N7C4dpVSp-Zn6nU9Y45kYH3FGhL31K46X_mhQo9ljFMM5WTkJhnXvn/exec';
 
 // 全域變數存儲圖表實例
 let riskTrendChart, departmentRiskChart, riskCategoryChart, riskLevelChart, monthlyComparisonChart;
@@ -2820,14 +2799,6 @@ document.addEventListener('DOMContentLoaded', function() {
         addUserForm.addEventListener('submit', function(e) {
             e.preventDefault(); // 防止表單默認提交
             handleAddUserSubmit();
-            resetInactivityTimer();
-        });
-    }
-    // 🔧 確保測試監控按鈕事件正確綁定
-    const testMonitoringBtn = document.getElementById('testMonitoringBtn');
-    if (testMonitoringBtn) {
-        testMonitoringBtn.addEventListener('click', function() {
-            testMonitoringSystem();
             resetInactivityTimer();
         });
     }
@@ -3065,62 +3036,6 @@ if (alertSettingsBtn) {
     }, 5 * 60 * 1000); // 5分鐘
         
 
-
-// 🔧 修正版：測試監控系統函數
-async function testMonitoringSystem() {
-    const btn = document.getElementById('testMonitoringBtn');
-    const resultDiv = document.getElementById('testMonitoringResult');
-    
-    try {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 測試中...';
-        resultDiv.style.display = 'block';
-        resultDiv.innerHTML = '<div class="alert alert-info">正在測試監控系統...</div>';
-        
-        // 🔧 修正：使用正確的測試端點
-        const response = await fetch(`${scriptUrl}?action=testNotification&type=system&timestamp=${Date.now()}`, {
-            method: 'GET'  // 🔧 改為 GET 請求
-        });
-        
-        if (!response.ok) {
-            throw new Error(`HTTP錯誤: ${response.status}`);
-        }
-        
-        const result = await response.json();
-        console.log('測試結果:', result);
-        
-        if (result.success) {
-            resultDiv.innerHTML = `
-                <div class="alert alert-success">
-                    <h6>✅ 監控系統測試成功！</h6>
-                    <p>系統運作正常。</p>
-                    <small>測試時間：${new Date().toLocaleString()}</small>
-                </div>
-            `;
-        } else {
-            resultDiv.innerHTML = `
-                <div class="alert alert-warning">
-                    <h6>⚠️ 測試完成，但發現問題</h6>
-                    <p>${result.message || '請檢查系統設定'}</p>
-                </div>
-            `;
-        }
-    } catch (error) {
-        console.error('測試失敗:', error);
-        resultDiv.innerHTML = `
-            <div class="alert alert-danger">
-                <h6>❌ 測試失敗</h6>
-                <p>錯誤：${error.message}</p>
-            </div>
-        `;
-    } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-play"></i> 執行監控測試';
-    }
-}
-
-
-    
 // 🆕 檢查新預警通知
 async function checkForNewAlerts() {
     try {
@@ -3248,7 +3163,7 @@ function showAlertSettingsPage() {
     alertSettingsPage.style.display = 'block';
 }
 
-// 🔍 找到 loadAlertSettings 函數，在最後加入這段
+// 載入預警設定
 async function loadAlertSettings() {
     try {
         const response = await fetch(`${scriptUrl}?action=getAlertSettings`);
@@ -3258,22 +3173,17 @@ async function loadAlertSettings() {
             const settings = result.settings;
             
             // 填入設定值
-            document.getElementById('lowRiskThreshold').value = settings.lowRiskThreshold || 3;      // 🔧 改為3
-            document.getElementById('mediumRiskThreshold').value = settings.mediumRiskThreshold || 5;  // 🔧 改為5
-            document.getElementById('criticalRiskThreshold').value = settings.criticalRiskThreshold || 8; // 🔧 改為8
-            document.getElementById('checkFrequency').value = settings.checkFrequency || 'hourly';    // 🔧 改為hourly
+            document.getElementById('lowRiskThreshold').value = settings.lowRiskThreshold || 15;
+            document.getElementById('mediumRiskThreshold').value = settings.mediumRiskThreshold || 30;
+            document.getElementById('criticalRiskThreshold').value = settings.criticalRiskThreshold || 50;
+            document.getElementById('checkFrequency').value = settings.checkFrequency || 'daily';
             document.getElementById('notificationTime').value = settings.notificationTime || '09:00';
             
-            document.getElementById('enableEmailAlert').checked = settings.enableEmailAlert !== false; // 🔧 預設為true
+            document.getElementById('enableEmailAlert').checked = settings.enableEmailAlert || false;
             document.getElementById('emailRecipients').value = settings.emailRecipients || '';
             document.getElementById('enableLineAlert').checked = settings.enableLineAlert || false;
             document.getElementById('lineToken').value = settings.lineToken || '';
-            document.getElementById('enableSystemAlert').checked = settings.enableSystemAlert !== false; // 🔧 預設為true
-            
-            // 🆕 如果沒有設定Email，顯示提醒
-            if (!settings.emailRecipients) {
-                showNotification('請記得設定Email收件人以接收預警通知', 'warning');
-            }
+            document.getElementById('enableSystemAlert').checked = settings.enableSystemAlert || true;
         }
     } catch (error) {
         console.error('載入預警設定失敗:', error);
@@ -3281,72 +3191,53 @@ async function loadAlertSettings() {
     }
 }
 
-
-// 🔧 修正版：儲存預警設定函數
+// 儲存預警設定
 async function saveAlertSettings() {
+    const saveBtn = document.getElementById('saveAlertSettingsBtn');
+    const originalText = saveBtn.innerHTML;
+    
     try {
-        // 🔧 關鍵修正：獲取並正確處理時間
-        const timeInput = document.getElementById('notificationTime');
-        let notificationTime = timeInput.value;
+        // 顯示載入狀態
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 儲存中...';
+        saveBtn.disabled = true;
         
-        // 確保時間格式正確
-        if (notificationTime && notificationTime.includes(':')) {
-            const timeParts = notificationTime.split(':');
-            if (timeParts.length >= 2) {
-                const hours = timeParts[0].padStart(2, '0');
-                const minutes = timeParts[1].padStart(2, '0');
-                notificationTime = `${hours}:${minutes}`;
-            }
-        } else {
-            notificationTime = '09:00'; // 預設值
-        }
+        const settings = {
+            lowRiskThreshold: parseFloat(document.getElementById('lowRiskThreshold').value),
+            mediumRiskThreshold: parseFloat(document.getElementById('mediumRiskThreshold').value),
+            criticalRiskThreshold: parseFloat(document.getElementById('criticalRiskThreshold').value),
+            checkFrequency: document.getElementById('checkFrequency').value,
+            notificationTime: document.getElementById('notificationTime').value,
+            enableEmailAlert: document.getElementById('enableEmailAlert').checked,
+            emailRecipients: document.getElementById('emailRecipients').value,
+            enableLineAlert: document.getElementById('enableLineAlert').checked,
+            lineToken: document.getElementById('lineToken').value,
+            enableSystemAlert: document.getElementById('enableSystemAlert').checked
+        };
         
-        console.log('處理後的通知時間:', notificationTime);
-        
-        // 🔧 修正：直接使用字符串參數
-        const params = new URLSearchParams();
-        params.append('action', 'saveAlertSettings');
-        params.append('lowRiskThreshold', document.getElementById('lowRiskThreshold').value || '3');
-        params.append('mediumRiskThreshold', document.getElementById('mediumRiskThreshold').value || '5');
-        params.append('criticalRiskThreshold', document.getElementById('criticalRiskThreshold').value || '8');
-        params.append('checkFrequency', document.getElementById('checkFrequency').value || 'daily');
-        params.append('notificationTime', notificationTime);
-        params.append('enableEmailAlert', document.getElementById('enableEmailAlert').checked ? 'true' : 'false');
-        params.append('emailRecipients', document.getElementById('emailRecipients').value || '');
-        params.append('enableLineAlert', document.getElementById('enableLineAlert').checked ? 'true' : 'false');
-        params.append('lineToken', document.getElementById('lineToken').value || '');
-        params.append('enableSystemAlert', document.getElementById('enableSystemAlert').checked ? 'true' : 'false');
-        
-        console.log('發送參數:', params.toString());
-        
-        const response = await fetch(scriptUrl, {
+        const response = await fetch(`${scriptUrl}?action=saveAlertSettings`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: params.toString()
+            body: JSON.stringify(settings)
         });
         
-        if (!response.ok) {
-            throw new Error(`HTTP錯誤: ${response.status}`);
-        }
-        
         const result = await response.json();
-        console.log('後端回應:', result);
         
         if (result.success) {
-            showNotification('預警設定已儲存', 'success');
+            showNotification('預警設定已成功儲存！', 'success');
+            
+            // 設置觸發器
+            await setupAlertTriggers(settings);
         } else {
-            showNotification('儲存失敗: ' + (result.message || '未知錯誤'), 'error');
+            showNotification('儲存失敗: ' + result.message, 'error');
         }
         
     } catch (error) {
         console.error('儲存預警設定失敗:', error);
-        showNotification('儲存失敗: ' + error.message, 'error');
+        showNotification('儲存失敗，請稍後再試', 'error');
+    } finally {
+        saveBtn.innerHTML = originalText;
+        saveBtn.disabled = false;
     }
 }
-
-
 
 // 設置預警觸發器
 async function setupAlertTriggers(settings) {
